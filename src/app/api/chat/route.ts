@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CHATBOT_SYSTEM_PROMPT } from "@/lib/constants";
+import { RAG_SYSTEM_PROMPT_TEMPLATE } from "@/lib/constants";
+import { retrieveContext, buildContextString } from "@/lib/rag";
 import { checkRateLimit } from "@/lib/rateLimit";
 
 interface Message {
@@ -50,6 +51,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // RAG: Pinecone에서 관련 문서 검색
+    let contextString = "관련 참고 자료가 없습니다.";
+    try {
+      if (process.env.PINECONE_API_KEY) {
+        const contexts = await retrieveContext(lastMsg.content, 5);
+        contextString = buildContextString(contexts);
+      }
+    } catch (ragError) {
+      console.error("RAG 검색 실패 (폴백으로 진행):", ragError);
+    }
+
+    // 동적 시스템 프롬프트 생성
+    const systemPrompt = RAG_SYSTEM_PROMPT_TEMPLATE.replace("{CONTEXT}", contextString);
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -58,9 +73,9 @@ export async function POST(req: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 500,
-        system: CHATBOT_SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: mergedMessages,
       }),
     });

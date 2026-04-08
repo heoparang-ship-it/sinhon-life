@@ -1,0 +1,94 @@
+name: 정책 크롤링 및 업데이트
+
+on:
+  schedule:
+    # 매주 월요일 한국 정오 (UTC 03:00)
+    - cron: "0 3 * * 1"
+  workflow_dispatch: # 수동 실행 지원
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  crawl-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: 날짜 설정
+        id: date
+        run: |
+          echo "today=$(date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "today_dash=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: 크롤링 실행
+        run: npx tsx scripts/crawl.ts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+
+      - name: 구조화 실행
+        run: npx tsx scripts/structurize.ts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: 변경 사항 확인
+        id: check_changes
+        run: |
+          if git diff --quiet knowledge/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: PR 생성
+        if: steps.check_changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_DATE: ${{ steps.date.outputs.today }}
+          PR_DATE: ${{ steps.date.outputs.today_dash }}
+        run: |
+          git checkout -b "crawl-update-${BRANCH_DATE}"
+          git add knowledge/
+          git commit -m "정책 데이터 업데이트 ${PR_DATE}"
+          git push origin "crawl-update-${BRANCH_DATE}"
+          gh pr create \
+            --title "정책 데이터 업데이트 ${PR_DATE}" \
+            --body "주간 크롤링으로 수집된 정책 데이터입니다. 검수 후 머지해주세요." \
+            --base main
+
+  # 수동 실행 시 Pinecone 업서트도 함께 실행
+  upsert:
+    runs-on: ubuntu-latest
+    needs: crawl-and-update
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Pinecone 업서트
+        run: npx tsx scripts/embed-and-upsert.ts
+        env:
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
