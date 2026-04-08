@@ -10,8 +10,11 @@ import {
   ArrowRight,
   Sparkles,
   TrendingUp,
+  Star,
+  MapPin,
+  Store,
 } from "lucide-react";
-import { MEGA_CATEGORIES, POLICIES, BRAND } from "@/lib/constants";
+import { MEGA_CATEGORIES, POLICIES, BRAND, VENDORS, VENDOR_CATEGORIES } from "@/lib/constants";
 import type { MegaCategoryId } from "@/lib/types";
 import TopSearchBar from "@/components/TopSearchBar";
 
@@ -118,6 +121,83 @@ export default function HomePage() {
               <p className="text-2xl font-extrabold text-coral tracking-tight">200만</p>
               <p className="text-[10px] text-warm-text-muted mt-1">출산 바우처</p>
             </div>
+          </div>
+        </section>
+
+        {/* 웨딩 업체 섹션 */}
+        <section className="space-y-4 opacity-0 animate-fade-up stagger-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Store size={16} className="text-coral" />
+              <h2 className="text-[17px] font-extrabold tracking-tight">인기 웨딩업체</h2>
+            </div>
+            <span className="text-[11px] text-warm-text-muted">{VENDORS.length}개 업체</span>
+          </div>
+
+          {/* 카테고리 칩 */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {VENDOR_CATEGORIES.map((cat) => (
+              <span
+                key={cat.id}
+                className="flex-shrink-0 text-[12px] font-medium bg-white border border-warm-border px-3 py-1.5 rounded-full text-warm-text-secondary"
+              >
+                {cat.emoji} {cat.label}
+              </span>
+            ))}
+          </div>
+
+          {/* 업체 카드 가로 스크롤 */}
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-5 px-5 pb-1">
+            {VENDORS.map((vendor) => (
+              <Link
+                key={vendor.slug}
+                href={`/vendor/${vendor.slug}`}
+                className="flex-shrink-0 w-[260px] bg-white rounded-2xl border border-warm-border overflow-hidden active:scale-[0.98] transition-transform hover:shadow-md"
+              >
+                {/* 컬러 바 */}
+                <div className="h-24 bg-gradient-to-br from-coral-50 to-coral-100 flex items-center justify-center">
+                  <span className="text-4xl">{VENDOR_CATEGORIES.find((c) => c.id === vendor.category)?.emoji}</span>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] font-bold text-coral bg-coral-50 px-2 py-0.5 rounded-md">{vendor.categoryLabel}</span>
+                    <div className="flex items-center gap-0.5">
+                      <Star size={10} className="text-amber-400 fill-amber-400" />
+                      <span className="text-[11px] font-bold">{vendor.rating}</span>
+                      <span className="text-[10px] text-warm-text-muted">({vendor.reviewCount})</span>
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-[15px] mt-1">{vendor.name}</h3>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <MapPin size={10} className="text-warm-text-muted" />
+                    <span className="text-[11px] text-warm-text-secondary">{vendor.location}</span>
+                    <span className="text-[11px] text-warm-text-muted mx-1">·</span>
+                    <span className="text-[11px] font-bold text-mint">{vendor.priceRange}</span>
+                  </div>
+                  <div className="flex gap-1 mt-2.5">
+                    {vendor.tags.slice(0, 2).map((tag) => (
+                      <span key={tag} className="text-[10px] text-warm-text-muted bg-warm-bg px-2 py-0.5 rounded-full">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </Link>
+            ))}
+
+            {/* 입점 문의 카드 */}
+            <a
+              href={BRAND.kakaoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 w-[260px] bg-gradient-to-br from-warm-bg to-warm-border/30 rounded-2xl border border-dashed border-warm-border flex flex-col items-center justify-center gap-3 p-6 active:scale-[0.98] transition-transform"
+            >
+              <div className="w-12 h-12 rounded-full bg-coral-50 flex items-center justify-center">
+                <Store size={20} className="text-coral" />
+              </div>
+              <div className="text-center">
+                <p className="font-bold text-sm">우리 업체도 등록하고 싶어요</p>
+                <p className="text-[11px] text-warm-text-muted mt-1">카톡으로 입점 문의하기</p>
+              </div>
+            </a>
           </div>
         </section>
 

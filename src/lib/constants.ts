@@ -1,4 +1,4 @@
-import type { MegaCategoryId } from "./types";
+import type { MegaCategoryId, Vendor } from "./types";
 
 export const BRAND = {
   name: "신혼생활",
@@ -309,3 +309,70 @@ export const RAG_SYSTEM_PROMPT_TEMPLATE = `당신은 "신혼생활" AI 정책 �
 === 참고 자료 ===
 {CONTEXT}
 === 참고 자료 끝 ===`;
+
+export const VENDOR_CATEGORIES = [
+  { id: "wedding-hall" as const, label: "웨딩홀", emoji: "🏛️" },
+  { id: "studio" as const, label: "스튜디오", emoji: "📸" },
+  { id: "dress" as const, label: "드레스", emoji: "👗" },
+  { id: "honeymoon" as const, label: "허니문", emoji: "✈️" },
+];
+
+export const VENDORS: Vendor[] = [
+  {
+    slug: "grace-wedding-hall",
+    name: "그레이스 웨딩홀",
+    category: "wedding-hall",
+    categoryLabel: "웨딩홀",
+    location: "서울 강남구",
+    priceRange: "300~500만원",
+    rating: 4.8,
+    reviewCount: 124,
+    tags: ["소규모웨딩", "가든식", "뷔페포함"],
+    description: "강남 한복판, 자연광이 쏟아지는 프라이빗 웨딩 공간. 50~150명 규모의 소규모 웨딩에 최적화되어 있어요. 전문 웨딩 플래너가 상주하며, 맞춤 패키지도 가능합니다.",
+    highlights: [
+      "자연광 채플 + 가든 테라스 동시 사용",
+      "50~150명 맞춤 소규모 웨딩",
+      "뷔페·플라워·사회자 올인원 패키지",
+      "주차 100대 무료",
+    ],
+    contactUrl: "https://open.kakao.com/o/p10syHoi",
+  },
+  {
+    slug: "moment-studio",
+    name: "모먼트 스튜디오",
+    category: "studio",
+    categoryLabel: "스튜디오",
+    location: "서울 마포구",
+    priceRange: "150~300만원",
+    rating: 4.9,
+    reviewCount: 89,
+    tags: ["자연스러운촬영", "야외촬영", "원본전체제공"],
+    description: "자연스러운 순간을 담는 웨딩 스튜디오. 강요된 포즈 없이, 두 사람의 진짜 모습을 사진에 담아드려요. 실내 촬영 + 야외 로케이션 촬영을 함께 진행합니다.",
+    highlights: [
+      "보정본 50장 + 원본 전체 제공",
+      "야외 로케이션 1곳 포함",
+      "메이크업·헤어 스타일링 포함",
+      "앨범 1권 + 액자 2점 기본 제공",
+    ],
+    contactUrl: "https://open.kakao.com/o/p10syHoi",
+  },
+  {
+    slug: "bella-dress",
+    name: "벨라 드레스",
+    category: "dress",
+    categoryLabel: "드레스",
+    location: "서울 청담동",
+    priceRange: "80~200만원",
+    rating: 4.7,
+    reviewCount: 67,
+    tags: ["수입드레스", "맞춤수선", "피팅무제한"],
+    description: "유럽 수입 드레스부터 국내 디자이너 드레스까지, 200벌 이상 보유. 전문 피팅사가 체형에 맞게 수선해드리며, 계약 후 피팅 횟수 제한이 없어요.",
+    highlights: [
+      "수입·국내 드레스 200벌+ 보유",
+      "계약 후 피팅 무제한",
+      "속드레스·베일·글러브 무료 대여",
+      "신랑 턱시도 패키지 할인",
+    ],
+    contactUrl: "https://open.kakao.com/o/p10syHoi",
+  },
+];
