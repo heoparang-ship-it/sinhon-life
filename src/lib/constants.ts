@@ -312,9 +312,7 @@ export const RAG_SYSTEM_PROMPT_TEMPLATE = `당신은 "신혼생활" AI 정책 �
 
 export const VENDOR_CATEGORIES = [
   { id: "wedding-hall" as const, label: "웨딩홀", emoji: "🏛️" },
-  { id: "studio" as const, label: "스튜디오", emoji: "📸" },
   { id: "dress" as const, label: "드레스", emoji: "👗" },
-  { id: "honeymoon" as const, label: "허니문", emoji: "✈️" },
 ];
 
 export const VENDORS: Vendor[] = [
@@ -334,25 +332,6 @@ export const VENDORS: Vendor[] = [
       "50~150명 맞춤 소규모 웨딩",
       "뷔페·플라워·사회자 올인원 패키지",
       "주차 100대 무료",
-    ],
-    contactUrl: "https://open.kakao.com/o/p10syHoi",
-  },
-  {
-    slug: "moment-studio",
-    name: "모먼트 스튜디오",
-    category: "studio",
-    categoryLabel: "스튜디오",
-    location: "서울 마포구",
-    priceRange: "150~300만원",
-    rating: 4.9,
-    reviewCount: 89,
-    tags: ["자연스러운촬영", "야외촬영", "원본전체제공"],
-    description: "자연스러운 순간을 담는 웨딩 스튜디오. 강요된 포즈 없이, 두 사람의 진짜 모습을 사진에 담아드려요. 실내 촬영 + 야외 로케이션 촬영을 함께 진행합니다.",
-    highlights: [
-      "보정본 50장 + 원본 전체 제공",
-      "야외 로케이션 1곳 포함",
-      "메이크업·헤어 스타일링 포함",
-      "앨범 1권 + 액자 2점 기본 제공",
     ],
     contactUrl: "https://open.kakao.com/o/p10syHoi",
   },

@@ -17,7 +17,7 @@ export type MegaCategoryId = "wedding-prep" | "newlywed-life" | "gov-support";
 
 export type TabId = "home" | "chat" | "my";
 
-export type VendorCategoryId = "wedding-hall" | "studio" | "dress" | "honeymoon";
+export type VendorCategoryId = "wedding-hall" | "dress";
 
 export interface Vendor {
   slug: string;
