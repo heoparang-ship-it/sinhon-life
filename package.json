@@ -6,9 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:run:ios": "npx cap run ios",
+    "cap:run:android": "npx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/ios": "^8.3.0",
+    "@capacitor/push-notifications": "^8.0.3",
     "@pinecone-database/pinecone": "^7.1.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
@@ -17,6 +27,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@types/cheerio": "^0.22.35",
     "@types/node": "^20",
     "@types/react": "^18",

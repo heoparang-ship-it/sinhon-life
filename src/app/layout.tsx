@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import PushNotificationInit from "@/components/PushNotificationInit";
 
 export const metadata: Metadata = {
   title: "신혼생활 - 신혼부부 정책·혜택 AI 상담",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ko">
       <body className="antialiased bg-warm-bg text-warm-text">
         <ServiceWorkerRegister />
+        <PushNotificationInit />
         <main className="max-w-lg mx-auto min-h-screen pb-16">{children}</main>
         <BottomNav />
       </body>
