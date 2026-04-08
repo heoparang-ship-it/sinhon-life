@@ -292,7 +292,7 @@ async function main() {
   const BATCH_SIZE = 10;
   for (let i = 0; i < records.length; i += BATCH_SIZE) {
     const batch = records.slice(i, i + BATCH_SIZE);
-    await index.upsertRecords(batch);
+    await index.upsertRecords({ records: batch });
     console.log(`  업서트 완료: ${Math.min(i + BATCH_SIZE, records.length)}/${records.length}`);
   }
 
