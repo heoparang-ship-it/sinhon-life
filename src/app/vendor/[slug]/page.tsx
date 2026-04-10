@@ -7,6 +7,16 @@ export function generateStaticParams() {
   return VENDORS.map((v) => ({ slug: v.slug }));
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const vendor = VENDORS.find((v) => v.slug === slug);
+  if (!vendor) return {};
+  return {
+    title: `${vendor.name} - ${vendor.categoryLabel} | 신혼생활`,
+    description: `${vendor.name} ${vendor.location} ${vendor.priceRange}. ${vendor.description.slice(0, 80)}`,
+  };
+}
+
 export default async function VendorDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const vendor = VENDORS.find((v) => v.slug === slug);
