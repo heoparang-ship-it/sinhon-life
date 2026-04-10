@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     description: "신혼부부가 꼭 알아야 할 정책을 AI가 맞춤 안내합니다.",
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    google: "JoHboxJ0Mc12C3zDzj-sFImUZJEXAoU1ENIKFecd20k",
     other: {
-      "naver-site-verification": process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION ?? "",
+      "naver-site-verification": "bfe6e4a7441c02afeaba07922965048ec0c23805",
     },
   },
   other: {
