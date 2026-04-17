@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, MessageCircle, Sparkles, Store } from "lucide-react";
-import { HUB_CATEGORIES, POLICIES, VENDORS } from "@/lib/constants";
+import { HUB_CATEGORIES, POLICIES, VENDORS, FEATURE_FLAGS } from "@/lib/constants";
 
 const COLOR_BAR: Record<string, string> = {
   housing: "bg-coral",
@@ -39,7 +39,11 @@ export default function CategoryHubPage({ params }: Props) {
   const relatedPolicies = POLICIES.filter((p) =>
     hub.policyCategories.includes(p.category)
   );
-  const relatedVendors = hub.id === "wedding" ? VENDORS.slice(0, 4) : [];
+  // 광고주(웨딩업체) 노출은 FEATURE_FLAGS.SHOW_VENDORS 제어
+  const relatedVendors =
+    FEATURE_FLAGS.SHOW_VENDORS && hub.id === "wedding"
+      ? VENDORS.slice(0, 4)
+      : [];
   const isEmpty = relatedPolicies.length === 0;
 
   const bgGradient =

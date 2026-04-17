@@ -5,10 +5,35 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
 :root {
-  --background: #FAFAF8;
-  --foreground: #2C2C2A;
-  --coral: #D85A30;
-  --mint: #1D9E75;
+  /* ============================================================
+     신혼생활 키컬러 — "해 질 녘의 부엌"
+     2026-04-17 키컬러.rtf 제안서 적용. tailwind.config.ts 의
+     coral/mint/honey/navy DEFAULT 와 반드시 동일하게 유지할 것.
+     ============================================================ */
+  --background: #FDF8F1;     /* Rice Paper — 순면 식탁보 */
+  --foreground: #1E2A3A;     /* Ink Navy — 본문 (AAA 12.8:1) */
+  --coral: #F97066;          /* Hearth Coral — 노을 든 부엌 벽 */
+  --coral-deep: #C8453D;     /* Ember — 고위계 강조·경고 (AA 5.9:1) */
+  --mint: #5EC9A8;           /* Morning Mint — 창가 바질 화분 */
+  --mint-deep: #2F8770;      /* Pine Kitchen — 링크 hover (AA 4.8:1) */
+  --honey: #FBD38D;          /* Honey Butter — 갓 구운 빵 */
+  --navy: #1E2A3A;           /* Ink Navy alias */
+  --twilight: #4A5568;       /* 부제·메타 텍스트 */
+  --smoke: #A0AEC0;          /* 보조·구분선 */
+}
+
+/* ----------------------------------------------------------
+   "저녁 모드" (Dark mode) — 신혼생활 시그니처 다크 팔레트.
+   실제 저녁 7~10시 조명 톤. 단순 반전이 아니라 "해 진 후의 부엌".
+   현재는 변수만 선언. 1차 배포 후 컴포넌트별로 점진 적용 예정.
+   ---------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root.evening-mode {
+    --background: #1A1612;     /* 따뜻한 먹빛 */
+    --foreground: #F7E9D7;     /* 전구빛 스며든 크림 */
+    --coral: #FF9B8F;          /* 노을이 방으로 들어온 순간 */
+    --mint: #8EDDC0;           /* 야간 조명 아래 식물 */
+  }
 }
 
 * { -webkit-tap-highlight-color: transparent; }

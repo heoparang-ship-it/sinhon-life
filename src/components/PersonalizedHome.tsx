@@ -17,6 +17,7 @@ import {
   POLICIES,
   BRAND,
   VENDORS,
+  FEATURE_FLAGS,
 } from "@/lib/constants";
 import {
   getProfile,
@@ -286,7 +287,8 @@ export default function PersonalizedHome() {
           </div>
         </section>
 
-        {/* ⑥ 웨딩 업체 */}
+        {/* ⑥ 웨딩 업체 — FEATURE_FLAGS.SHOW_VENDORS 가 true일 때만 노출 */}
+        {FEATURE_FLAGS.SHOW_VENDORS && (
         <section className="space-y-3 opacity-0 animate-fade-up stagger-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -364,6 +366,7 @@ export default function PersonalizedHome() {
             </a>
           </div>
         </section>
+        )}
 
         {/* ⑦ 커뮤니티 */}
         <section className="bg-white rounded-2xl p-4 border border-warm-border flex items-center gap-3">

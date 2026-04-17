@@ -84,7 +84,6 @@ export default function PolicyPage({ params }: Props) {
           })}
         </div>
 
-        <p className="text-xs text-warm-text-muted pt-4">마지막 업데이트: {policy.updatedAt}</p>
       </div>
 
       {/* 관련 정책 추천 */}

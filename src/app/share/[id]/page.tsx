@@ -35,12 +35,9 @@ export default function ShareCardPage({ params }: Props) {
           <div className="flex flex-wrap gap-1.5">
             {policy.tags.map((tag) => <span key={tag} className="text-xs bg-coral-50 text-coral-700 px-2.5 py-1 rounded-full">#{tag}</span>)}
           </div>
-          <div className="border-t border-warm-border pt-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-coral flex items-center justify-center"><span className="text-white text-[10px] font-bold">신</span></div>
-              <span className="text-xs font-medium text-warm-text-secondary">sinhon.life</span>
-            </div>
-            <span className="text-[10px] text-warm-text-muted">{policy.updatedAt}</span>
+          <div className="border-t border-warm-border pt-4 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-coral flex items-center justify-center"><span className="text-white text-[10px] font-bold">신</span></div>
+            <span className="text-xs font-medium text-warm-text-secondary">sinhon.life</span>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, Compass, Store, Sparkles } from "lucide-react";
-import { HUB_CATEGORIES, POLICIES, VENDORS } from "@/lib/constants";
+import { HUB_CATEGORIES, POLICIES, VENDORS, FEATURE_FLAGS } from "@/lib/constants";
 
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
@@ -137,8 +137,8 @@ export default function ExplorePage() {
           )}
         </section>
 
-        {/* 업체 결과 */}
-        {filteredVendors.length > 0 && (
+        {/* 업체 결과 — FEATURE_FLAGS.SHOW_VENDORS 가 true일 때만 노출 */}
+        {FEATURE_FLAGS.SHOW_VENDORS && filteredVendors.length > 0 && (
           <section className="opacity-0 animate-fade-up stagger-3">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5">

@@ -4,8 +4,8 @@
   "description": "청약, 출산장려금, 전세대출 등 신혼부부가 꼭 알아야 할 정책을 AI가 맞춤 안내합니다.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAFAF8",
-  "theme_color": "#D85A30",
+  "background_color": "#FDF8F1",
+  "theme_color": "#F97066",
   "orientation": "portrait",
   "icons": [
     {

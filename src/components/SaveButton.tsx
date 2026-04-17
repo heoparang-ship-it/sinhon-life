@@ -43,8 +43,8 @@ export default function SaveButton({ id }: SaveButtonProps) {
         width="20"
         height="20"
         viewBox="0 0 24 24"
-        fill={saved ? "#D85A30" : "none"}
-        stroke={saved ? "#D85A30" : "#9C9C9A"}
+        fill={saved ? "#F97066" : "none"}
+        stroke={saved ? "#F97066" : "#A0AEC0"}
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"

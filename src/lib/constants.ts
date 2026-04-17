@@ -8,6 +8,16 @@ export const BRAND = {
   instagram: "https://instagram.com/sinhon.life",
 } as const;
 
+/**
+ * 기능 플래그 (Feature Flags)
+ * - SHOW_VENDORS: 광고주(웨딩업체 등) 섹션 노출 여부.
+ *   현재(2026-04-17) 무료 공공 정보 위주 포지셔닝 → false.
+ *   추후 입점 모델이 준비되면 true로 전환하기만 하면 노출 복원.
+ */
+export const FEATURE_FLAGS = {
+  SHOW_VENDORS: false,
+} as const;
+
 export const MEGA_CATEGORIES: {
   id: MegaCategoryId;
   title: string;
@@ -121,7 +131,11 @@ export interface Policy {
   summary: string;
   content: string;
   tags: string[];
-  updatedAt: string;
+  /**
+   * 데이터 관리용 내부 메타. UI에는 표시하지 않음.
+   * (2026-04-17 정책 변경: 사용자에게 "업데이트 날짜"를 노출하지 않기로 함)
+   */
+  updatedAt?: string;
   highlight?: string;
 }
 

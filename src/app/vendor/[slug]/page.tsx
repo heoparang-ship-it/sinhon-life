@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Star, MapPin, Check, MessageCircle, ExternalLink } from "lucide-react";
-import { VENDORS, VENDOR_CATEGORIES, BRAND } from "@/lib/constants";
+import { VENDORS, VENDOR_CATEGORIES, BRAND, FEATURE_FLAGS } from "@/lib/constants";
 
 export function generateStaticParams() {
+  // 광고주(웨딩업체) 페이지 노출 안 할 때는 정적 경로도 만들지 않음
+  if (!FEATURE_FLAGS.SHOW_VENDORS) return [];
   return VENDORS.map((v) => ({ slug: v.slug }));
 }
 
 export default async function VendorDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  // 무료 공공 정보 모드 — 광고주 상세 페이지 비공개
+  if (!FEATURE_FLAGS.SHOW_VENDORS) notFound();
+
   const { slug } = await params;
   const vendor = VENDORS.find((v) => v.slug === slug);
   if (!vendor) notFound();

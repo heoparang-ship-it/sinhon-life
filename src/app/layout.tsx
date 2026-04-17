@@ -33,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#FAFAF8",
+  themeColor: "#FDF8F1", // Rice Paper — 키컬러 시스템 배경
   viewportFit: "cover",
 };
 
