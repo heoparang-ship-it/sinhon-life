@@ -116,7 +116,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "google-site-verification-placeholder-replace-me",
+    // HTML 파일 방식(public/google7e5f43628e481ad3.html)이 주 인증이며,
+    // 메타 태그는 이중 안전장치 용도.
+    google: "google7e5f43628e481ad3",
     other: {
       "naver-site-verification": "bfe6e4a7441c02afeaba07922965048ec0c23805",
     },
