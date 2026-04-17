@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
@@ -37,7 +37,7 @@ const INTERESTS: { id: InterestTopic; label: string; emoji: string }[] = [
   { id: "honeymoon", label: "신혼여행", emoji: "✈️" },
 ];
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/";
@@ -270,5 +270,13 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingContent />
+    </Suspense>
   );
 }
