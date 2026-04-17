@@ -1,4 +1,4 @@
-import type { MegaCategoryId, Vendor } from "./types";
+import type { MegaCategoryId, Vendor, HubCategory } from "./types";
 
 export const BRAND = {
   name: "신혼생활",
@@ -48,6 +48,64 @@ export const CATEGORIES = [
   { id: "baby", title: "출산 머니", color: "coral" as const },
   { id: "tax", title: "세금 아끼기", color: "mint" as const },
 ] as const;
+
+// 2026.04 개편: 홈 & 탐색 탭의 진짜 목적지. /category/[id] 허브 페이지로 연결.
+export const HUB_CATEGORIES: HubCategory[] = [
+  {
+    id: "wedding",
+    title: "예식준비",
+    subtitle: "웨딩홀·스드메·혼수",
+    emoji: "💒",
+    color: "coral",
+    policyCategories: ["housing"], // 임시: 직접 콘텐츠가 적음 → 관련 꿀정보로 채움
+    description: "웨딩홀 고르는 법, 스드메 견적, 하객 관리까지 결혼식 전에 꼭 챙겨야 할 정보.",
+  },
+  {
+    id: "home",
+    title: "신혼집",
+    subtitle: "청약·전세·월세",
+    emoji: "🏠",
+    color: "coral",
+    policyCategories: ["housing"],
+    description: "새 아파트 특공, 전세대출, 행복주택 — 신혼집 마련에 관한 모든 것.",
+  },
+  {
+    id: "money",
+    title: "재테크",
+    subtitle: "세금·대출·투자",
+    emoji: "💰",
+    color: "mint",
+    policyCategories: ["finance", "tax"],
+    description: "연말정산·취득세·부부 증여까지, 아는 만큼 절약하는 신혼 머니 가이드.",
+  },
+  {
+    id: "parenting",
+    title: "출산육아",
+    subtitle: "출산지원금·부모급여",
+    emoji: "👶",
+    color: "coral",
+    policyCategories: ["baby"],
+    description: "첫만남이용권 200만원부터 매달 부모급여까지, 아이가 생기면 챙길 혜택.",
+  },
+  {
+    id: "honeymoon",
+    title: "신혼여행",
+    subtitle: "가성비·럭셔리·이색",
+    emoji: "✈️",
+    color: "mint",
+    policyCategories: ["finance"], // 준비중
+    description: "예산별 신혼여행지, 현지 팁, 여행자보험까지 — 콘텐츠 확장 준비 중.",
+  },
+  {
+    id: "policy",
+    title: "혜택정책",
+    subtitle: "지원금·바우처·세액공제",
+    emoji: "🎁",
+    color: "mint",
+    policyCategories: ["baby", "tax", "finance", "housing"],
+    description: "2026년 기준 신혼부부가 받을 수 있는 전 부처·지자체 지원금 총정리.",
+  },
+];
 
 export const QUICK_QUESTIONS = [
   "우리 부부 새 아파트 당첨 가능해요?",

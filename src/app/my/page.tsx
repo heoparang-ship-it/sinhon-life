@@ -2,18 +2,73 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, MessageCircle, BookOpen, ExternalLink, Heart, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  MessageCircle,
+  BookOpen,
+  ExternalLink,
+  Heart,
+  Sparkles,
+  Settings,
+  RotateCcw,
+} from "lucide-react";
 import { BRAND, POLICIES } from "@/lib/constants";
 import { getSavedIds } from "@/lib/storage";
+import {
+  getProfile,
+  getGreetingName,
+  hasCompletedOnboarding,
+  resetProfile,
+  type Profile,
+} from "@/lib/profile";
+
+const STAGE_LABEL: Record<string, string> = {
+  planning: "결혼 준비 중",
+  newly: "신혼부부",
+  parenting: "임신·출산·육아",
+};
+
+const REGION_LABEL: Record<string, string> = {
+  seoul: "서울",
+  incheon: "인천",
+  gyeonggi: "경기",
+  busan: "부산",
+  daegu: "대구",
+  etc: "그 외",
+};
+
+const INTEREST_LABEL: Record<string, string> = {
+  housing: "신혼집·청약",
+  finance: "대출·재테크",
+  tax: "세금·연말정산",
+  baby: "출산·육아",
+  wedding: "예식·스드메",
+  honeymoon: "신혼여행",
+};
 
 export default function MyPage() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [onboarded, setOnboarded] = useState(false);
 
   useEffect(() => {
     setSavedIds(getSavedIds());
+    setProfile(getProfile());
+    setOnboarded(hasCompletedOnboarding());
+    setMounted(true);
   }, []);
 
   const savedPolicies = POLICIES.filter((p) => savedIds.includes(p.slug));
+  const greetingName = profile ? getGreetingName(profile) : "";
+
+  const handleResetProfile = () => {
+    if (confirm("프로필을 초기화할까요? 다시 온보딩을 진행해야 해요.")) {
+      resetProfile();
+      setProfile(null);
+      setOnboarded(false);
+    }
+  };
 
   return (
     <div className="px-5 pt-14 pb-4 space-y-6">
@@ -21,16 +76,76 @@ export default function MyPage() {
       <section className="bg-white rounded-2xl p-5 border border-warm-border opacity-0 animate-fade-up stagger-1">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-gradient-to-br from-coral to-coral-400 flex items-center justify-center shadow-lg shadow-coral/20">
-            <span className="text-white text-xl">👋</span>
+            <span className="text-white text-xl">
+              {mounted && onboarded ? "💑" : "👋"}
+            </span>
           </div>
-          <div>
-            <h2 className="font-bold text-lg">반가워요!</h2>
-            <p className="text-[11px] text-warm-text-muted mt-0.5">로그인하면 나에게 딱 맞는 혜택을 찾아줘요</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-bold text-lg truncate">
+              {mounted && onboarded && greetingName
+                ? `${greetingName}님,`
+                : "반가워요!"}
+            </h2>
+            <p className="text-[11px] text-warm-text-muted mt-0.5">
+              {mounted && onboarded
+                ? "나에게 맞는 혜택 중심으로 보여드리고 있어요"
+                : "30초 온보딩으로 나에게 딱 맞는 혜택 찾기"}
+            </p>
           </div>
         </div>
-        <button disabled className="w-full mt-4 bg-warm-bg text-warm-text-muted py-2.5 rounded-xl text-sm font-medium">
-          로그인 (곧 오픈!)
-        </button>
+
+        {mounted && onboarded && profile ? (
+          <div className="mt-4 space-y-2.5">
+            {/* 프로필 요약 칩 */}
+            <div className="flex flex-wrap gap-1.5">
+              {profile.stage && (
+                <span className="text-[11px] font-bold text-coral bg-coral-50 px-2.5 py-1 rounded-lg">
+                  {STAGE_LABEL[profile.stage]}
+                </span>
+              )}
+              {profile.region && (
+                <span className="text-[11px] font-bold text-mint-700 bg-mint-50 px-2.5 py-1 rounded-lg">
+                  📍 {REGION_LABEL[profile.region]}
+                </span>
+              )}
+              {profile.interests.slice(0, 3).map((i) => (
+                <span
+                  key={i}
+                  className="text-[11px] font-medium text-warm-text bg-warm-bg px-2.5 py-1 rounded-lg"
+                >
+                  {INTEREST_LABEL[i] || i}
+                </span>
+              ))}
+              {profile.interests.length > 3 && (
+                <span className="text-[11px] font-medium text-warm-text-muted bg-warm-bg px-2.5 py-1 rounded-lg">
+                  +{profile.interests.length - 3}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Link
+                href="/onboarding?next=/my"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-warm-bg text-warm-text py-2.5 rounded-xl text-xs font-bold active:scale-[0.98] transition-transform"
+              >
+                <Settings size={13} /> 프로필 수정
+              </Link>
+              <button
+                onClick={handleResetProfile}
+                className="flex items-center justify-center gap-1 bg-white border border-warm-border text-warm-text-muted px-3 py-2.5 rounded-xl text-xs font-medium active:scale-[0.98] transition-transform"
+                aria-label="초기화"
+              >
+                <RotateCcw size={13} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/onboarding?next=/my"
+            className="block text-center w-full mt-4 bg-coral text-white py-2.5 rounded-xl text-sm font-bold active:scale-[0.98] transition-transform shadow-lg shadow-coral/20"
+          >
+            30초 온보딩 시작하기
+          </Link>
+        )}
       </section>
 
       {/* 저장한 정책 */}
@@ -58,7 +173,11 @@ export default function MyPage() {
       <section className="bg-gradient-to-br from-coral-50 via-white to-mint-50 rounded-2xl p-4 border border-warm-border opacity-0 animate-fade-up stagger-2">
         <div className="flex items-center gap-1.5 mb-3">
           <Sparkles size={14} className="text-coral" />
-          <h3 className="font-bold text-sm">놓치고 있는 혜택이 있어요</h3>
+          <h3 className="font-bold text-sm">
+            {mounted && onboarded
+              ? "내 상황에 맞는 혜택"
+              : "놓치고 있는 혜택이 있어요"}
+          </h3>
         </div>
         <div className="grid grid-cols-3 gap-2.5 text-center">
           <div className="bg-white rounded-xl p-3 shadow-sm">
@@ -85,7 +204,7 @@ export default function MyPage() {
           </div>
           <ChevronRight size={16} className="text-warm-text-muted" />
         </Link>
-        <Link href="/" className="flex items-center justify-between px-5 py-4 active:bg-warm-bg transition-colors">
+        <Link href="/explore" className="flex items-center justify-between px-5 py-4 active:bg-warm-bg transition-colors">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-mint-50 flex items-center justify-center"><BookOpen size={16} className="text-mint" /></div>
             <span className="text-sm font-medium">꿀정보 모아보기</span>
@@ -109,7 +228,7 @@ export default function MyPage() {
       </section>
 
       <section className="text-center space-y-1 pt-2">
-        <p className="text-[11px] text-warm-text-muted">신혼생활 v2.0 real</p>
+        <p className="text-[11px] text-warm-text-muted">신혼생활 v2.1 personalized</p>
         <p className="text-[10px] text-warm-text-muted">문의: sinhon.life@gmail.com</p>
       </section>
     </div>

@@ -2,10 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, MessageCircle, User } from "lucide-react";
+import { Home, Compass, MessageCircle, User } from "lucide-react";
 
 const tabs = [
   { id: "home", href: "/", icon: Home, label: "홈" },
+  { id: "explore", href: "/explore", icon: Compass, label: "탐색" },
   { id: "chat", href: "/chat", icon: MessageCircle, label: "AI비서" },
   { id: "my", href: "/my", icon: User, label: "MY" },
 ] as const;
@@ -16,6 +17,9 @@ export default function BottomNav() {
   const getActiveTab = () => {
     if (pathname === "/") return "home";
     if (pathname.startsWith("/policy")) return "home";
+    if (pathname.startsWith("/explore")) return "explore";
+    if (pathname.startsWith("/category")) return "explore";
+    if (pathname.startsWith("/vendor")) return "explore";
     if (pathname.startsWith("/chat")) return "chat";
     if (pathname.startsWith("/my")) return "my";
     return "home";
@@ -33,7 +37,7 @@ export default function BottomNav() {
             <Link
               key={tab.id}
               href={tab.href}
-              className={`flex flex-col items-center justify-center gap-0.5 w-20 py-1 transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-16 py-1 transition-all duration-200 ${
                 isActive ? "text-coral" : "text-warm-text-muted"
               }`}
             >

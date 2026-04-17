@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, MessageCircle, ExternalLink, Sparkles, ArrowRight } from "lucide-react";
 import { POLICIES, BRAND } from "@/lib/constants";
 import SaveButton from "@/components/SaveButton";
 import ShareButton from "@/components/ShareButton";
@@ -18,7 +18,15 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: Props) {
   const policy = POLICIES.find((p) => p.slug === params.slug);
   if (!policy) return {};
-  return { title: `${policy.title} | 신혼생활`, description: policy.summary };
+  return {
+    title: `${policy.title} | 신혼생활`,
+    description: policy.summary,
+    openGraph: {
+      title: `${policy.title} · 신혼생활`,
+      description: policy.summary,
+      url: `https://sinhon.life/policy/${policy.slug}`,
+    },
+  };
 }
 
 export default function PolicyPage({ params }: Props) {
@@ -26,6 +34,19 @@ export default function PolicyPage({ params }: Props) {
   if (!policy) notFound();
 
   const paragraphs = policy.content.split(/\n\n+/);
+
+  // 관련 정책: 같은 카테고리 우선, 그 다음 태그 겹치는 것, 자기 자신 제외, 최대 3개
+  const related = POLICIES
+    .filter((p) => p.slug !== policy.slug)
+    .map((p) => {
+      let score = 0;
+      if (p.category === policy.category) score += 10;
+      score += p.tags.filter((t) => policy.tags.includes(t)).length * 3;
+      return { policy: p, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map((x) => x.policy);
 
   return (
     <div className="min-h-screen">
@@ -66,13 +87,61 @@ export default function PolicyPage({ params }: Props) {
         <p className="text-xs text-warm-text-muted pt-4">마지막 업데이트: {policy.updatedAt}</p>
       </div>
 
-      <div className="px-5 pb-20 space-y-3">
-        <Link href="/chat" className="flex items-center justify-center gap-2 w-full bg-coral text-white py-3.5 rounded-xl font-semibold text-sm active:scale-[0.98] transition-transform">
-          <MessageCircle size={18} />더 궁금한 건 AI에게 물어보세요
+      {/* 관련 정책 추천 */}
+      {related.length > 0 && (
+        <section className="px-5 pb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles size={15} className="text-coral" />
+            <h3 className="text-[15px] font-extrabold">함께 보면 좋은 꿀정보</h3>
+          </div>
+          <div className="space-y-2.5">
+            {related.map((p) => (
+              <Link
+                key={p.slug}
+                href={`/policy/${p.slug}`}
+                className="flex items-center gap-3.5 bg-white rounded-xl p-3.5 border border-warm-border active:scale-[0.99] transition-all hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className={`w-1 h-10 rounded-full flex-shrink-0 ${COLOR_BAR[p.category] || "bg-coral"}`} />
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-[13px] leading-tight truncate">{p.title}</h4>
+                  <p className="text-[11px] text-warm-text-muted mt-1 line-clamp-1">{p.summary}</p>
+                </div>
+                {p.highlight && (
+                  <span className="text-[10px] font-bold text-coral bg-coral-50 px-2 py-1 rounded-lg flex-shrink-0">{p.highlight}</span>
+                )}
+                <ArrowRight size={13} className="text-warm-text-muted flex-shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* CTA 3종 */}
+      <div className="px-5 pb-24 space-y-2.5">
+        <Link
+          href={`/chat?q=${encodeURIComponent(policy.title + "에 대해 자세히 알려주세요")}`}
+          className="flex items-center justify-center gap-2 w-full bg-coral text-white py-3.5 rounded-xl font-bold text-sm active:scale-[0.98] transition-transform shadow-lg shadow-coral/20"
+        >
+          <MessageCircle size={18} />
+          이 혜택 AI에게 자세히 묻기
         </Link>
-        <a href={BRAND.kakaoLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-mint-50 text-mint-700 py-3.5 rounded-xl font-semibold text-sm active:scale-[0.98] transition-transform">
-          <ExternalLink size={16} />카톡 커뮤니티 참여하기
-        </a>
+        <div className="grid grid-cols-2 gap-2">
+          <a
+            href={BRAND.kakaoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 bg-mint-50 text-mint-700 py-3 rounded-xl font-bold text-[13px] active:scale-[0.98] transition-transform"
+          >
+            <ExternalLink size={14} />
+            선배에게 묻기
+          </a>
+          <Link
+            href="/explore"
+            className="flex items-center justify-center gap-1.5 bg-white border border-warm-border text-warm-text py-3 rounded-xl font-bold text-[13px] active:scale-[0.98] transition-transform"
+          >
+            다른 혜택 더 보기
+          </Link>
+        </div>
       </div>
     </div>
   );
