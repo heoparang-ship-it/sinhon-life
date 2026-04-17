@@ -6,6 +6,15 @@ import { ArrowLeft, MessageCircle, ExternalLink, Sparkles, ArrowRight } from "lu
 import { POLICIES, BRAND } from "@/lib/constants";
 import SaveButton from "@/components/SaveButton";
 import ShareButton from "@/components/ShareButton";
+import {
+  ProductComparisonTable,
+  RateBonuses,
+  DocumentChecklist,
+  HowToSteps,
+  OfficialLinks,
+  FaqAccordion,
+  SourcesFooter,
+} from "@/components/policy/RichPolicySections";
 
 const SITE_URL = "https://sinhon.life";
 
@@ -37,7 +46,7 @@ export function generateMetadata({ params }: Props): Metadata {
     policy.category === "housing"
       ? "신혼부부 청약"
       : policy.category === "finance"
-      ? "신혼부부 대출"
+      ? "신혼부부 절약"
       : policy.category === "baby"
       ? "출산지원금"
       : "신혼부부 세금",
@@ -92,6 +101,17 @@ export default function PolicyPage({ params }: Props) {
   if (!policy) notFound();
 
   const paragraphs = policy.content.split(/\n\n+/);
+
+  // Rich 모드: 확장 필드 중 하나라도 있으면 활성화
+  const isRich = !!(
+    policy.products ||
+    policy.calculator ||
+    policy.rateBonuses ||
+    policy.documents ||
+    policy.howToSteps ||
+    policy.externalLinks ||
+    policy.faqs
+  );
 
   // 관련 정책: 같은 카테고리 우선, 그 다음 태그 겹치는 것, 자기 자신 제외, 최대 3개
   const related = POLICIES
@@ -184,15 +204,64 @@ export default function PolicyPage({ params }: Props) {
         <h2 className="text-xl font-extrabold leading-tight tracking-tight">{policy.title}</h2>
         <p className="text-sm text-warm-text-secondary leading-relaxed">{policy.summary}</p>
 
-        <div className="space-y-5 pt-2">
-          {paragraphs.map((para, i) => {
-            const trimmed = para.trim();
-            if (trimmed.length < 30 && !trimmed.includes("원") && !trimmed.includes("%")) {
-              return <h3 key={i} className="text-[15px] font-bold text-coral mt-8 first:mt-0">{trimmed}</h3>;
-            }
-            return <p key={i} className="text-[14px] leading-[1.8] text-warm-text">{trimmed}</p>;
-          })}
-        </div>
+        {/* 레거시 모드: content를 풀 렌더. Rich 모드: TL;DR만 짧게 */}
+        {!isRich ? (
+          <div className="space-y-5 pt-2">
+            {paragraphs.map((para, i) => {
+              const trimmed = para.trim();
+              if (trimmed.length < 30 && !trimmed.includes("원") && !trimmed.includes("%")) {
+                return (
+                  <h3
+                    key={i}
+                    className="text-[15px] font-bold text-coral mt-8 first:mt-0"
+                  >
+                    {trimmed}
+                  </h3>
+                );
+              }
+              return (
+                <p key={i} className="text-[14px] leading-[1.8] text-warm-text">
+                  {trimmed}
+                </p>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="pt-2 space-y-6">
+            {/* 1. 상품 비교표 (2개 이상이면 렌더) */}
+            {policy.products && policy.products.length >= 2 && (
+              <ProductComparisonTable products={policy.products} />
+            )}
+
+            {/* 3. 우대금리 조건 */}
+            {policy.rateBonuses && policy.rateBonuses.length > 0 && (
+              <RateBonuses bonuses={policy.rateBonuses} />
+            )}
+
+            {/* 4. 필요서류 체크리스트 */}
+            {policy.documents && policy.documents.length > 0 && (
+              <DocumentChecklist slug={policy.slug} documents={policy.documents} />
+            )}
+
+            {/* 5. 신청 절차 */}
+            {policy.howToSteps && policy.howToSteps.length > 0 && (
+              <HowToSteps steps={policy.howToSteps} />
+            )}
+
+            {/* 6. 공식 신청처 */}
+            {policy.externalLinks && policy.externalLinks.length > 0 && (
+              <OfficialLinks links={policy.externalLinks} />
+            )}
+
+            {/* 7. FAQ */}
+            {policy.faqs && policy.faqs.length > 0 && <FaqAccordion faqs={policy.faqs} />}
+
+            {/* 8. 출처 */}
+            {policy.sources && policy.sources.length > 0 && (
+              <SourcesFooter sources={policy.sources} />
+            )}
+          </div>
+        )}
 
       </article>
 

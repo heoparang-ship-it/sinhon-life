@@ -57,6 +57,11 @@ export default function PersonalizedHome() {
   const bentoBig = rest[0]?.item;
   const bentoSmall = rest.slice(1, 7).map((r) => r.item);
 
+  // 런타임 집계 — 하드코딩 대신 실제 등록된 혜택 개수 기준
+  const totalCount = POLICIES.length;
+  const housingCount = POLICIES.filter((p) => p.category === "housing").length;
+  const babyCount = POLICIES.filter((p) => p.category === "baby").length;
+
   return (
     <div>
       <div className="px-5 pt-5 space-y-7">
@@ -180,31 +185,31 @@ export default function PersonalizedHome() {
           </div>
         </section>
 
-        {/* ④ 스탯 3박스 (개인화 or 기본) */}
+        {/* ④ 스탯 3박스 — 런타임 집계 (POLICIES 기반, 과장 없음) */}
         <section className="opacity-0 animate-fade-up stagger-3">
           <div className="flex gap-3">
             <div className="flex-1 bg-white rounded-xl p-3.5 border border-warm-border">
               <p className="text-2xl font-extrabold text-coral tracking-tight">
-                15+
+                {totalCount}
               </p>
               <p className="text-[10px] text-warm-text-muted mt-1">
-                받을 수 있는 혜택
+                등록된 혜택
               </p>
             </div>
             <div className="flex-1 bg-white rounded-xl p-3.5 border border-warm-border">
               <p className="text-2xl font-extrabold text-mint tracking-tight">
-                1.1%
+                {housingCount}
               </p>
               <p className="text-[10px] text-warm-text-muted mt-1">
-                최저 대출금리
+                주거·청약
               </p>
             </div>
             <div className="flex-1 bg-white rounded-xl p-3.5 border border-warm-border">
               <p className="text-2xl font-extrabold text-coral tracking-tight">
-                200만
+                {babyCount}
               </p>
               <p className="text-[10px] text-warm-text-muted mt-1">
-                출산 바우처
+                출산·육아
               </p>
             </div>
           </div>

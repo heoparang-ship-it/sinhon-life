@@ -48,7 +48,7 @@ export default function ExplorePage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="어떤 정보가 궁금하세요? (예: 전세대출, 출산지원금)"
+              placeholder="어떤 정보가 궁금하세요? (예: 청약, 출산지원금)"
               className="w-full bg-white border border-warm-border rounded-full pl-10 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-coral/30 focus:border-coral/40 placeholder:text-warm-text-muted"
             />
           </div>

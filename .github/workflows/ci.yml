@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 같은 브랜치의 진행 중인 CI는 취소 (리소스 절약)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck · Lint · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck (tsc --noEmit)
+        run: npm run typecheck
+
+      - name: Lint (next lint)
+        run: npm run lint
+
+      - name: Build (next build)
+        env:
+          # 빌드 파이프라인 전용 더미 값 — 실제 호출 없음
+          ANTHROPIC_API_KEY: "dummy-build-key"
+          PINECONE_API_KEY: "dummy-build-key"
+          NEXT_PUBLIC_APP_URL: "https://sinhon.life"
+          ADMIN_PASSWORD: "ci-build-only-password"
+          # Sentry DSN 없으면 소스맵 업로드 생략 (no-op)
+          NEXT_PUBLIC_SENTRY_DSN: ""
+          SENTRY_AUTH_TOKEN: ""
+        run: npm run build

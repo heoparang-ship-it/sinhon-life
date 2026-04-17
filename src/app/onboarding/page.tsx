@@ -33,7 +33,7 @@ const REGIONS: { id: Region; label: string }[] = [
 
 const INTERESTS: { id: InterestTopic; label: string; emoji: string }[] = [
   { id: "housing", label: "신혼집·청약", emoji: "🏠" },
-  { id: "finance", label: "대출·재테크", emoji: "💰" },
+  { id: "finance", label: "절약·재테크", emoji: "💰" },
   { id: "tax", label: "세금·연말정산", emoji: "📑" },
   { id: "baby", label: "출산·육아", emoji: "👶" },
   { id: "wedding", label: "예식·스드메", emoji: "💒" },

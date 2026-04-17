@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Brain, Store, Users, ArrowLeft } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Brain, Store, Users, ArrowLeft, LogOut } from "lucide-react";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "대시보드" },
@@ -13,6 +13,19 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  const router = useRouter();
+
+  // 로그인 페이지는 관리자 chrome(헤더/사이드바) 없이 풀스크린으로 렌더
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.replace("/admin/login");
+    router.refresh();
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -25,7 +38,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
             <h1 className="font-bold text-lg">신혼생활 관리자</h1>
           </div>
-          <span className="text-xs text-gray-400">sinhon.life admin</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-400 hidden sm:inline">sinhon.life admin</span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-coral px-2 py-1 rounded-md transition-colors"
+              aria-label="로그아웃"
+            >
+              <LogOut size={13} />
+              로그아웃
+            </button>
+          </div>
         </div>
       </header>
 

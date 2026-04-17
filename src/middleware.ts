@@ -1,7 +1,45 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  ADMIN_COOKIE,
+  ADMIN_LOGIN_PATH,
+  hashAdminToken,
+} from "@/lib/adminAuth";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ───────────── /admin 인증 게이트 ─────────────
+  // /admin/login 과 /api/admin/login(+logout)은 예외.
+  const isAdminArea =
+    pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdminLoginPage = pathname === ADMIN_LOGIN_PATH;
+
+  if (isAdminArea && !isAdminLoginPage) {
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      // 환경변수 미설정 → 접근 자체 차단, 로그인 페이지로 안내 (에러 플래그)
+      const url = request.nextUrl.clone();
+      url.pathname = ADMIN_LOGIN_PATH;
+      url.searchParams.set("e", "config");
+      return NextResponse.redirect(url);
+    }
+
+    const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
+    let authorized = false;
+    if (cookie) {
+      const expected = await hashAdminToken(adminPassword);
+      authorized = cookie === expected;
+    }
+
+    if (!authorized) {
+      const url = request.nextUrl.clone();
+      url.pathname = ADMIN_LOGIN_PATH;
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   const response = NextResponse.next();
 
   // 보안 헤더
@@ -11,7 +49,7 @@ export function middleware(request: NextRequest) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   // API CORS
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  if (pathname.startsWith("/api/")) {
     const origin = request.headers.get("origin") ?? "";
     const allowed = [
       "https://sinhon.life",

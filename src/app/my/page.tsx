@@ -39,7 +39,7 @@ const REGION_LABEL: Record<string, string> = {
 
 const INTEREST_LABEL: Record<string, string> = {
   housing: "신혼집·청약",
-  finance: "대출·재테크",
+  finance: "절약·재테크",
   tax: "세금·연말정산",
   baby: "출산·육아",
   wedding: "예식·스드메",

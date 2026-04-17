@@ -105,7 +105,7 @@ function ChatContent() {
             </div>
             <div className="animate-bubble-in" style={{ animationDelay: "0.5s", opacity: 0 }}>
               <div className="bg-white rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] border border-warm-border shadow-sm">
-                <p className="text-sm leading-relaxed">새집 마련, 대출 금리, 출산 지원금 등 궁금한 거 편하게 물어봐주세요!</p>
+                <p className="text-sm leading-relaxed">새집 마련, 공공임대, 출산 지원금 등 궁금한 거 편하게 물어봐주세요!</p>
               </div>
             </div>
             <div className="space-y-2 pt-2">

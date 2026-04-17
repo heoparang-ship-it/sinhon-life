@@ -29,7 +29,7 @@ export const MEGA_CATEGORIES: {
   {
     id: "wedding-prep",
     title: "결혼준비",
-    description: "새집·청약·전세대출",
+    description: "새집·청약·임대",
     iconName: "Home",
     color: "coral",
     policyCategories: ["housing"],
@@ -37,7 +37,7 @@ export const MEGA_CATEGORIES: {
   {
     id: "newlywed-life",
     title: "신혼생활",
-    description: "세금·대출·재테크",
+    description: "세금·절약·재테크",
     iconName: "Wallet",
     color: "mint",
     policyCategories: ["finance", "tax"],
@@ -73,16 +73,16 @@ export const HUB_CATEGORIES: HubCategory[] = [
   {
     id: "home",
     title: "신혼집",
-    subtitle: "청약·전세·월세",
+    subtitle: "청약·임대·월세",
     emoji: "🏠",
     color: "coral",
     policyCategories: ["housing"],
-    description: "새 아파트 특공, 전세대출, 행복주택 — 신혼집 마련에 관한 모든 것.",
+    description: "새 아파트 특공, 공공임대, 행복주택 — 신혼집 마련에 관한 모든 것.",
   },
   {
     id: "money",
     title: "재테크",
-    subtitle: "세금·대출·투자",
+    subtitle: "세금·절약·투자",
     emoji: "💰",
     color: "mint",
     policyCategories: ["finance", "tax"],
@@ -119,10 +119,66 @@ export const HUB_CATEGORIES: HubCategory[] = [
 
 export const QUICK_QUESTIONS = [
   "우리 부부 새 아파트 당첨 가능해요?",
-  "전세대출 이자 제일 싼 거 뭐예요?",
+  "행복주택 월세 얼마나 저렴해요?",
   "아이 낳으면 돈 얼마나 받아요?",
   "맞벌이인데 뭐 신청할 수 있어요?",
 ] as const;
+
+/**
+ * Rich 정책 스키마 — 의사결정·계산·비교가 필요한 콘텐츠용.
+ * 하위 필드가 하나라도 있으면 정책 상세 페이지가 Rich 모드로 렌더된다.
+ * 없으면 기존 `content` 문자열 기반 레거시 렌더 유지 (backward compatible).
+ */
+export interface PolicyProduct {
+  /** UI용 ID (버튼/탭 key) */
+  id: string;
+  /** 상품 정식 명칭 */
+  name: string;
+  /** 짧은 한 줄 요약 */
+  tagline: string;
+  /** 금리(연 %) 범위 — [min, max] */
+  rate: [number, number];
+  /** 한도(원). 1억은 100_000_000 */
+  maxAmount: number;
+  /** 대상 자격 조건 짧은 리스트 */
+  eligibility: string[];
+  /** 강점 (뱃지로 표시될 짧은 문구) */
+  strength?: string;
+  /** 약점/주의사항 */
+  weakness?: string;
+  /** 공식 신청/안내 URL */
+  officialUrl?: string;
+  /** 심사 소요 (예: "2~3주") */
+  processingTime?: string;
+}
+
+export interface PolicyFaq {
+  q: string;
+  a: string;
+}
+
+export interface PolicyExternalLink {
+  label: string;
+  url: string;
+  /** 공식 정부 > 은행 > 블로그 순으로 신뢰도 구분 */
+  type: "gov" | "bank" | "guide";
+}
+
+export interface PolicySource {
+  label: string;
+  url: string;
+  /** 이 정보 기준 시점 (YYYY-MM-DD) */
+  verifiedAt: string;
+}
+
+export interface PolicyRateBonus {
+  /** 조건 설명 */
+  condition: string;
+  /** 감면 효과 (예: "-0.2%p") */
+  effect: string;
+  /** 신청 시 반드시 필요 여부 */
+  required?: boolean;
+}
 
 export interface Policy {
   slug: string;
@@ -137,6 +193,25 @@ export interface Policy {
    */
   updatedAt?: string;
   highlight?: string;
+
+  /* ───── Rich 필드 (옵션) ───── */
+
+  /** 상품 비교표 원료. 2개 이상이면 비교표 렌더 */
+  products?: PolicyProduct[];
+  /** 계산기 프리셋. 현재 사용처 없음 — v1.1에서 재도입 가능 */
+  calculator?: "none";
+  /** 우대금리 / 가산 조건 */
+  rateBonuses?: PolicyRateBonus[];
+  /** 필요서류 체크리스트 (localStorage로 체크 상태 저장) */
+  documents?: { label: string; hint?: string }[];
+  /** 신청 절차 (순번 표시) */
+  howToSteps?: { title: string; detail?: string }[];
+  /** 공식 신청처·은행 직링크 */
+  externalLinks?: PolicyExternalLink[];
+  /** FAQ (아코디언) */
+  faqs?: PolicyFaq[];
+  /** 출처/검증 시점 — E-E-A-T 시그널 */
+  sources?: PolicySource[];
 }
 
 export const POLICIES: Policy[] = [
@@ -247,43 +322,6 @@ LH 청약센터(apply.lh.or.kr)에서 온라인 신청
     tags: ["행복주택", "월세절약", "반값임대"],
     updatedAt: "2026-04-03",
   },
-  // ── 금융 (finance) ──
-  {
-    slug: "jeonse-loan-guide",
-    title: "이자 1%대? 신혼부부 전세대출 꿀비교",
-    category: "finance",
-    summary: "같은 전세대출인데 금리가 이렇게 다르다고? 내 상황에 딱 맞는 대출 찾기",
-    highlight: "연 1.1%~",
-    content: `전세대출, 어디서 빌려야 이자가 제일 적을까?
-
-신혼부부가 받을 수 있는 전세대출은 크게 3가지예요. 상황에 따라 금리 차이가 꽤 나요!
-
-1. 버팀목 전세대출
-
-이자: 연 1.5% ~ 2.1%
-최대: 3억까지
-부부합산 연봉 7,500만원 이하면 신청 가능해요.
-
-2. 신생아 특례 전세대출 (제일 싸요!)
-
-이자: 연 1.1% ~ 3.0%
-최대: 3억까지
-아이가 태어난 지 2년 안이면 이게 최고예요!
-
-3. 디딤돌 대출 (내 집 살 때)
-
-이자: 연 2.15% ~ 3.0%
-최대: 5억까지 (신생아 특례 적용 시)
-전세 말고 매매할 때 쓰는 거예요.
-
-그래서 뭘 골라야 돼요?
-
-전세로 살 거라면 → 버팀목 or 신생아 특례
-아이 있으면 → 신생아 특례가 압도적으로 싸요
-내 집 사려면 → 디딤돌 + 신생아 특례 조합이 최선`,
-    tags: ["전세대출", "금리비교", "이자절약"],
-    updatedAt: "2026-04-01",
-  },
   // ── 출산 (baby) ──
   {
     slug: "birth-benefits-2026",
@@ -350,20 +388,21 @@ LH 청약센터(apply.lh.or.kr)에서 온라인 신청
 부모님에게: 10년간 5천만원까지 세금 없음
 축의금은 당연히 비과세예요!
 
-전세·매매 대출 이자도 공제돼요
+월세살이도 세액공제로 돌려받아요
 
-전세대출 이자: 연 400만원까지
-주택담보대출 이자: 연 300~1,800만원까지 (상환기간에 따라)`,
+월세 세액공제: 월세의 17% (총급여 7천만원 이하)
+주택임차차입금 원리금: 연 400만원까지 소득공제
+청약통장 납입액: 연 300만원까지 소득공제`,
     tags: ["세금환급", "연말정산", "취득세감면"],
     updatedAt: "2026-04-01",
   },
 ];
 
 /** 레거시 시스템 프롬프트 — UI에서 빠른 질문 등에 참고용으로 유지 */
-export const CHATBOT_SYSTEM_PROMPT = `당신은 "신혼생활" AI 정책 상담사예요. 신혼부부 정책, 지원금, 청약, 대출, 출산 혜택만 안내해요.`;
+export const CHATBOT_SYSTEM_PROMPT = `당신은 "신혼생활" AI 정책 상담사예요. 신혼부부 정책, 지원금, 청약, 공공임대, 출산 혜택만 안내해요.`;
 
 /** RAG 기반 동적 시스템 프롬프트 템플릿 — {CONTEXT}에 Pinecone 검색 결과가 주입됩니다 */
-export const RAG_SYSTEM_PROMPT_TEMPLATE = `당신은 "신혼생활" AI 정책 상담사예요. 신혼부부 정책, 지원금, 청약, 대출, 출산 혜택만 안내해요.
+export const RAG_SYSTEM_PROMPT_TEMPLATE = `당신은 "신혼생활" AI 정책 상담사예요. 신혼부부 정책, 지원금, 청약, 공공임대, 출산 혜택만 안내해요.
 
 절대 규칙:
 1. 마크다운 서식 절대 금지. **, ##, -, *, 번호목록 등 서식기호 쓰지 마세요.
@@ -371,7 +410,8 @@ export const RAG_SYSTEM_PROMPT_TEMPLATE = `당신은 "신혼생활" AI 정책 �
 3. 여러 정보가 있으면 빈 줄 두 번(줄바꿈)으로 나눠주세요.
 4. 당신은 오직 "신혼생활 AI 상담사"입니다. 절대로 Claude, Anthropic, GPT, AI 모델명, 기술 정보를 언급하지 마세요.
 5. "어떤 모델이야?", "누가 만들었어?", "AI야?" 같은 질문에는 "저는 신혼생활 정책 상담사예요! 신혼부부 정책이나 혜택 관련해서 궁금한 거 물어봐주세요"라고만 답하세요.
-6. 신혼부부 정책/혜택/생활과 관련 없는 질문에는 "저는 신혼부부 정책 전문 상담사라서 그 부분은 도움드리기 어려워요. 대신 청약, 대출, 출산 지원금 등은 편하게 물어봐주세요!"라고 답하세요.
+6. 신혼부부 정책/혜택/생활과 관련 없는 질문에는 "저는 신혼부부 정책 전문 상담사라서 그 부분은 도움드리기 어려워요. 대신 청약, 공공임대, 출산 지원금 등은 편하게 물어봐주세요!"라고 답하세요.
+   단, 금융상품(은행 차입 등) 관련 질문에는 "금융상품 상담은 제공하지 않아요. 청약, 공공임대, 출산 지원금 등 정부·지자체 혜택만 안내드릴 수 있어요!"라고 답하세요.
 7. 정치, 종교, 논란 주제에는 절대 답하지 마세요.
 8. "~해요" 체로 친근하게. 친구한테 설명하듯이.
 9. 이모지는 덩어리 시작에 1개 정도만.
