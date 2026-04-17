@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
+import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, MessageCircle, Sparkles, Store } from "lucide-react";
 import { HUB_CATEGORIES, POLICIES, VENDORS, FEATURE_FLAGS } from "@/lib/constants";
+
+const SITE_URL = "https://sinhon.life";
 
 const COLOR_BAR: Record<string, string> = {
   housing: "bg-coral",
@@ -18,16 +22,53 @@ export function generateStaticParams() {
   return HUB_CATEGORIES.map((c) => ({ id: c.id }));
 }
 
-export function generateMetadata({ params }: Props) {
+export function generateMetadata({ params }: Props): Metadata {
   const hub = HUB_CATEGORIES.find((c) => c.id === params.id);
   if (!hub) return {};
+  const url = `${SITE_URL}/category/${hub.id}`;
+  const title = `${hub.title} — 신혼부부·신랑신부 ${hub.subtitle} | 신혼생활`;
+  const description = `${hub.description} · 신혼생활(sinhon.life)에서 신혼부부를 위한 ${hub.title} 관련 2026 정책·혜택·꿀정보를 한 번에 확인하세요.`;
   return {
-    title: `${hub.title} | 신혼생활`,
-    description: hub.description,
+    title,
+    description,
+    keywords: [
+      "신혼생활",
+      "신혼부부",
+      "신랑",
+      "신부",
+      hub.title,
+      hub.subtitle,
+      `${hub.title} 신혼부부`,
+      `신혼부부 ${hub.title}`,
+      "2026 신혼부부 혜택",
+    ],
+    alternates: { canonical: url },
     openGraph: {
       title: `${hub.title} · 신혼생활`,
-      description: hub.description,
-      url: `https://sinhon.life/category/${hub.id}`,
+      description,
+      url,
+      siteName: "신혼생활",
+      locale: "ko_KR",
+      type: "website",
+      images: [
+        {
+          url: "/icon-1024.png",
+          width: 1024,
+          height: 1024,
+          alt: `${hub.title} — 신혼생활`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${hub.title} · 신혼생활`,
+      description,
+      images: ["/icon-1024.png"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
     },
   };
 }
@@ -54,8 +95,47 @@ export default function CategoryHubPage({ params }: Props) {
   const accentBtn =
     hub.color === "coral" ? "bg-coral text-white" : "bg-mint text-white";
 
+  const url = `${SITE_URL}/category/${hub.id}`;
+  const categoryJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        name: `${hub.title} — 신혼생활`,
+        description: hub.description,
+        url,
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        inLanguage: "ko-KR",
+        about: { "@id": `${SITE_URL}/#organization` },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: relatedPolicies.length,
+          itemListElement: relatedPolicies.map((p, idx) => ({
+            "@type": "ListItem",
+            position: idx + 1,
+            url: `${SITE_URL}/policy/${p.slug}`,
+            name: p.title,
+          })),
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: hub.title, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
+      <Script
+        id={`ld-category-${hub.id}`}
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryJsonLd) }}
+      />
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-3 bg-white/95 backdrop-blur-xl border-b border-warm-border/50 sticky top-0 z-10">
         <Link

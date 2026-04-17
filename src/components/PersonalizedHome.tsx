@@ -74,9 +74,9 @@ export default function PersonalizedHome() {
                     30초 진단
                   </span>
                 </div>
-                <h1 className="text-[22px] font-bold leading-snug tracking-tight">
+                <h2 className="text-[22px] font-bold leading-snug tracking-tight">
                   지금 어떤 상황이세요?
-                </h1>
+                </h2>
                 <p className="text-xs opacity-80 mt-1.5 leading-relaxed">
                   3가지 질문에 답하면 내 상황에 딱 맞는
                   <br />
