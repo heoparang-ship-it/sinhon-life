@@ -11,8 +11,16 @@ const tabs = [
   { id: "my", href: "/my", icon: User, label: "MY" },
 ] as const;
 
+// 하단 네비를 숨길 경로 (전체화면 플로우: 온보딩 등)
+const HIDE_ON_PATHS = ["/onboarding"];
+
 export default function BottomNav() {
   const pathname = usePathname();
+
+  // 온보딩 등 특정 플로우에서는 하단 네비 감춤 (CTA 버튼과 겹침 방지)
+  if (HIDE_ON_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return null;
+  }
 
   const getActiveTab = () => {
     if (pathname === "/") return "home";
