@@ -8,14 +8,15 @@ import { Home, Sparkles, CheckSquare, Wallet, User } from "lucide-react";
 const tabs = [
   { id: "home", href: "/", icon: Home, label: "홈" },
   { id: "chat", href: "/chat", icon: Sparkles, label: "AI톡" },
-  { id: "checklist", href: "/checklist", icon: CheckSquare, label: "체크" },
+  { id: "checklist", href: "/checklist", icon: CheckSquare, label: "체크리스트" },
   { id: "budget", href: "/budget", icon: Wallet, label: "가계부" },
   { id: "my", href: "/my", icon: User, label: "MY" },
 ] as const;
 
-// Routes that render their own chrome (onboarding flow) or take the full viewport
-// and therefore hide the bottom nav.
-const HIDE_ON_PATHS = ["/onboarding"];
+// Routes that render their own chrome or take the full viewport and therefore
+// hide the bottom nav. /chat is a fullscreen conversation — header's ArrowLeft
+// handles navigation back.
+const HIDE_ON_PATHS = ["/onboarding", "/chat"];
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -54,14 +55,18 @@ export default function BottomNav() {
             <Link
               key={tab.id}
               href={tab.href}
-              className={`flex flex-col items-center justify-center gap-0.5 w-14 py-1 transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 py-1 transition-all duration-200 ${
                 isActive ? "text-coral-700" : "text-ink-muted"
               }`}
             >
               <div className={`transition-transform duration-200 ${isActive ? "scale-110" : ""}`}>
                 <Icon size={20} strokeWidth={isActive ? 2.2 : 1.6} />
               </div>
-              <span className={`text-[10px] ${isActive ? "font-bold" : "font-normal"}`}>
+              <span
+                className={`text-[10px] whitespace-nowrap ${
+                  isActive ? "font-bold" : "font-normal"
+                }`}
+              >
                 {tab.label}
               </span>
             </Link>

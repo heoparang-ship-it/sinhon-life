@@ -42,12 +42,12 @@ export default function BudgetPage() {
   return (
     <div className="pt-6 pb-28">
       <div className="px-5 mb-5">
-        <Eyebrow tone="coral">couple budget</Eyebrow>
+        <Eyebrow tone="coral">wedding budget</Eyebrow>
         <h1 className="font-serif text-[28px] leading-tight tracking-tightest text-ink mt-1 wb-keep">
-          우리 부부 한 달, 어디에 쓰고 있을까
+          우리 부부 결혼, 지금까지 얼마 썼나요
         </h1>
-        <p className="text-[13px] text-ink-muted mt-1">
-          지훈·서연·공동 지출을 한 지갑에서 추적. 로컬에만 저장돼요.
+        <p className="text-[13px] text-ink-muted mt-1 wb-keep">
+          예식장·스드메·혼수·본식 현금봉투까지 9 카테고리. 예산 목표 없이 누적만 추적해요.
         </p>
       </div>
 

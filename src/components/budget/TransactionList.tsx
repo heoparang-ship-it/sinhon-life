@@ -22,13 +22,8 @@ export default function TransactionList({ txns }: { txns: Transaction[] }) {
             </div>
           </div>
           <div className="text-right">
-            <div
-              className={`font-serif text-[13px] font-bold ${
-                t.income ? "text-mint-700" : "text-ink"
-              }`}
-            >
-              {t.income ? "+ " : "- "}
-              {formatWon(t.amount).replace("₩ ", "")}
+            <div className="font-serif text-[13px] font-bold text-ink">
+              − {formatWon(t.amount).replace("₩ ", "")}
             </div>
             <div className="text-[10px] text-ink-muted">{t.time}</div>
           </div>

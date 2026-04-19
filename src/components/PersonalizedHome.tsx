@@ -17,7 +17,7 @@ import {
 import TopBar from "@/components/home/TopBar";
 import FeedTabs, { type TabId } from "@/components/home/FeedTabs";
 import Headline from "@/components/home/Headline";
-import FeaturedCard from "@/components/home/FeaturedCard";
+import HundredMillionGuide from "@/components/home/HundredMillionGuide";
 import UrgentList from "@/components/home/UrgentList";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import GuidesRail from "@/components/home/GuidesRail";
@@ -48,10 +48,7 @@ export default function PersonalizedHome() {
       ? scorePolicies(POLICIES, profile)
       : POLICIES.map((p) => ({ item: p, score: 0, reason: "" }));
 
-  const featured = scoredPolicies[0]?.item;
-  const railPolicies = scoredPolicies.slice(1, 9).map((s) => s.item);
-  const benefitCount = POLICIES.length;
-  const maxAmountText = "2,400만원";
+  const railPolicies = scoredPolicies.slice(0, 8).map((s) => s.item);
 
   return (
     <div>
@@ -84,9 +81,9 @@ export default function PersonalizedHome() {
         </section>
       )}
 
-      <Headline benefitCount={benefitCount} maxAmountText={maxAmountText} />
+      <Headline />
 
-      {featured && <FeaturedCard policy={featured} />}
+      <HundredMillionGuide />
 
       <SectionTitle title="마감 임박 혜택" accent="coral" href="/explore" />
       <UrgentList items={URGENT_BENEFITS} />
