@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, Suspense } from "react";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { QUICK_QUESTIONS } from "@/lib/constants";
 import type { ChatMessage, ChatBubble } from "@/lib/types";
+import ChatHeader from "@/components/chat/ChatHeader";
+import SuggestionChips from "@/components/chat/SuggestionChips";
 
 function stripMarkdown(text: string): string {
   return text
@@ -79,41 +79,27 @@ function ChatContent() {
 
   return (
     <div className="flex flex-col h-screen max-w-lg mx-auto">
-      <header className="flex items-center gap-3 px-5 py-3 bg-white/95 backdrop-blur-xl border-b border-warm-border/50 sticky top-0 z-10">
-        <Link href="/" className="text-warm-text-secondary active:scale-90 transition-transform"><ArrowLeft size={20} /></Link>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-coral to-coral-400 flex items-center justify-center shadow-sm">
-            <span className="text-white text-xs font-bold">신</span>
-          </div>
-          <div>
-            <h1 className="text-sm font-bold">신혼생활 AI</h1>
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-mint animate-pulse" />
-              <p className="text-[10px] text-mint font-medium">응답 가능</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ChatHeader />
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-warm-bg">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-paper">
         {displayBubbles.length === 0 && !showTyping && (
           <div className="space-y-4">
             <div className="animate-bubble-in">
-              <div className="bg-white rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] border border-warm-border shadow-sm">
-                <p className="text-sm leading-relaxed">안녕하세요! 신혼생활 상담사예요.</p>
+              <div className="bg-paper-surface rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] border border-paper-line shadow-sm">
+                <p className="text-[13.5px] leading-relaxed text-ink">
+                  안녕하세요, 신혼생활 AI예요.
+                </p>
               </div>
             </div>
-            <div className="animate-bubble-in" style={{ animationDelay: "0.5s", opacity: 0 }}>
-              <div className="bg-white rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] border border-warm-border shadow-sm">
-                <p className="text-sm leading-relaxed">새집 마련, 공공임대, 출산 지원금 등 궁금한 거 편하게 물어봐주세요!</p>
+            <div className="animate-bubble-in" style={{ animationDelay: "0.4s", opacity: 0 }}>
+              <div className="bg-paper-surface rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%] border border-paper-line shadow-sm">
+                <p className="text-[13.5px] leading-relaxed text-ink">
+                  결혼·청약·출산지원금·세제까지 — 아래 주제로 시작해볼까요?
+                </p>
               </div>
             </div>
-            <div className="space-y-2 pt-2">
-              {QUICK_QUESTIONS.map((q, i) => (
-                <button key={i} onClick={() => sendMessage(q)} className="block w-full text-left bg-white border border-coral/15 rounded-xl px-4 py-3 text-[13px] text-coral font-medium active:scale-[0.98] transition-transform hover:bg-coral-50">
-                  {q}
-                </button>
-              ))}
+            <div className="pt-2">
+              <SuggestionChips onPick={(t) => sendMessage(t)} disabled={isLoading} />
             </div>
           </div>
         )}
@@ -122,19 +108,25 @@ function ChatContent() {
             : messages.find((m) => bubble.id === m.id)?.role ?? (messages.find((m) => bubble.id.startsWith(m.id))?.role ?? "assistant");
           return (
             <div key={bubble.id} className={`flex ${role === "user" ? "justify-end" : "justify-start"} animate-bubble-in`}>
-              <div className={`max-w-[85%] px-4 py-3 ${role === "user" ? "bg-coral text-white rounded-2xl rounded-tr-md" : "bg-white rounded-2xl rounded-tl-md border border-warm-border shadow-sm"}`}>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{bubble.text}</p>
+              <div
+                className={`max-w-[85%] px-4 py-3 text-[13.5px] leading-relaxed ${
+                  role === "user"
+                    ? "bg-coral-500 text-white rounded-2xl rounded-tr-md"
+                    : "bg-paper-surface rounded-2xl rounded-tl-md border border-paper-line shadow-sm text-ink"
+                }`}
+              >
+                <p className="whitespace-pre-wrap">{bubble.text}</p>
               </div>
             </div>
           );
         })}
         {showTyping && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl rounded-tl-md px-4 py-3 border border-warm-border shadow-sm">
+            <div className="bg-paper-surface rounded-2xl rounded-tl-md px-4 py-3 border border-paper-line shadow-sm">
               <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-warm-text-muted typing-dot" />
-                <div className="w-2 h-2 rounded-full bg-warm-text-muted typing-dot" />
-                <div className="w-2 h-2 rounded-full bg-warm-text-muted typing-dot" />
+                <div className="w-2 h-2 rounded-full bg-ink-muted typing-dot" />
+                <div className="w-2 h-2 rounded-full bg-ink-muted typing-dot" />
+                <div className="w-2 h-2 rounded-full bg-ink-muted typing-dot" />
               </div>
             </div>
           </div>
@@ -142,9 +134,26 @@ function ChatContent() {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="flex items-center gap-2 px-4 py-3 bg-white border-t border-warm-border pb-safe">
-        <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="궁금한 거 뭐든 물어보세요" className="flex-1 bg-warm-bg rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-coral/30 placeholder:text-warm-text-muted" disabled={isLoading} />
-        <button type="submit" disabled={!input.trim() || isLoading} className="w-10 h-10 rounded-full bg-coral text-white flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage(input);
+        }}
+        className="flex items-center gap-2 px-4 py-3 bg-paper-surface border-t border-paper-line pb-safe"
+      >
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="궁금한 거 뭐든 물어보세요"
+          className="flex-1 bg-paper rounded-full px-4 py-2.5 text-[13.5px] outline-none focus:ring-2 focus:ring-coral-300 placeholder:text-ink-muted text-ink"
+          disabled={isLoading}
+        />
+        <button
+          type="submit"
+          disabled={!input.trim() || isLoading}
+          className="w-10 h-10 rounded-full bg-coral-500 text-white flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all"
+        >
           <Send size={18} />
         </button>
       </form>
