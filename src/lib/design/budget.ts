@@ -156,6 +156,18 @@ export function writeTxns(txns: Transaction[]) {
   }
 }
 
+export function groupByCategory(txns: Transaction[]): Record<TxnCategory, Transaction[]> {
+  const acc: Record<TxnCategory, Transaction[]> = {
+    예식장: [], 스드메: [], 예복: [], 예물예단: [], 혼수가전: [],
+    신혼집: [], 신혼여행: [], 본식현금: [], 기타: [],
+  };
+  for (const t of txns) {
+    const cat: TxnCategory = isValidCategory(t.category) ? t.category : "기타";
+    acc[cat].push(t);
+  }
+  return acc;
+}
+
 export function formatWon(amount: number): string {
   return "₩ " + amount.toLocaleString("ko-KR");
 }

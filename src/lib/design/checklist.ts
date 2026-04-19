@@ -198,6 +198,7 @@ const DONE_KEY = "sinhon.checklist.done";
 const CUSTOM_KEY = "sinhon.checklist.custom"; // Record<groupId, ChecklistItem[]>
 const REMOVED_KEY = "sinhon.checklist.removed"; // string[] of itemIds
 const WHO_OVERRIDE_KEY = "sinhon.checklist.whoOverride"; // Record<itemId, Assignee>
+const MEMO_KEY = "sinhon.checklist.memos"; // Record<itemId, string>
 
 export function readDoneMap(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
@@ -341,6 +342,34 @@ export function cycleWho(current: Assignee): Assignee {
   if (current === "함께") return "신랑";
   if (current === "신랑") return "신부";
   return "함께";
+}
+
+export function readMemos(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(MEMO_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function writeMemos(map: Record<string, string>) {
+  try {
+    window.localStorage.setItem(MEMO_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function setMemo(itemId: string, memo: string) {
+  const map = readMemos();
+  const trimmed = memo.trim();
+  if (trimmed) {
+    writeMemos({ ...map, [itemId]: trimmed });
+  } else {
+    const { [itemId]: _, ...rest } = map;
+    writeMemos(rest);
+  }
 }
 
 export function getInitialDoneMap(): Record<string, boolean> {
