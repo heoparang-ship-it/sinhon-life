@@ -93,9 +93,28 @@ const config: Config = {
           "text-secondary": "#4A5568", // Twilight — 부제·메타 (AA)
           "text-muted": "#A0AEC0",     // Smoke — 구분선·비활성 (아이콘/배경 전용)
         },
+        // V3.1 Redesign tokens — imported from design-source/tailwind.config.ref.ts
+        // Scoped namespace so new components opt-in via `bg-paper`, `text-ink` without
+        // touching legacy `warm-*` / `navy-*` usages in existing routes.
+        ink: {
+          DEFAULT: "#1E2A3A",
+          soft: "#4A5568",
+          muted: "#A0AEC0",
+        },
+        paper: {
+          DEFAULT: "#FDF8F1",
+          surface: "#FFFFFF",
+          alt: "#FEEBC8",
+          line: "#F0E4D2",
+        },
       },
       fontFamily: {
         sans: ["Pretendard", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        serif: ["var(--font-fraunces)", "Fraunces", "Georgia", "serif"],
+        mono: ["var(--font-jbmono)", "JetBrains Mono", "ui-monospace", "monospace"],
+      },
+      letterSpacing: {
+        tightest: "-0.03em",
       },
       keyframes: {
         "fade-up": {

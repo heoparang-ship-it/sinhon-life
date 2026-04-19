@@ -1,9 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PushNotificationInit from "@/components/PushNotificationInit";
+
+// V3.1 redesign typography — serif headlines + mono eyebrow labels.
+// Pretendard (body) is loaded via globals.css CDN import to avoid next/font build weight.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const jbmono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jbmono",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 const SITE_URL = "https://sinhon.life";
 const SITE_NAME = "신혼생활";
@@ -193,7 +211,7 @@ const GLOBAL_JSONLD = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={`${fraunces.variable} ${jbmono.variable}`}>
       <head>
         <link rel="canonical" href={SITE_URL} />
         <meta name="subject" content="신혼부부 정책·혜택 AI 상담" />

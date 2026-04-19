@@ -80,3 +80,7 @@ body {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* V3.1 Fraunces headlines — Korean keep-all + text-wrap balance */
+.text-balance { text-wrap: balance; }
+.wb-keep { word-break: keep-all; }
