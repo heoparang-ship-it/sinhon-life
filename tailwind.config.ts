@@ -116,6 +116,66 @@ const config: Config = {
       letterSpacing: {
         tightest: "-0.03em",
       },
+      // RFP §8.1 — 4px base grid. Names are semantic steps, not pixel values.
+      spacing: {
+        "4xs": "2px",
+        "3xs": "4px",
+        "2xs": "8px",
+        xs: "12px",
+        sm: "16px",
+        md: "20px",
+        lg: "24px",
+        xl: "32px",
+        "2xl": "40px",
+        "3xl": "48px",
+        "4xl": "64px",
+        "5xl": "80px",
+      },
+      borderRadius: {
+        sm: "6px",
+        md: "10px",
+        lg: "16px",
+        xl: "24px",
+        "2xl": "32px",
+        pill: "9999px",
+      },
+      boxShadow: {
+        xs: "0 1px 2px rgba(30,42,58,0.04)",
+        sm: "0 2px 6px rgba(30,42,58,0.06)",
+        md: "0 6px 16px rgba(30,42,58,0.08)",
+        lg: "0 12px 28px rgba(30,42,58,0.10)",
+        overlay: "0 -8px 24px rgba(30,42,58,0.08)",
+        "ring-brand": "0 0 0 3px rgba(249,112,102,0.35)",
+      },
+      transitionDuration: {
+        instant: "80ms",
+        quick: "140ms",
+        base: "220ms",
+        slow: "360ms",
+        page: "500ms",
+      },
+      transitionTimingFunction: {
+        standard: "cubic-bezier(0.2, 0, 0, 1)",
+        emphasized: "cubic-bezier(0.3, 0, 0, 1.2)",
+        decelerate: "cubic-bezier(0, 0, 0.2, 1)",
+        accelerate: "cubic-bezier(0.4, 0, 1, 1)",
+      },
+      fontSize: {
+        // Semantic type scale — RFP §6 typography
+        display: ["36px", { lineHeight: "1.15", letterSpacing: "-0.03em", fontWeight: "700" }],
+        title: ["24px", { lineHeight: "1.25", letterSpacing: "-0.02em", fontWeight: "700" }],
+        subtitle: ["20px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "body-lg": ["18px", { lineHeight: "1.6" }],
+        body: ["16px", { lineHeight: "1.55" }],
+        caption: ["13px", { lineHeight: "1.4" }],
+        overline: ["11px", { lineHeight: "1.2", letterSpacing: "0.08em", fontWeight: "600" }],
+      },
+      zIndex: {
+        nav: "40",
+        sheet: "50",
+        modal: "60",
+        toast: "70",
+      },
       keyframes: {
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(16px)" },

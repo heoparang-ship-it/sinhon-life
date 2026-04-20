@@ -10,8 +10,9 @@ import {
   type Region,
   type InterestTopic,
 } from "@/lib/profile";
+import KakaoCTAStep from "@/components/onboarding/KakaoCTAStep";
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 // 단계 1·2: 한 개 선택만으로 충분 → 클릭 즉시 다음 단계 자동 전환
 const AUTO_ADVANCE_DELAY_MS = 220; // 선택 피드백을 잠깐 보여준 뒤 넘어감
@@ -84,12 +85,8 @@ function OnboardingContent() {
 
   const handleFinish = () => {
     if (!stage) return;
-    completeOnboarding({
-      stage,
-      region: region || undefined,
-      interests,
-    });
-    router.push(next);
+    completeOnboarding({ stage, region: region || undefined, interests });
+    setStep(4); // step 4: 카카오 저장 CTA (스킵 가능)
   };
 
   const canContinue =
@@ -268,8 +265,12 @@ function OnboardingContent() {
         )}
       </div>
 
+      {step === 4 && (
+        <KakaoCTAStep onSkip={() => router.push(next)} />
+      )}
+
       {/* 하단 Fixed CTA — Step 1·2는 자동 전환되므로 안내 문구만, Step 3는 다중 선택이라 버튼 노출 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-warm-border/50 pb-safe">
+      {step < 4 && <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-warm-border/50 pb-safe">
         <div className="max-w-lg mx-auto px-5 py-3">
           {step < 3 ? (
             <p className="text-center text-[12px] text-warm-text-muted py-3.5">
@@ -289,7 +290,7 @@ function OnboardingContent() {
             </button>
           )}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

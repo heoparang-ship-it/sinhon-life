@@ -1,82 +1,139 @@
 "use client";
 
-import { Users, Shield, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, UserCheck, UserX, TrendingUp, Loader2 } from "lucide-react";
+
+interface Stats {
+  totalActive: number;
+  totalDeleted: number;
+  newThisMonth: number;
+  newThisWeek: number;
+  newToday: number;
+  mau: number;
+}
+
+interface RecentUser {
+  id: string;
+  nickname: string | null;
+  createdAt: string;
+  lastLoginAt: string | null;
+  marketingOptIn: boolean;
+}
+
+function StatCard({ icon, label, value, sub }: {
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+  sub?: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center gap-2 mb-3">{icon}<span className="text-sm font-medium text-gray-600">{label}</span></div>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+    </div>
+  );
+}
 
 export default function UsersPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/users")
+      .then((r) => r.json())
+      .then((d) => { setStats(d.stats); setRecentUsers(d.recentUsers ?? []); })
+      .catch(() => setError("DB 미연결 또는 권한 오류"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <Loader2 size={24} className="animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+        <p className="font-bold text-amber-800">데이터 로딩 실패</p>
+        <p className="text-sm text-amber-600 mt-1">{error ?? "DB 연결 필요 — DATABASE_URL 환경변수를 확인하세요"}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold">가입자 DB</h2>
-        <p className="text-sm text-gray-500 mt-1">사용자 인증 시스템 연동 후 활성화됩니다</p>
+        <p className="text-sm text-gray-500 mt-1">카카오 로그인 기반 실시간 통계</p>
       </div>
 
-      {/* 미연동 안내 */}
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-          <Users size={28} className="text-gray-400" />
-        </div>
-        <h3 className="font-bold text-lg">인증 시스템 연동 필요</h3>
-        <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">
-          카카오 로그인 등 사용자 인증을 연동하면 가입자 정보, 상담 내역, 스크랩 데이터를 확인할 수 있습니다.
-        </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard
+          icon={<UserCheck size={16} className="text-coral" />}
+          label="총 활성 회원"
+          value={stats.totalActive.toLocaleString()}
+        />
+        <StatCard
+          icon={<TrendingUp size={16} className="text-mint-700" />}
+          label="MAU (30일)"
+          value={stats.mau.toLocaleString()}
+          sub="최근 30일 로그인"
+        />
+        <StatCard
+          icon={<Users size={16} className="text-blue-500" />}
+          label="이번 달 신규"
+          value={stats.newThisMonth.toLocaleString()}
+        />
+        <StatCard
+          icon={<Users size={16} className="text-green-500" />}
+          label="이번 주 신규"
+          value={stats.newThisWeek.toLocaleString()}
+        />
+        <StatCard
+          icon={<Users size={16} className="text-indigo-500" />}
+          label="오늘 신규"
+          value={stats.newToday.toLocaleString()}
+        />
+        <StatCard
+          icon={<UserX size={16} className="text-gray-400" />}
+          label="탈퇴 (누적)"
+          value={stats.totalDeleted.toLocaleString()}
+        />
       </div>
 
-      {/* 연동 후 제공될 기능 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-coral-50 flex items-center justify-center">
-              <Users size={16} className="text-coral" />
-            </div>
-            <h4 className="font-bold text-sm">가입자 상세</h4>
+      {recentUsers.length > 0 && (
+        <div>
+          <h3 className="font-bold text-sm mb-3">최근 가입자 (최대 10명)</h3>
+          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+            {recentUsers.map((u) => (
+              <div key={u.id} className="px-4 py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{u.nickname ?? "이름 없음"}</p>
+                  <p className="text-xs text-gray-400 font-mono">
+                    가입: {new Date(u.createdAt).toLocaleDateString("ko-KR")}
+                  </p>
+                </div>
+                <div className="text-right">
+                  {u.marketingOptIn && (
+                    <span className="text-[10px] bg-coral-50 text-coral-600 px-2 py-0.5 rounded-full font-mono">마케팅동의</span>
+                  )}
+                  {u.lastLoginAt && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      최근: {new Date(u.lastLoginAt).toLocaleDateString("ko-KR")}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-          <ul className="space-y-1.5 text-xs text-gray-500">
-            <li>• 가입일 / 마지막 접속일</li>
-            <li>• 결혼 예정일 / D-day</li>
-            <li>• 관심 카테고리</li>
-            <li>• 지역 / 소득 구간 (선택 입력)</li>
-          </ul>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-mint-50 flex items-center justify-center">
-              <MessageCircle size={16} className="text-mint" />
-            </div>
-            <h4 className="font-bold text-sm">AI 상담 내역</h4>
-          </div>
-          <ul className="space-y-1.5 text-xs text-gray-500">
-            <li>• 총 상담 횟수</li>
-            <li>• 자주 묻는 질문 TOP 10</li>
-            <li>• 상담 만족도</li>
-            <li>• 최근 질문 로그</li>
-          </ul>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Shield size={16} className="text-gray-500" />
-            </div>
-            <h4 className="font-bold text-sm">혜택 신청 현황</h4>
-          </div>
-          <ul className="space-y-1.5 text-xs text-gray-500">
-            <li>• 저장한 정책 목록</li>
-            <li>• 신청 완료 체크</li>
-            <li>• 예상 수혜 금액</li>
-            <li>• 스크랩 업체 리스트</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* 다음 단계 */}
-      <div className="bg-gradient-to-br from-coral-50 to-coral-100/50 rounded-xl p-5 border border-coral-200/30">
-        <h4 className="font-bold text-sm mb-2">다음 단계: 카카오 로그인 연동</h4>
-        <ol className="space-y-1.5 text-xs text-gray-600">
-          <li>1. Kakao Developers에서 앱 등록</li>
-          <li>2. NextAuth.js + Kakao Provider 설정</li>
-          <li>3. Supabase 또는 PlanetScale로 사용자 DB 구축</li>
-          <li>4. 이 관리자 페이지에서 가입자 데이터 조회 가능</li>
-        </ol>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,104 @@
+// Prisma schema — sinhon.life 카카오 로그인 MVP
+// DB: Supabase Postgres (연결 문자열: DATABASE_URL env)
+// 생성: 2026-04-20 옵션 1 스코프
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// users — 카카오 계정 기준 식별자
+// ---------------------------------------------------------------------------
+model User {
+  id             String    @id @default(cuid())
+  kakaoId        String    @unique @map("kakao_id")
+  email          String?
+  nickname       String?
+  profileImage   String?   @map("profile_image")
+  marketingOptIn Boolean   @default(false) @map("marketing_opt_in")
+  // 옵션 2 전환 대비 — 옵션 1에서는 항상 null/false
+  phoneNumber    String?   @map("phone_number")
+  alimtalkOptIn  Boolean   @default(false) @map("alimtalk_opt_in")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  lastLoginAt    DateTime? @map("last_login_at")
+  deletedAt      DateTime? @map("deleted_at") // soft delete
+
+  profile        Profile?
+  checklistItems ChecklistItem[]
+  budgetTxns     BudgetTxn[]
+  consents       Consent[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// profiles — sinhon-profile-v1 localStorage 스키마 1:1 대응
+// ---------------------------------------------------------------------------
+model Profile {
+  userId      String   @id @map("user_id")
+  stage       String?  // planning | newly | parenting
+  region      String?  // seoul | incheon | gyeonggi | ...
+  interests   Json?    // string[]
+  partnerName String?  @map("partner_name")
+  weddingDate String?  @map("wedding_date") // ISO date string
+  completedAt DateTime? @map("completed_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ---------------------------------------------------------------------------
+// checklist_items — localStorage 체크리스트 키 그대로 이관
+// ---------------------------------------------------------------------------
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  groupKey  String   @map("group_key")
+  itemKey   String   @map("item_key")
+  checked   Boolean  @default(false)
+  memo      String?
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupKey, itemKey])
+  @@map("checklist_items")
+}
+
+// ---------------------------------------------------------------------------
+// budget_txns — 부부 분담형 가계부 (v3.1 리뉴얼 스키마)
+// ---------------------------------------------------------------------------
+model BudgetTxn {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  owner    String   // jihoon | seoyeon | joint
+  category String
+  amount   Int      // 원 단위 정수
+  memo     String?
+  spentAt  DateTime @map("spent_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("budget_txns")
+}
+
+// ---------------------------------------------------------------------------
+// consents — 개인정보·약관 버전별 동의 내역 (법적 근거)
+// ---------------------------------------------------------------------------
+model Consent {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  kind      String   // privacy | tos | marketing
+  version   String
+  agreedAt  DateTime @map("agreed_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("consents")
+}

@@ -5,6 +5,9 @@ import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PushNotificationInit from "@/components/PushNotificationInit";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { ToastProvider } from "@/components/ui";
+import AuthProvider from "@/components/AuthProvider";
 
 // V3.1 redesign typography — serif headlines + mono eyebrow labels.
 // Pretendard (body) is loaded via globals.css CDN import to avoid next/font build weight.
@@ -234,8 +237,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <ServiceWorkerRegister />
         <PushNotificationInit />
-        <main className="max-w-lg mx-auto min-h-screen pb-16">{children}</main>
-        <BottomNav />
+        <AuthProvider>
+          <ToastProvider>
+            <main className="max-w-lg mx-auto min-h-screen pb-16">{children}</main>
+            <BottomNav />
+            <PWAInstallPrompt />
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

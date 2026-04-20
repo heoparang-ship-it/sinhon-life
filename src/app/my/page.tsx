@@ -20,7 +20,7 @@ import Eyebrow from "@/components/design/Eyebrow";
 import ProfileHero from "@/components/my/ProfileHero";
 import EditProfileModal from "@/components/my/EditProfileModal";
 import MenuGroup, { type MenuItem } from "@/components/my/MenuGroup";
-import KakaoSignupCTA from "@/components/my/KakaoSignupCTA";
+import AuthCard from "@/components/my/AuthCard";
 import { BRAND, POLICIES } from "@/lib/constants";
 import { getSavedIds } from "@/lib/storage";
 import {
@@ -115,6 +115,7 @@ export default function MyPage() {
   const settingsMenu: MenuItem[] = [
     { icon: <Bell size={17} className="text-ink-soft" />, label: "알림 (준비중)", right: "soon" },
     { icon: <Shield size={17} className="text-ink-soft" />, label: "개인정보 처리방침", href: "/privacy" },
+    { icon: <Shield size={17} className="text-ink-soft" />, label: "이용약관", href: "/terms" },
     { icon: <Mail size={17} className="text-ink-soft" />, label: "문의: sinhon.life@gmail.com", href: "mailto:sinhon.life@gmail.com" },
   ];
 
@@ -138,7 +139,7 @@ export default function MyPage() {
         />
       )}
 
-      <KakaoSignupCTA />
+      <AuthCard />
 
       {mounted && onboarded && profile && (
         <div className="mx-4 mb-5 p-4 rounded-2xl bg-paper-surface border border-paper-line">

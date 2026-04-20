@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 신혼생활 mark-only — square icon for favicon/avatar/compact contexts -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="신혼생활 mark">
+  <title>신혼생활</title>
+  <rect width="64" height="64" rx="14" fill="#FDF8F1"/>
+  <path d="M32 10 C16 10 8 24 8 34 C8 48 22 54 32 54 C42 54 56 48 56 34 C56 24 48 10 32 10 Z"
+        fill="#F97066"/>
+  <path d="M32 18 C22 18 16 28 16 34 C16 42 24 46 32 46 C40 46 48 42 48 34 C48 28 42 18 32 18 Z"
+        fill="#FDF8F1"/>
+  <circle cx="32" cy="34" r="5" fill="#F97066"/>
+</svg>

@@ -1,11 +1,15 @@
 ---
-name: sinhon-kstartup-matcher
-description: 신혼생활(sinhon.life) 플랫폼 전용 K-Startup 모집중 공고 자동 추천·누적 대시보드 스킬. 매일 1회 1~10페이지를 스캔해 profile.md 기준으로 매칭 티어(🟢/🟡/🟠/🔴)를 분류하고, 만료 공고는 완전 삭제, 신규는 누적 풀에 upsert해 마크다운+HTML 대시보드를 재생성한다. 반드시 이 스킬을 사용해야 하는 트리거 표현(하나라도 포함되면 무조건 발동): "K-Startup", "K스타트업", "공고", "모집공고", "모집중", "지원사업", "정부지원", "지원 받을", "신혼생활 공고", "신혼생활 지원", "오늘의 공고", "오늘의 지원사업", "오늘 공고", "공고 확인", "공고 스캔", "공고 업데이트", "공고 풀", "공고 매칭", "새 공고", "새로운 공고", "신규 공고", "지원사업 대시보드", "지원사업 알아봐", "지원사업 찾아", "지원사업 추천", "사업 알아봐줘", "받을 수 있는 지원", "뭐 지원받을", "모집중인 것", "kstartup-dashboard", "bizpbanc-ongoing". 사용자가 "오늘 뭐 받을 수 있어?", "지원사업 없어?", "공고 업뎃해줘", "사업 하나 알아봐", "대시보드 갱신" 등 비슷한 뉘앙스의 문장을 던지면 이 스킬이 최우선으로 발동되어야 한다. 타 정부지원사업 스킬(gov-support-workflow, startup-package-advisor)과 달리, 이 스킬은 "발굴·추천·누적 관리" 전용이며 사업계획서 작성에는 관여하지 않는다. 유튜브/크리에이터 컨텍스트는 매칭·리포트에 절대 포함하지 않는다.
+name: founder-gov-radar
+description: 허파랑(sinhon.life 운영자) 개인 창업가 전용 K-Startup·정부지원 공고 발굴·누적 대시보드 스킬. 운영자가 운영하는 B2C 신혼부부 플랫폼 스타트업이 지원 가능한 모집중 공고를 매일 1회 전수 스캔해 profile.md 기준으로 매칭 티어(🟢/🟡/🟠/🔴)로 분류하고, 만료 공고는 완전 삭제, 신규는 누적 풀에 upsert해 마크다운+HTML 대시보드를 재생성한다. **중요: 이 스킬의 출력은 "운영자 본인이 받을 지원금"을 찾기 위한 것이며, sinhon.life 앱의 일반 사용자(신혼부부)에게 노출하는 콘텐츠가 아니다.** sinhon.life 앱 내부 챗봇/정책 피드와 절대 혼용하지 않는다. 트리거: "K-Startup", "K스타트업", "공고", "모집공고", "지원사업", "정부지원", "오늘의 공고", "공고 스캔", "공고 업데이트", "새 공고", "지원사업 대시보드", "내가 받을 지원", "내 사업 지원", "founder 지원", "창업자 지원", "사업 알아봐줘", "받을 수 있는 지원", "founder-gov-radar", "kstartup-dashboard", "bizpbanc-ongoing". 타 정부지원사업 스킬(gov-support-workflow, startup-package-advisor)과 달리, 이 스킬은 "발굴·추천·누적 관리" 전용이며 사업계획서 작성에는 관여하지 않는다. ⚠️ **최신 사본은 `신혼생활/.claude/skills/founder-gov-radar/SKILL.md` (v7 — Master-Pack Review Guide, 2026-04-18~)**. 이 사본은 레거시 v2 참고용.
 ---
 
-# sinhon-kstartup-matcher v2
+# founder-gov-radar v2 (LEGACY — 최신 v7은 신혼생활/.claude/skills/founder-gov-radar/SKILL.md 참고)
 
-신혼생활(sinhon.life) "B2C 신혼부부 라이프스타일 플랫폼"을 정체성으로, K-Startup 모집중 공고를 매일 1회 스캔해 누적 추천 풀을 유지하고 단일 대시보드를 재생성한다.
+> **v7 개정 (2026-04-18)**: classify() 시그니처 (tier, evidence_dict) / 3D프린팅·메이커 false-green 교정 / 마스터팩 기반 deep_summary v4 / master_modules.json 동적 주입 / GitHub Actions workflow_dispatch 추가 (force_regenerate, skip_crawl). 이 레거시 문서의 v2 크롤링(WebFetch 10p + 키워드 보완 스캔)은 **폐기됨** — v3부터 nidview JSON 전수 스캔으로 대체.
+
+**허파랑 개인 창업가용 정부지원 공고 레이더.** 운영자가 운영하는 "B2C 신혼부부 라이프스타일 플랫폼 스타트업" 정체성을 기준으로, K-Startup 모집중 공고를 매일 1회 스캔해 누적 추천 풀을 유지하고 단일 대시보드를 재생성한다.
+
+> ⚠️ **맥락 경계**: 이 스킬 출력은 운영자 본인이 보는 내부 자료. sinhon.life 앱 사용자용 콘텐츠와 절대 섞지 않는다.
 
 ## 0. 핵심 불변식 (반드시 지킬 것)
 
@@ -13,24 +17,24 @@ description: 신혼생활(sinhon.life) 플랫폼 전용 K-Startup 모집중 공�
 - **누적**: 추천은 휘발되지 않고 `recommendations.json`에 쌓인다.
 - **완전 삭제**: 마감일이 지난 공고는 아카이브 없이 지운다.
 - **JSON은 자동 계산만**: `recommendations.json`에는 수동 상태 플래그를 저장하지 않는다. 단, HTML 대시보드 측에서 **브라우저 localStorage** 기반의 사용자 상태(진행중 / 지원완료 / 내 사업)는 허용한다. 서버 측(JSON) 데이터와 클라이언트 측(localStorage) 상태는 분리되어야 한다.
-- **단일 뷰**: 사용자는 `kstartup-dashboard.md` 한 파일만 본다. 채팅 리포트와 내용 중복 금지.
+- **단일 뷰**: 사용자는 `founder-gov-radar-dashboard.md` 한 파일만 본다. 채팅 리포트와 내용 중복 금지.
 - **🔴은 풀에 저장하지 않는다.** 카운트만 남긴다.
 - **타임존**: 모든 날짜 판정은 `Asia/Seoul` 기준. `today = 현재 KST의 YYYY-MM-DD`.
 
 ## 1. 파일 레이아웃
 
 ```
-신혼생활/.claude/skills/sinhon-kstartup-matcher/
+신혼생활/.claude/skills/founder-gov-radar/
   ├ SKILL.md              # 이 파일 (워크플로우)
   ├ profile.md            # 매칭 기준 단일 소스
   └ recommendations.json  # 누적 풀
 
 신혼생활/
-  ├ kstartup-dashboard.md   # 매 실행 전체 재생성되는 마크다운 대시보드 (보조)
-  └ kstartup-dashboard.html # 매 실행 전체 재생성되는 HTML 대시보드 (사용자 주 뷰)
+  ├ founder-gov-radar-dashboard.md   # 매 실행 전체 재생성되는 마크다운 대시보드 (보조)
+  └ founder-gov-radar-dashboard.html # 매 실행 전체 재생성되는 HTML 대시보드 (사용자 주 뷰)
 ```
 
-절대 경로는 `/sessions/trusting-kind-rubin/mnt/신혼생활/...`. 사용자에게 링크 전달 시 **HTML을 우선** 안내: `computer:///sessions/trusting-kind-rubin/mnt/신혼생활/kstartup-dashboard.html`. 마크다운 링크는 보조로 첨부.
+절대 경로는 `/sessions/trusting-kind-rubin/mnt/신혼생활/...`. 사용자에게 링크 전달 시 **HTML을 우선** 안내: `computer:///sessions/trusting-kind-rubin/mnt/신혼생활/founder-gov-radar-dashboard.html`. 마크다운 링크는 보조로 첨부.
 
 ## 2. recommendations.json 스키마 (v2)
 
@@ -159,7 +163,7 @@ Step 4에서 **실패한 페이지가 1개라도 있으면**, 그 페이지에 �
 
 **두 파일을 모두 재생성한다.** 어느 한쪽만 갱신하면 안 된다.
 
-#### 8-A. `신혼생활/kstartup-dashboard.md` 재생성. 구조:
+#### 8-A. `신혼생활/founder-gov-radar-dashboard.md` 재생성. 구조:
 
 ```markdown
 # 🗂️ K-Startup 추천·진행 대시보드
@@ -190,7 +194,7 @@ Step 4에서 **실패한 페이지가 1개라도 있으면**, 그 페이지에 �
 
 **공고 컬럼**: `[제목](detail_url)` 형식의 마크다운 링크. detail_url이 없으면 링크 없이 제목만.
 
-#### 8-B. `신혼생활/kstartup-dashboard.html` 재생성
+#### 8-B. `신혼생활/founder-gov-radar-dashboard.html` 재생성
 
 사용자 주 뷰. **순수 흑백(Black & White only) 미니멀 테마** 단일 HTML 파일 (외부 CDN/스크립트 의존성 없음).
 
@@ -214,7 +218,7 @@ Step 4에서 **실패한 페이지가 1개라도 있으면**, 그 페이지에 �
 - 카드 내용: 제목(링크, hover 시 밑줄 애니메이션), 배지 3종(티어 solid / 마감일+D-n / NEW), 주관기관(모노스페이스), 메모
 - 임박 마감(D-0~D-3) 배지는 검정 solid 반전 표시
 - 정렬: 마감일 오름차순
-- Footer: 좌측 "sinhon-kstartup-matcher v2 · 매일 18:00 KST 자동 갱신", 우측 raw data 링크
+- Footer: 좌측 "founder-gov-radar v2 · 매일 18:00 KST 자동 갱신", 우측 raw data 링크
 
 **데이터 임베딩**: `<script>` 태그 안에 `const items = [...]`로 풀 전체를 인라인 임베드. `TODAY` 상수로 오늘 날짜 하드코딩. JS로 D-n 계산 및 필터링.
 
@@ -266,7 +270,7 @@ Step 4에서 **실패한 페이지가 1개라도 있으면**, 그 페이지에 �
 📊 현재 풀: 총 K건 (🟢A 🟡B 🟠C) | 오늘 🔴 제외 X건
 ⚠️ 크롤링 실패 페이지: (있을 경우만)
 
-🔗 [HTML 대시보드 열기](computer:///sessions/trusting-kind-rubin/mnt/신혼생활/kstartup-dashboard.html) · [마크다운 보기](computer:///sessions/trusting-kind-rubin/mnt/신혼생활/kstartup-dashboard.md)
+🔗 [HTML 대시보드 열기](computer:///sessions/trusting-kind-rubin/mnt/신혼생활/founder-gov-radar-dashboard.html) · [마크다운 보기](computer:///sessions/trusting-kind-rubin/mnt/신혼생활/founder-gov-radar-dashboard.md)
 
 Sources:
 - [K-Startup 1p](https://...)
@@ -281,7 +285,7 @@ Sources:
 
 - `last_snapshot.json`이 있으면 `last_snapshot.json.deprecated`로 rename.
 - `recommendations.json`이 없거나 `schema_version < 2`이면 빈 풀로 부트스트랩하고 오늘자 크롤링 결과로 채운다.
-- `kstartup-dashboard.md`를 최초 생성.
+- `founder-gov-radar-dashboard.md`를 최초 생성.
 
 ## 6. 하지 말 것 (Anti-Patterns)
 

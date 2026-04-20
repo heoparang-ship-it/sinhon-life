@@ -24,10 +24,10 @@ export default function AIHub() {
             AI톡 · beta
           </div>
           <h3 className="font-serif text-[22px] font-semibold text-ink tracking-tightest leading-snug mb-2 wb-keep">
-            정부지원, 부부심리 <span className="italic">뭐든 물어봐요</span>
+            <span className="italic">“우리 부부 정부지원 혜택 알려줘”</span>
           </h3>
           <p className="text-[12.5px] text-ink-soft leading-relaxed mb-3 wb-keep">
-            맥락을 기억하는 전용 AI · 24시간
+            무엇이든 물어보세요
           </p>
           <span className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-ink text-honey-300 text-[12.5px] font-bold rounded-full">
             AI톡 시작하기 →

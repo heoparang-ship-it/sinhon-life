@@ -28,7 +28,7 @@ export default function ChatHeader() {
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-mint-200 animate-pulse" />
             <span className="text-[11px] text-white/90 font-medium">
-              맥락을 기억하는 전용 AI · 24시간
+              무엇이든 물어보세요 · 24시간
             </span>
           </div>
         </div>
