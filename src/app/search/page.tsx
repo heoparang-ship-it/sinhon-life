@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search as SearchIcon, X, TrendingUp, Clock } from "lucide-react";
@@ -36,8 +36,10 @@ function saveRecent(q: string) {
 /**
  * Search — resting state (recent + suggested) and results.
  * Matches against POLICIES title/description. No backend call; all client-side.
+ * `useSearchParams` requires a Suspense boundary at build time (Next 14 App Router),
+ * so we split the hook-using body into SearchContent and wrap it in the default export.
  */
-export default function SearchPage() {
+function SearchContent() {
   const router = useRouter();
   const params = useSearchParams();
   const initial = params.get("q") ?? "";
@@ -211,5 +213,13 @@ export default function SearchPage() {
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-paper" />}>
+      <SearchContent />
+    </Suspense>
   );
 }
