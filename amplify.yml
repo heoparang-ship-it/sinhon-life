@@ -3,12 +3,19 @@ frontend:
   phases:
     preBuild:
       commands:
+        - node --version
+        - npm --version
         - npm ci
     build:
       commands:
+        - echo "[1/4] Writing env vars to .env.production"
         - env | grep -E '^(ANTHROPIC_API_KEY|PINECONE_API_KEY|NEXT_PUBLIC_|KAKAO_|NEXTAUTH_|DATABASE_URL|DIRECT_URL)' >> .env.production
+        - echo "DATABASE_URL set=$(grep -c DATABASE_URL .env.production 2>/dev/null || echo 0)"
+        - echo "[2/4] Running prisma generate"
         - npx prisma generate
+        - echo "[3/4] Starting next build"
         - npm run build
+        - echo "[4/4] Build complete"
   artifacts:
     baseDirectory: .next
     files:
