@@ -6,7 +6,8 @@ frontend:
         - npm ci
     build:
       commands:
-        - env | grep -E '^(ANTHROPIC_API_KEY|PINECONE_API_KEY|NEXT_PUBLIC_)' >> .env.production
+        - env | grep -E '^(ANTHROPIC_API_KEY|PINECONE_API_KEY|NEXT_PUBLIC_|KAKAO_|NEXTAUTH_|DATABASE_URL|DIRECT_URL)' >> .env.production
+        - npx prisma generate
         - npm run build
   artifacts:
     baseDirectory: .next
