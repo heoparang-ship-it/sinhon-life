@@ -3,12 +3,16 @@
 import { useCoupleProfile } from "@/lib/design/useCoupleProfile";
 
 export default function Headline() {
-  const { names } = useCoupleProfile();
+  // Use partnerA/partnerB directly instead of the derived `names` ("A·B")
+  // because older storage occasionally leaked a joined string into partnerA
+  // and produced artefacts like "신랑.신부·신부 부부". The hook self-heals
+  // on read, but rendering the two fields separately is defence-in-depth.
+  const { partnerA, partnerB } = useCoupleProfile();
 
   return (
     <div className="px-5 pt-1 pb-5">
       <h1 className="text-[26px] font-extrabold text-ink tracking-tightest leading-[1.28] wb-keep text-balance">
-        {names} 부부,
+        {partnerA}, {partnerB} 부부,
         <br />
         신혼부부 지원금
         <br />

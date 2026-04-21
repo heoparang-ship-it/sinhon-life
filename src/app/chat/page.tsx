@@ -78,7 +78,7 @@ function ChatContent() {
   }, [initialQuery, hasSentInitial, sendMessage]);
 
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)] max-w-lg mx-auto">
       <ChatHeader />
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-paper">

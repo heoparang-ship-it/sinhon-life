@@ -14,9 +14,10 @@ const tabs = [
 ] as const;
 
 // Routes that render their own chrome or take the full viewport and therefore
-// hide the bottom nav. /chat is a fullscreen conversation — header's ArrowLeft
-// handles navigation back.
-const HIDE_ON_PATHS = ["/onboarding", "/chat"];
+// hide the bottom nav. Onboarding is a linear flow — chrome would distract.
+// Chat now keeps the nav visible per product decision (2026-04-21); users
+// want to bounce between tabs without hitting the back arrow.
+const HIDE_ON_PATHS = ["/onboarding"];
 
 export default function BottomNav() {
   const pathname = usePathname();

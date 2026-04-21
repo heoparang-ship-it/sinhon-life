@@ -26,15 +26,30 @@ export const DEFAULT_PROFILE: CoupleProfile = {
 const STORAGE_KEY = "sinhon.couple.profile";
 const CHANGE_EVENT = "sinhon:profile:changed";
 
+// Older builds sometimes saved the couple's names joined by a period, a comma,
+// or whitespace instead of the canonical middle dot. Treat all four as
+// separators so a value like "신랑.신부" or "신랑 신부" still migrates into two
+// fields instead of leaking into partnerA as a single "신랑.신부" string.
+const LEGACY_NAME_SEPARATORS = /[·.,\s]+/;
+
 function splitLegacyNames(raw: string): { partnerA: string; partnerB: string } {
   const parts = raw
-    .split("·")
+    .split(LEGACY_NAME_SEPARATORS)
     .map((s) => s.trim())
     .filter(Boolean);
   return {
     partnerA: parts[0] || DEFAULT_PROFILE.partnerA,
     partnerB: parts[1] || DEFAULT_PROFILE.partnerB,
   };
+}
+
+// A partner string is considered "dirty" if it contains any of the separator
+// characters — that means it came from a monolithic legacy value that the
+// previous migration failed to split (only the middle-dot was handled pre-v9).
+// We re-split it in readStorage so the home Headline stops rendering
+// "신랑.신부·신부 부부" artefacts.
+function containsSeparator(s: string): boolean {
+  return /[·.,]/.test(s) || /\s/.test(s);
 }
 
 function readStorage(): CoupleProfile {
@@ -61,9 +76,33 @@ function readStorage(): CoupleProfile {
       return migrated;
     }
 
+    let partnerA = parsed.partnerA || DEFAULT_PROFILE.partnerA;
+    let partnerB = parsed.partnerB || DEFAULT_PROFILE.partnerB;
+    // Self-heal: if a pre-v9 migration parked a joined string into partnerA
+    // (e.g. "신랑.신부") re-split it and persist the clean pair.
+    if (containsSeparator(partnerA)) {
+      const split = splitLegacyNames(partnerA);
+      partnerA = split.partnerA;
+      if (partnerB === DEFAULT_PROFILE.partnerB) {
+        partnerB = split.partnerB;
+      }
+      try {
+        window.localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            partnerA,
+            partnerB,
+            marriageDate: parsed.marriageDate || "",
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+
     return {
-      partnerA: parsed.partnerA || DEFAULT_PROFILE.partnerA,
-      partnerB: parsed.partnerB || DEFAULT_PROFILE.partnerB,
+      partnerA,
+      partnerB,
       marriageDate: parsed.marriageDate || "",
     };
   } catch {
