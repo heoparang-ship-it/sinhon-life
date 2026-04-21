@@ -164,7 +164,7 @@ export default function HeroSlider() {
     return (
       <section aria-label={`홈 하이라이트 ${slides.length}개`} className="px-0">
         {slides.map((slide, idx) => (
-          <div key={slide.id} className="aspect-[4/5] w-full">
+          <div key={slide.id} className="h-40 w-full">
             <HeroSlide
               slide={slide}
               slideIndex={idx + 1}
@@ -197,7 +197,7 @@ export default function HeroSlider() {
           swap avoids layout-shift artifacts while each slide handles its own
           padding. */}
       <div
-        className="relative aspect-[4/5] w-full overflow-hidden"
+        className="relative h-40 w-full overflow-hidden"
         tabIndex={0}
         role="region"
         aria-live="off"
