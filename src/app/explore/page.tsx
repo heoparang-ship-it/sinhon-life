@@ -1,12 +1,29 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Search, Compass, Store, Sparkles } from "lucide-react";
+import { Search, Compass, Store, Sparkles, Landmark } from "lucide-react";
 import { HUB_CATEGORIES, POLICIES, VENDORS, FEATURE_FLAGS } from "@/lib/constants";
+import type { GovPolicy } from "@/app/api/gov-policies/route";
+
+const GOV_CATEGORY_EMOJI: Record<string, string> = {
+  housing: "🏠",
+  baby: "👶",
+  finance: "💰",
+  tax: "📋",
+};
 
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
+  const [govPolicies, setGovPolicies] = useState<GovPolicy[]>([]);
+
+  // 정부 공고 fetch (serviceKey 없으면 빈 배열 반환 → 섹션 비노출)
+  useEffect(() => {
+    fetch("/api/gov-policies")
+      .then((r) => r.json())
+      .then((d) => setGovPolicies((d.policies ?? []).slice(0, 6)))
+      .catch(() => {});
+  }, []);
 
   const filteredPolicies = useMemo(() => {
     if (!query.trim()) return POLICIES.slice(0, 6);
@@ -136,6 +153,43 @@ export default function ExplorePage() {
             </div>
           )}
         </section>
+
+        {/* 정부 공고 — GOV_POLICY_API_KEY 설정 시 자동 노출 */}
+        {govPolicies.length > 0 && !query.trim() && (
+          <section className="opacity-0 animate-fade-up stagger-3">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1.5">
+                <Landmark size={14} className="text-coral" />
+                <h2 className="text-[13px] font-bold text-warm-text-secondary">
+                  최신 정부 공고
+                </h2>
+              </div>
+              <span className="text-[11px] text-warm-text-muted">{govPolicies.length}개</span>
+            </div>
+            <div className="space-y-2">
+              {govPolicies.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/gov/${encodeURIComponent(p.id)}`}
+                  className="flex items-center gap-3 bg-white rounded-xl p-3.5 border border-warm-border active:scale-[0.99]"
+                >
+                  <span className="text-xl flex-shrink-0">
+                    {GOV_CATEGORY_EMOJI[p.category] ?? "📄"}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-[13px] truncate">{p.title}</h3>
+                    <p className="text-[11px] text-warm-text-muted mt-0.5 line-clamp-1">
+                      {p.summary}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-bold text-white bg-coral px-2 py-0.5 rounded-full flex-shrink-0">
+                    공고
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 업체 결과 — FEATURE_FLAGS.SHOW_VENDORS 가 true일 때만 노출 */}
         {FEATURE_FLAGS.SHOW_VENDORS && filteredVendors.length > 0 && (
