@@ -322,6 +322,51 @@ export function removeItem(itemId: string) {
   }
 }
 
+/**
+ * Restore a previously hidden item. Used by V3.2 S1 search to let users
+ * re-add something they dismissed. Fires `item_unhidden` at call site.
+ */
+export function restoreItem(itemId: string) {
+  const removed = readRemoved();
+  if (!removed.includes(itemId)) return;
+  writeRemoved(removed.filter((id) => id !== itemId));
+}
+
+/**
+ * Return the list of removed (hidden) items along with their original group.
+ * Custom items that were removed are dropped from this view because the
+ * CUSTOM_KEY store has already forgotten them once removed.
+ */
+export interface HiddenItemEntry {
+  item: ChecklistItem;
+  groupId: string;
+  groupTitle: string;
+  groupIcon: string;
+}
+
+export function getHiddenItems(): HiddenItemEntry[] {
+  const removed = new Set(readRemoved());
+  if (removed.size === 0) return [];
+  const entries: HiddenItemEntry[] = [];
+  for (const group of CHECKLIST_SEED) {
+    for (const item of group.items) {
+      if (removed.has(item.id)) {
+        entries.push({
+          item,
+          groupId: group.id,
+          groupTitle: group.title,
+          groupIcon: group.icon,
+        });
+      }
+    }
+  }
+  return entries;
+}
+
+export function countHiddenItems(): number {
+  return readRemoved().length;
+}
+
 export function setItemWho(itemId: string, who: Assignee) {
   const map = readWhoOverride();
   writeWhoOverride({ ...map, [itemId]: who });
