@@ -17,17 +17,27 @@ function formatKoreanDate(iso: string): string {
   return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}. 결혼`;
 }
 
+// Each avatar shows ~1 character; trim gracefully so longer names don't
+// overflow the 52px circle.
+function shortLabel(name: string, fallback: string): string {
+  const s = name.trim();
+  if (!s) return fallback;
+  return s.length > 2 ? s.slice(0, 2) : s;
+}
+
 export default function ProfileHero({
-  names,
+  partnerA,
+  partnerB,
   marriageDate,
   onEdit,
 }: {
-  names: string;
+  partnerA: string;
+  partnerB: string;
   marriageDate: string;
   onEdit: () => void;
 }) {
-  const parts = names.split("·").map((s) => s.trim());
-  const [a, b] = [parts[0] || "", parts[1] || ""];
+  const a = shortLabel(partnerA, "신랑");
+  const b = shortLabel(partnerB, "신부");
   const days = daysSince(marriageDate);
   const dLabel = days !== null ? `D+${days}` : "Our Story";
 
@@ -46,17 +56,17 @@ export default function ProfileHero({
       </div>
       <div className="flex items-center gap-2.5 mb-4">
         <div
-          className="rounded-full bg-white/85 flex items-center justify-center font-bold text-coral-700"
+          className="rounded-full bg-white/85 flex items-center justify-center font-bold text-coral-700 text-[15px]"
           style={{ width: 52, height: 52 }}
         >
-          {a || "나"}
+          {a}
         </div>
         <div className="font-serif text-[22px] font-medium text-[#2a1a10]">&amp;</div>
         <div
-          className="rounded-full bg-white/85 flex items-center justify-center font-bold text-coral-700"
+          className="rounded-full bg-white/85 flex items-center justify-center font-bold text-mint-700 text-[15px]"
           style={{ width: 52, height: 52 }}
         >
-          {b || "그대"}
+          {b}
         </div>
       </div>
       <div className="font-serif text-[20px] font-medium text-[#2a1a10] tracking-tight leading-snug">

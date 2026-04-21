@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# sinhon.life pre-push hook
+#
+# main 브랜치에 push하기 전에 "Amplify가 실제로 터졌던 3가지 패턴"을 자동 검사.
+# - deploy 35: prisma generate 누락으로 PrismaClient export 없음
+# - deploy 37: Prisma 7.x adapter 미주입
+# - deploy 39: useSearchParams Suspense 미래핑
+#
+# 느린 풀 빌드는 안 돌림(2~5분). 대신 predeploy 스크립트로 빠르게(20~40초) 검증.
+# 풀 빌드가 필요하면 `npm run amplify:dryrun` 수동 실행.
+#
+# 스킵이 필요할 때: git push --no-verify (긴급시에만)
+
+set -e
+
+# 현재 push되는 ref를 확인
+# stdin으로 "<local_ref> <local_sha> <remote_ref> <remote_sha>" 받음
+PUSHING_MAIN=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    PUSHING_MAIN=1
+  fi
+done
+
+if [ "$PUSHING_MAIN" -eq 0 ]; then
+  # main이 아니면 검증 생략
+  exit 0
+fi
+
+echo ""
+echo "🛡  pre-push: main 브랜치 push 감지 — 검증 시작"
+echo ""
+
+# 프로젝트 루트로 이동 (git hook은 어느 위치에서도 호출될 수 있음)
+cd "$(git rev-parse --show-toplevel)"
+
+if ! npm run predeploy; then
+  echo ""
+  echo "❌ pre-push 검증 실패 — push 차단"
+  echo ""
+  echo "   긴급 스킵이 필요하면: git push --no-verify"
+  echo "   (Amplify 빌드가 실패할 확률이 매우 높으니 권장하지 않음)"
+  echo ""
+  exit 1
+fi
+
+echo ""
+echo "✅ pre-push 검증 통과 — push 진행"
+echo ""
+exit 0

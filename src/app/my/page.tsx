@@ -61,7 +61,7 @@ export default function MyPage() {
   const [onboarded, setOnboarded] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  const { names, marriageDate, update, ready } = useCoupleProfile();
+  const { partnerA, partnerB, marriageDate, update, ready } = useCoupleProfile();
 
   useEffect(() => {
     setSavedIds(getSavedIds());
@@ -133,7 +133,8 @@ export default function MyPage() {
 
       {ready && (
         <ProfileHero
-          names={names}
+          partnerA={partnerA}
+          partnerB={partnerB}
           marriageDate={marriageDate}
           onEdit={() => setEditOpen(true)}
         />
@@ -231,7 +232,8 @@ export default function MyPage() {
 
       <EditProfileModal
         open={editOpen}
-        initialNames={names}
+        initialPartnerA={partnerA}
+        initialPartnerB={partnerB}
         initialMarriageDate={marriageDate}
         onClose={() => setEditOpen(false)}
         onSave={(data) => update(data)}

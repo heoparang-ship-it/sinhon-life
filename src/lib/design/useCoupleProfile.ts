@@ -6,18 +6,36 @@ import { useEffect, useState } from "react";
 // because the onboarding profile doesn't carry names/marriageDate yet. If
 // onboarding gains those fields later, migrate this hook to read from the
 // shared profile key.
+//
+// Schema v2 (2026-04-21): split monolithic `names: "A·B"` string into
+// `partnerA` / `partnerB` so the rest of the app can rename both parties
+// independently. A legacy-migration path (readStorage) converts the old
+// single-field shape in-place without losing data.
 export interface CoupleProfile {
-  names: string; // "지훈·서연"
+  partnerA: string; // default "신랑"
+  partnerB: string; // default "신부"
   marriageDate: string; // ISO date or ""
 }
 
-const DEFAULT_PROFILE: CoupleProfile = {
-  names: "지훈·서연",
+export const DEFAULT_PROFILE: CoupleProfile = {
+  partnerA: "신랑",
+  partnerB: "신부",
   marriageDate: "",
 };
 
 const STORAGE_KEY = "sinhon.couple.profile";
 const CHANGE_EVENT = "sinhon:profile:changed";
+
+function splitLegacyNames(raw: string): { partnerA: string; partnerB: string } {
+  const parts = raw
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return {
+    partnerA: parts[0] || DEFAULT_PROFILE.partnerA,
+    partnerB: parts[1] || DEFAULT_PROFILE.partnerB,
+  };
+}
 
 function readStorage(): CoupleProfile {
   if (typeof window === "undefined") return DEFAULT_PROFILE;
@@ -25,8 +43,27 @@ function readStorage(): CoupleProfile {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_PROFILE;
     const parsed = JSON.parse(raw);
+
+    // Legacy v1: `{ names: "지훈·서연", marriageDate }`
+    // Convert once, rewrite storage so future reads hit the fast path.
+    if (typeof parsed?.names === "string" && !parsed?.partnerA) {
+      const { partnerA, partnerB } = splitLegacyNames(parsed.names);
+      const migrated: CoupleProfile = {
+        partnerA,
+        partnerB,
+        marriageDate: parsed.marriageDate || "",
+      };
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      } catch {
+        /* ignore */
+      }
+      return migrated;
+    }
+
     return {
-      names: parsed.names || DEFAULT_PROFILE.names,
+      partnerA: parsed.partnerA || DEFAULT_PROFILE.partnerA,
+      partnerB: parsed.partnerB || DEFAULT_PROFILE.partnerB,
       marriageDate: parsed.marriageDate || "",
     };
   } catch {
@@ -61,7 +98,12 @@ export function useCoupleProfile() {
     }
   };
 
-  return { ...profile, ready, update };
+  // Back-compat derived getter — some components/tests may still read
+  // `names` as "A·B". Keep it readable but never use it as the source of
+  // truth on write paths.
+  const names = `${profile.partnerA}·${profile.partnerB}`;
+
+  return { ...profile, names, ready, update };
 }
 
 export function daysUntilAnniversary(marriageDate: string): number | null {

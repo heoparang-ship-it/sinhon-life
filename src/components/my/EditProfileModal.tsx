@@ -5,33 +5,42 @@ import { X } from "lucide-react";
 
 export default function EditProfileModal({
   open,
-  initialNames,
+  initialPartnerA,
+  initialPartnerB,
   initialMarriageDate,
   onClose,
   onSave,
 }: {
   open: boolean;
-  initialNames: string;
+  initialPartnerA: string;
+  initialPartnerB: string;
   initialMarriageDate: string;
   onClose: () => void;
-  onSave: (data: { names: string; marriageDate: string }) => void;
+  onSave: (data: {
+    partnerA: string;
+    partnerB: string;
+    marriageDate: string;
+  }) => void;
 }) {
-  const [names, setNames] = useState(initialNames);
+  const [partnerA, setPartnerA] = useState(initialPartnerA);
+  const [partnerB, setPartnerB] = useState(initialPartnerB);
   const [date, setDate] = useState(initialMarriageDate);
 
   useEffect(() => {
     if (open) {
-      setNames(initialNames);
+      setPartnerA(initialPartnerA);
+      setPartnerB(initialPartnerB);
       setDate(initialMarriageDate);
     }
-  }, [open, initialNames, initialMarriageDate]);
+  }, [open, initialPartnerA, initialPartnerB, initialMarriageDate]);
 
   if (!open) return null;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      names: names.trim() || initialNames,
+      partnerA: partnerA.trim() || initialPartnerA,
+      partnerB: partnerB.trim() || initialPartnerB,
       marriageDate: date || "",
     });
     onClose();
@@ -54,18 +63,35 @@ export default function EditProfileModal({
           </button>
         </div>
 
-        <label className="block">
-          <span className="text-[11px] text-ink-muted font-mono uppercase tracking-wider">
-            우리 이름 (· 으로 구분)
-          </span>
-          <input
-            type="text"
-            value={names}
-            onChange={(e) => setNames(e.target.value)}
-            placeholder="지훈·서연"
-            className="w-full mt-1 bg-paper rounded-xl px-3.5 py-2.5 text-[14px] border border-paper-line focus:outline-none focus:ring-2 focus:ring-coral-300"
-          />
-        </label>
+        <div className="grid grid-cols-2 gap-2.5">
+          <label className="block">
+            <span className="text-[11px] text-ink-muted font-mono uppercase tracking-wider">
+              신랑 이름
+            </span>
+            <input
+              type="text"
+              value={partnerA}
+              onChange={(e) => setPartnerA(e.target.value)}
+              placeholder="신랑"
+              className="w-full mt-1 bg-paper rounded-xl px-3.5 py-2.5 text-[14px] border border-paper-line focus:outline-none focus:ring-2 focus:ring-coral-300"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[11px] text-ink-muted font-mono uppercase tracking-wider">
+              신부 이름
+            </span>
+            <input
+              type="text"
+              value={partnerB}
+              onChange={(e) => setPartnerB(e.target.value)}
+              placeholder="신부"
+              className="w-full mt-1 bg-paper rounded-xl px-3.5 py-2.5 text-[14px] border border-paper-line focus:outline-none focus:ring-2 focus:ring-mint-300"
+            />
+          </label>
+        </div>
+        <p className="text-[11px] text-ink-muted -mt-1.5">
+          가계부·홈·MY에서 바로 이 이름으로 바뀌어요.
+        </p>
 
         <label className="block">
           <span className="text-[11px] text-ink-muted font-mono uppercase tracking-wider">결혼일</span>

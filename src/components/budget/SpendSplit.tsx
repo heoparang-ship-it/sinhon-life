@@ -1,25 +1,32 @@
-import { formatWon, type BudgetSummary } from "@/lib/design/budget";
+"use client";
 
+import { formatWon, type BudgetSummary } from "@/lib/design/budget";
+import { useCoupleProfile } from "@/lib/design/useCoupleProfile";
+
+// Role-keyed access — labels come from useCoupleProfile so a MY-tab edit
+// instantly propagates (storage + custom event fan-out).
 export default function SpendSplit({ summary }: { summary: BudgetSummary }) {
-  const husband = summary.byWho["지훈"];
-  const wife = summary.byWho["서연"];
-  const solo = husband + wife;
-  const husbandPct = solo > 0 ? Math.round((husband / solo) * 100) : 0;
-  const wifePct = solo > 0 ? 100 - husbandPct : 0;
+  const { partnerA, partnerB } = useCoupleProfile();
+
+  const a = summary.byWho["A"];
+  const b = summary.byWho["B"];
+  const solo = a + b;
+  const aPct = solo > 0 ? Math.round((a / solo) * 100) : 0;
+  const bPct = solo > 0 ? 100 - aPct : 0;
 
   const cards = [
     {
-      who: "지훈",
-      amount: husband,
-      pct: husbandPct,
+      who: partnerA,
+      amount: a,
+      pct: aPct,
       bg: "bg-gradient-to-br from-coral-200 to-coral-500/30",
       text: "text-coral-700",
       chip: "bg-gradient-to-br from-coral-500 to-coral-700",
     },
     {
-      who: "서연",
-      amount: wife,
-      pct: wifePct,
+      who: partnerB,
+      amount: b,
+      pct: bPct,
       bg: "bg-gradient-to-br from-mint-200 to-mint-500/30",
       text: "text-mint-700",
       chip: "bg-gradient-to-br from-mint-500 to-mint-700",

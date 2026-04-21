@@ -1,6 +1,16 @@
-import { formatWon, type Transaction } from "@/lib/design/budget";
+"use client";
+
+import { formatWon, type Transaction, type Who } from "@/lib/design/budget";
+import { useCoupleProfile } from "@/lib/design/useCoupleProfile";
 
 export default function TransactionList({ txns }: { txns: Transaction[] }) {
+  const { partnerA, partnerB } = useCoupleProfile();
+  const whoLabel: Record<Who, string> = {
+    A: partnerA,
+    B: partnerB,
+    JOINT: "공동",
+  };
+
   return (
     <div className="mx-4 bg-paper-surface border border-paper-line rounded-2xl overflow-hidden">
       {txns.map((t, i) => (
@@ -18,7 +28,7 @@ export default function TransactionList({ txns }: { txns: Transaction[] }) {
               {t.name}
             </div>
             <div className="text-[10.5px] text-ink-muted mt-px">
-              {t.category} · {t.who}
+              {t.category} · {whoLabel[t.who]}
             </div>
           </div>
           <div className="text-right">

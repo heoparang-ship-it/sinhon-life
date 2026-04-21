@@ -6,23 +6,30 @@ import {
   CATEGORIES,
   CATEGORY_ICONS,
   CATEGORY_TEMPLATES,
+  WHO_ROLES,
   type Transaction,
   type TxnCategory,
   type Who,
 } from "@/lib/design/budget";
-
-const WHO: Who[] = ["지훈", "서연", "공동"];
+import { useCoupleProfile } from "@/lib/design/useCoupleProfile";
 
 export default function AddTxnButton({
   onAdd,
 }: {
   onAdd: (t: Transaction) => void;
 }) {
+  const { partnerA, partnerB } = useCoupleProfile();
+  const whoLabel: Record<Who, string> = {
+    A: partnerA,
+    B: partnerB,
+    JOINT: "공동",
+  };
+
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<TxnCategory>("예식장");
-  const [who, setWho] = useState<Who>("공동");
+  const [who, setWho] = useState<Who>("JOINT");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +167,7 @@ export default function AddTxnButton({
                 결제자
               </span>
               <div className="mt-1.5 flex gap-1.5">
-                {WHO.map((w) => {
+                {WHO_ROLES.map((w) => {
                   const isActive = who === w;
                   return (
                     <button
@@ -173,7 +180,7 @@ export default function AddTxnButton({
                           : "bg-paper text-ink-soft border border-paper-line"
                       }`}
                     >
-                      {w}
+                      {whoLabel[w]}
                     </button>
                   );
                 })}
