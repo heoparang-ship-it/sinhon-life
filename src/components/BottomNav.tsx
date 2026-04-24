@@ -2,22 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Sparkles, CheckSquare, Wallet, User } from "lucide-react";
+import { Home, MessageCircle, CheckSquare, User } from "lucide-react";
 
-// V3.1 redesign — 5 tabs. "탐색"은 MY 탭 하위 허브로 흡수됐으므로 여기서 제외.
+// V4 redesign — 4 tabs: 홈 / AI톡 / 체크리스트 / MY
 const tabs = [
   { id: "home", href: "/", icon: Home, label: "홈" },
-  { id: "chat", href: "/chat", icon: Sparkles, label: "AI톡" },
+  { id: "ai", href: "/chat", icon: MessageCircle, label: "AI톡" },
   { id: "checklist", href: "/checklist", icon: CheckSquare, label: "체크리스트" },
-  { id: "budget", href: "/budget", icon: Wallet, label: "가계부" },
   { id: "my", href: "/my", icon: User, label: "MY" },
 ] as const;
 
-// Routes that render their own chrome or take the full viewport and therefore
-// hide the bottom nav. Onboarding is a linear flow — chrome would distract.
-// Chat now keeps the nav visible per product decision (2026-04-21); users
-// want to bounce between tabs without hitting the back arrow.
-const HIDE_ON_PATHS = ["/onboarding"];
+const HIDE_ON_PATHS = ["/onboarding", "/quiz"];
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -29,26 +24,18 @@ export default function BottomNav() {
   const getActiveTab = () => {
     if (pathname === "/") return "home";
     if (pathname.startsWith("/policy")) return "home";
-    if (pathname.startsWith("/chat")) return "chat";
+    if (pathname.startsWith("/explore") || pathname.startsWith("/category")) return "home";
+    if (pathname.startsWith("/chat")) return "ai";
     if (pathname.startsWith("/checklist")) return "checklist";
-    if (pathname.startsWith("/budget")) return "budget";
-    if (pathname.startsWith("/my")) return "my";
-    // Routes folded into MY hub (explore/category/vendor) keep MY active.
-    if (
-      pathname.startsWith("/explore") ||
-      pathname.startsWith("/category") ||
-      pathname.startsWith("/vendor")
-    ) {
-      return "my";
-    }
+    if (pathname.startsWith("/my") || pathname.startsWith("/vendor")) return "my";
     return "home";
   };
 
   const activeTab = getActiveTab();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-paper-surface/95 backdrop-blur-xl border-t border-paper-line pb-safe">
-      <div className="max-w-lg mx-auto flex items-center justify-around h-14">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/98 backdrop-blur-xl border-t border-design-line pb-safe">
+      <div className="max-w-lg mx-auto flex items-center justify-around h-[78px] pt-2.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -57,15 +44,13 @@ export default function BottomNav() {
               key={tab.id}
               href={tab.href}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 py-1 transition-all duration-200 ${
-                isActive ? "text-coral-700" : "text-ink-muted"
+                isActive ? "text-blue-500" : "text-gray-400"
               }`}
             >
-              <div className={`transition-transform duration-200 ${isActive ? "scale-110" : ""}`}>
-                <Icon size={20} strokeWidth={isActive ? 2.2 : 1.6} />
-              </div>
+              <Icon size={24} strokeWidth={isActive ? 2 : 1.6} />
               <span
-                className={`text-[10px] whitespace-nowrap ${
-                  isActive ? "font-bold" : "font-normal"
+                className={`text-[11px] tracking-tight whitespace-nowrap ${
+                  isActive ? "font-extrabold" : "font-medium"
                 }`}
               >
                 {tab.label}

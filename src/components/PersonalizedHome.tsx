@@ -3,28 +3,21 @@
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { getProfile, type Profile } from "@/lib/profile";
-import TopBar from "@/components/home/TopBar";
-import HeroSlider from "@/components/home/HeroSlider";
-import HundredMillionGuide from "@/components/home/HundredMillionGuide";
-import AIHub from "@/components/home/AIHub";
-import SectionTitle from "@/components/design/SectionTitle";
+import HeroCard from "@/components/v4/HeroCard";
+import ComicScroll from "@/components/v4/ComicScroll";
+import DeadlineList from "@/components/v4/DeadlineList";
+import PopularList from "@/components/v4/PopularList";
 
-// V3.2 home structure (2026-04-21 — Hero Slider 패턴 채택):
-//   TopBar
+// V4 home structure (2026-04-25 — white-first, blue primary):
+//   TopSearchBar (rendered in page.tsx)
 //     ↓
-//   HeroSlider (3 slides: 1억 내러티브 / 이번 주 마감 임박 / AI 1차 점검)
+//   HeroCard (30초 진단 CTA)
 //     ↓
-//   HundredMillionGuide (상세표 — Hero 아래 스크롤 섹션으로 이동)
+//   ComicScroll (4컷만화 가로스크롤)
 //     ↓
-//   SectionTitle "우리 둘을 위한 AI 도구"
+//   DeadlineList (마감 임박)
 //     ↓
-//   AIHub (AI톡 + 체크리스트 + 가계부)
-//
-// Prior layout put `Headline` + `HundredMillionGuide` directly under TopBar.
-// Slide 1 of HeroSlider now carries the 1억 narrative, so the old Headline is
-// retired. The detail guide stays for users who scroll.
-//
-// Spec: docs/2026-04-21_V3.2_S0_UX_DECISIONS.md §1 D1 + §3 Hero Slider 구현 스펙.
+//   PopularList (많이 저장한)
 
 export default function PersonalizedHome() {
   const [, setProfile] = useState<Profile | null>(null);
@@ -36,31 +29,22 @@ export default function PersonalizedHome() {
   }, []);
 
   if (!mounted) {
-    return <div className="pt-6 pb-24 px-5 text-ink-muted text-sm">불러오는 중…</div>;
+    return <div className="pt-6 pb-24 px-5 text-[#667085] text-sm">불러오는 중…</div>;
   }
 
   return (
-    <div>
-      <TopBar />
+    <div className="pb-4">
+      <HeroCard />
+      <ComicScroll />
+      <DeadlineList />
+      <PopularList />
 
-      {/* ① Hero Slider — 3 슬라이드 rotate */}
-      <HeroSlider />
-
-      {/* ② 1억원 지원금 상세표 (Hero 아래 스크롤 섹션) */}
-      <div className="mt-6">
-        <HundredMillionGuide />
-      </div>
-
-      {/* ③ AI 허브 (AI톡 + 체크리스트 + 가계부) */}
-      <SectionTitle title="우리 둘을 위한 AI 도구" accent="mint" />
-      <AIHub />
-
-      <section className="mx-5 mt-10 mb-2 pt-5 border-t border-paper-line text-center">
+      <section className="mx-4 mt-8 mb-2 pt-4 border-t border-[#F0F4F8] text-center">
         <a
           href={BRAND.instagram}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted font-mono active:text-coral-500 transition"
+          className="inline-flex items-center gap-1.5 text-[11px] text-[#98A2B3] active:text-blue-500 transition"
         >
           @sinhon.life — 신혼부부를 위한 매일의 혜택·팁
         </a>
