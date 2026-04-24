@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>sinhon.life — App Launch UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="tokens.css"/>
+  <style>
+    body { background: var(--section); }
+    .app-shell { width: 390px; height: 800px; position: relative; overflow: hidden; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="comic.jsx"></script>
+  <script type="text/babel" src="screens-a.jsx"></script>
+  <script type="text/babel" src="screens-b.jsx"></script>
+  <script type="text/babel" src="desktop.jsx"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const DEFAULTS = /*EDITMODE-BEGIN*/{
+      "ctaColor": "#6F8FA8",
+      "qrStyle": "card",
+      "comicVariant": "A",
+      "heroStyle": "fullbleed",
+      "darkFooter": false,
+      "view": "canvas"
+    }/*EDITMODE-END*/;
+
+    // ─────────────────────────────────────────
+    // MobileApp — interactive prototype host
+    // ─────────────────────────────────────────
+    function MobileApp({ comicVariant, heroStyle, startScreen = 'home', height = 800 }) {
+      const [screen, setScreen] = useState(startScreen);
+      const [tab, setTab] = useState('home');
+      const [quizStep, setQuizStep] = useState(0);
+      const [answers, setAnswers] = useState({});
+
+      // tab sync with bottom nav
+      const go = (s) => {
+        setScreen(s);
+        if (s === 'home') setTab('home');
+        else if (s === 'ai') setTab('ai');
+        else if (s === 'my') setTab('my');
+        else if (s === 'result' || s === 'detail' || s === 'shorts' || s === 'checklist') setTab('benefit');
+      };
+      const onTab = (t) => {
+        setTab(t);
+        if (t === 'home') setScreen('home');
+        else if (t === 'ai') setScreen('ai');
+        else if (t === 'my') setScreen('my');
+        else if (t === 'benefit') setScreen('result');
+      };
+
+      const content = (() => {
+        switch (screen) {
+          case 'home':      return <ScreenHome go={go} hero={heroStyle}/>;
+          case 'quiz':      return <ScreenQuiz go={go} step={quizStep} setStep={setQuizStep} answers={answers} setAnswers={setAnswers}/>;
+          case 'result':    return <ScreenResult go={go}/>;
+          case 'detail':    return <ScreenDetail go={go} comicVariant={comicVariant}/>;
+          case 'ai':        return <ScreenAI go={go}/>;
+          case 'checklist': return <ScreenChecklist go={go}/>;
+          case 'my':        return <ScreenMy go={go}/>;
+          case 'shorts':    return <ScreenShorts go={go}/>;
+          default: return null;
+        }
+      })();
+
+      const showTabs = screen !== 'quiz';
+      return (
+        <div style={{ width: 390, height, position: 'relative', overflow: 'hidden', background: 'var(--warm-paper)' }}>
+          <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+            {content}
+          </div>
+          {showTabs && <BottomTabs tab={tab} onTab={onTab}/>}
+        </div>
+      );
+    }
+
+    // ─────────────────────────────────────────
+    // Canvas composition
+    // ─────────────────────────────────────────
+    function CanvasView({ t }) {
+      return (
+        <DesignCanvas title="sinhon.life — App Launch UI" subtitle="어려운 정책을, 아침 식탁 위에 쉽게.">
+          <DCSection id="showroom" title="데스크톱 앱 쇼룸 / QR 랜딩">
+            <DCArtboard id="desktop-light" label="Desktop Showroom (1440 · Light)" width={1440} height={1380}>
+              <DesktopShowroom ctaColor={t.ctaColor} qrStyle={t.qrStyle} heroStyle={t.heroStyle} comicVariant={t.comicVariant}/>
+            </DCArtboard>
+            <DCArtboard id="desktop-dark" label="Desktop Showroom (Dark · 식탁 저녁 무드)" width={1440} height={1380}>
+              <DesktopShowroom ctaColor={t.ctaColor} qrStyle={t.qrStyle} heroStyle={t.heroStyle} comicVariant={t.comicVariant} darkMode/>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="core-flow" title="모바일 핵심 플로우 — 홈 · 30초 진단 · 결과">
+            <DCArtboard id="m-home" label="01 Home — 콘텐츠 피드" width={412} height={820}>
+              <Phone label="01 Home"><MobileApp startScreen="home" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+            <DCArtboard id="m-quiz" label="02 30초 진단 Q1" width={412} height={820}>
+              <Phone label="02 Quiz"><MobileApp startScreen="quiz" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+            <DCArtboard id="m-result" label="03 진단 결과" width={412} height={820}>
+              <Phone label="03 Result"><MobileApp startScreen="result" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="detail-flow" title="정책 상세 · 번역 · 4컷 · 쇼츠 · 체크리스트">
+            <DCArtboard id="m-detail" label="04 정책 상세 (버팀목)" width={412} height={820}>
+              <Phone label="04 Detail"><MobileApp startScreen="detail" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+            <DCArtboard id="m-checklist" label="05 체크리스트 상세" width={412} height={820}>
+              <Phone label="05 Checklist"><MobileApp startScreen="checklist" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+            <DCArtboard id="m-shorts" label="06 쇼츠로 보는 정책" width={412} height={820}>
+              <Phone label="06 Shorts"><MobileApp startScreen="shorts" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="ai-my" title="AI톡 · MY 저장함">
+            <DCArtboard id="m-ai" label="07 AI톡 — 랑" width={412} height={820}>
+              <Phone label="07 AI"><MobileApp startScreen="ai" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+            <DCArtboard id="m-my" label="08 MY / 저장함" width={412} height={820}>
+              <Phone label="08 MY"><MobileApp startScreen="my" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/></Phone>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="ds" title="디자인 시스템 일부">
+            <DCArtboard id="ds-color" label="Color tokens" width={900} height={360}>
+              <DSColors/>
+            </DCArtboard>
+            <DCArtboard id="ds-buttons" label="Buttons & Badges" width={900} height={360}>
+              <DSButtons/>
+            </DCArtboard>
+            <DCArtboard id="ds-translation" label="정책 번역 카드" width={520} height={420}>
+              <div style={{ padding: 20, background: 'var(--warm-paper)', height: '100%' }}>
+                <TranslationCard items={[
+                  { official: '무주택세대구성원', easy: '나와 배우자, 같이 사는 가족 모두 집이 없어야 해요.', warn: '전세나 월세는 괜찮지만 본인 소유 주택은 안 돼요.' },
+                  { official: '부부합산 연소득', easy: '부부 한 해 소득을 더한 값이에요.', warn: '세전 기준이에요.' },
+                ]}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ds-comic" label="4컷만화 카드 (A)" width={520} height={420}>
+              <div style={{ padding: 20, background: 'var(--warm-paper)', height: '100%' }}>
+                <FourCutComic variant="A"/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ds-shorts" label="쇼츠 카드" width={360} height={420}>
+              <div style={{ padding: 20, background: 'var(--warm-paper)', height: '100%' }}>
+                <ShortsCard/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ds-checklist" label="오늘 할 일 체크리스트" width={360} height={420}>
+              <div style={{ padding: 20, background: 'var(--warm-paper)', height: '100%' }}>
+                <Checklist items={[
+                  { title: '주민등록등본 발급', hint: '정부24에서 무료', done: true },
+                  { title: '혼인관계증명서(상세) 발급', hint: '대법원 전자가족관계등록시스템', done: false },
+                  { title: '부부 소득자료 확인', hint: '원천징수영수증 또는 소득금액증명', done: false, meta: 'D-7' },
+                ]}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ds-source" label="공식 출처 카드" width={360} height={240}>
+              <div style={{ padding: 20, background: 'var(--warm-paper)', height: '100%' }}>
+                <SourceCard/>
+              </div>
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    // Design system atoms — v4
+    function DSColors() {
+      const palette = [
+        ['Primary Blue',  '#2196F3', 'CTA · 활성탭 · 검색'],
+        ['Primary Deep',  '#1478D4', '호버 · 텍스트'],
+        ['Sky Card',      '#EAF6FF', '정책 번역 · AI'],
+        ['Mint Card',     '#EAFBF4', '가능성 · 완료'],
+        ['Peach Card',    '#FFF0E8', '4컷 · 부부'],
+        ['Butter Card',   '#FFF7D6', '마감 · 주의'],
+        ['Ink',           '#172033', '제목 텍스트'],
+        ['Section',       '#F8FAFC', '섹션 배경'],
+      ];
+      return (
+        <div style={{ padding: 28, background: '#fff', height: '100%', fontFamily: 'var(--font-kr)' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)', marginBottom: 4 }}>White-first · 컬러는 카드 속에만</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 20 }}>배경은 화이트 80%. Primary Blue는 CTA·활성탭·검색 포커스에만. 네 개의 카드 틴트로 섹션을 구분.</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+            {palette.map(([n, c, u]) => (
+              <div key={n} style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)' }}>
+                <div style={{ height: 68, background: c, borderBottom: c === '#F8FAFC' ? '1px solid var(--line)' : 'none' }}/>
+                <div style={{ padding: '10px 12px', background: '#fff' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{n}</div>
+                  <div style={{ fontSize: 10.5, color: 'var(--ink-3)', fontFamily: 'ui-monospace' }}>{c}</div>
+                  <div style={{ fontSize: 10.5, color: 'var(--ink-2)', marginTop: 2 }}>{u}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function DSButtons() {
+      return (
+        <div style={{ padding: 28, background: '#fff', height: '100%', fontFamily: 'var(--font-kr)' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)', marginBottom: 18 }}>Buttons & Badges</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,auto)', gap: 10, marginBottom: 20, justifyContent: 'start' }}>
+            <CTA size="lg" variant="primary">우리 혜택 30초만에 찾기</CTA>
+            <CTA size="lg" variant="dark" icon={<Ic.sparkle width="14" height="14"/>}>AI에게 물어보기</CTA>
+            <CTA size="lg" variant="outline">담기</CTA>
+            <CTA size="lg" variant="kakao">카카오로 링크 받기</CTA>
+            <CTA size="md" variant="ghost">건너뛰기</CTA>
+            <CTA size="md" variant="outline">편집</CTA>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+            <Badge tone="mint">가능성 높음</Badge>
+            <Badge tone="butter">확인 필요</Badge>
+            <Badge tone="neutral">조건 부족</Badge>
+            <Badge tone="sky">공식 출처 기반</Badge>
+            <Badge tone="peach">4컷만화</Badge>
+            <Badge tone="primary">BETA</Badge>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <Chip active>전체</Chip>
+            <Chip>신혼집</Chip>
+            <Chip>전세대출</Chip>
+            <Chip>청약</Chip>
+            <Chip>출산</Chip>
+            <Chip>세금</Chip>
+          </div>
+        </div>
+      );
+    }
+
+    // ─────────────────────────────────────────
+    // Prototype view — centered interactive phone
+    // ─────────────────────────────────────────
+    function PrototypeView({ t }) {
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 40, padding: 40, background: 'var(--section)' }}>
+          <div style={{ maxWidth: 420 }}>
+            <SinhonLogo size={22}/>
+            <h1 style={{ fontSize: 38, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.2, letterSpacing: -1, margin: '16px 0' }}>
+              어려운 정책을,<br/><span style={{ color: 'var(--primary)' }}>우리 부부 말</span>로 쉽게.
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.65 }}>
+              오른쪽 앱을 직접 탭해보세요.<br/>
+              홈 → 30초 진단 → 맞춤 혜택 → 정책 상세 → AI톡 → MY까지<br/>실제 앱처럼 이동할 수 있어요.
+            </p>
+            <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
+              {['홈 화면에서 "우리 혜택 30초만에 찾기" 탭', '3개 질문에 답하고 맞춤 혜택 보기', '정책 카드를 탭해 상세 열기', 'AI에게 내 조건 물어보기'].map((s,i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 99, background: 'var(--primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i+1}</div>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 24, padding: '12px 14px', background: '#fff', borderRadius: 12, fontSize: 12, color: 'var(--ink-3)', lineHeight: 1.5, border: '1px solid var(--line)' }}>
+              공식 출처 기반 · 개인 조건에 따라 결과가 달라질 수 있어요. AI 답변에는 "공식 확인 필요" 뱃지가 함께 표시됩니다.
+            </div>
+          </div>
+          <Phone label="Interactive Prototype">
+            <MobileApp startScreen="home" comicVariant={t.comicVariant} heroStyle={t.heroStyle}/>
+          </Phone>
+        </div>
+      );
+    }
+
+    // ─────────────────────────────────────────
+    // View switcher
+    // ─────────────────────────────────────────
+    function App() {
+      const [t, set] = useTweaks(DEFAULTS);
+      const [view, setView] = useState(t.view || 'canvas');
+      useEffect(() => { set('view', view); /* eslint-disable-line */ }, [view]);
+
+      return (
+        <>
+          {/* top segmented control (always visible, outside canvas/prototype) */}
+          <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 30, display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(10px)', borderRadius: 99, border: '1px solid var(--line)', boxShadow: 'var(--shadow-card)' }}>
+            {[['canvas','디자인 캔버스'],['prototype','인터랙티브 프로토타입']].map(([k, l]) => (
+              <button key={k} onClick={() => setView(k)} style={{
+                padding: '8px 16px', borderRadius: 99, fontSize: 12.5, fontWeight: 600,
+                background: view === k ? 'var(--ink)' : 'transparent',
+                color: view === k ? '#fff' : 'var(--ink-2)',
+                fontFamily: 'var(--font-kr)',
+              }}>{l}</button>
+            ))}
+          </div>
+
+          {view === 'canvas' ? <CanvasView t={t}/> : <PrototypeView t={t}/>}
+
+          {/* Tweaks panel */}
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="CTA 버튼 색상">
+              <TweakRadio value={t.ctaColor} onChange={v => set('ctaColor', v)} options={[
+                { value: '#6F8FA8', label: 'Table Blue' },
+                { value: '#263746', label: 'Deep Slate' },
+                { value: '#F3B59F', label: 'Soft Apricot' },
+              ]}/>
+            </TweakSection>
+            <TweakSection title="QR 영역 스타일">
+              <TweakRadio value={t.qrStyle} onChange={v => set('qrStyle', v)} options={[
+                { value: 'card', label: '카드형' },
+                { value: 'line', label: '라인형' },
+                { value: 'illust', label: '일러스트 동반' },
+              ]}/>
+            </TweakSection>
+            <TweakSection title="4컷만화 표현">
+              <TweakRadio value={t.comicVariant} onChange={v => set('comicVariant', v)} options={[
+                { value: 'A', label: 'A · 2x2 그리드' },
+                { value: 'B', label: 'B · 가로 스크롤' },
+              ]}/>
+            </TweakSection>
+            <TweakSection title="모바일 Hero 카드">
+              <TweakRadio value={t.heroStyle} onChange={v => set('heroStyle', v)} options={[
+                { value: 'fullbleed', label: '풀블리드' },
+                { value: 'card', label: '카드형 (크림)' },
+                { value: 'illust', label: '일러스트 동반' },
+              ]}/>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+
+  <template id="__bundler_thumbnail">
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+      <rect width="240" height="240" fill="#D8E0E7"/>
+      <circle cx="120" cy="100" r="50" fill="#8EA9C1"/>
+      <path d="M90 120 Q120 80 150 120" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <text x="120" y="180" text-anchor="middle" font-size="22" font-weight="700" fill="#263746" font-family="sans-serif">sinhon.life</text>
+    </svg>
+  </template>
+</body>
+</html>

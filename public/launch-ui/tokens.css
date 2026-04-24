@@ -1,0 +1,83 @@
+/* sinhon.life — Design tokens (v4: 강남언니 / 오늘의집 tone)
+   Principle: White 80% · Primary Blue 10% · 보조 카드 컬러 10%.
+   Color lives in CTAs, active tabs, search focus, 주요 아이콘, and inside cards. */
+:root {
+  /* ── Surfaces ── */
+  --bg: #FFFFFF;                 /* page background — white */
+  --section: #F8FAFC;            /* secondary section / input fill / desktop chrome */
+  --pure-white: #FFFFFF;         /* alias */
+  --cloud-white: #F8FAFC;        /* alias */
+
+  /* ── Text ── */
+  --ink: #172033;                /* Deep Navy text */
+  --ink-2: #2E3A52;
+  --ink-3: #667085;              /* Sub text */
+  --ink-4: #98A2B3;
+
+  /* ── Lines ── */
+  --line: #E6ECF2;
+  --line-2: #F0F4F8;
+
+  /* ── Brand (Primary Blue) ── */
+  --primary: #2196F3;            /* CTA / active tab / search / primary icon */
+  --primary-deep: #1478D4;       /* pressed / text on white */
+  --primary-ink: #1478D4;
+  --primary-soft: #EAF6FF;       /* = sky card */
+
+  /* ── Card tints (only inside cards / chips) ── */
+  --sky-card: #EAF6FF;           /* 정책 번역, AI */
+  --sky-ink: #1478D4;
+  --mint-card: #EAFBF4;          /* 가능성 높음 / 완료 */
+  --mint-ink: #0E8E66;
+  --peach-card: #FFF0E8;         /* 4컷 만화 / 부부 대화 */
+  --peach-ink: #C85A32;
+  --butter-card: #FFF7D6;        /* 마감 임박 / 주의 */
+  --butter-ink: #8A6A08;
+  --kakao-yellow: #FEE500;       /* 카카오 로그인만 */
+
+  /* Radii */
+  --r-xs: 8px; --r-s: 12px; --r-m: 16px; --r-l: 20px; --r-xl: 28px;
+
+  /* Shadows — very subtle */
+  --shadow-card: 0 1px 2px rgba(23,32,51,.04), 0 4px 14px rgba(23,32,51,.04);
+  --shadow-float: 0 8px 24px rgba(23,32,51,.08);
+
+  /* Type */
+  --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+
+  /* ── Legacy aliases (map to v4) ── */
+  --parang: var(--primary);
+  --parang-deep: var(--primary-deep);
+  --parang-ink: var(--primary-ink);
+  --parang-soft: var(--sky-card);
+  --baby-sky: var(--sky-card);
+  --mint-milk: var(--mint-card);
+  --peach-milk: var(--peach-card);
+  --butter-cream: var(--butter-card);
+  --sierra-blue: var(--primary);
+  --sierra-glass: #A9C7DA;
+  --morning-silver: var(--line);
+  --morning-sky: var(--sky-card);
+  --table-blue: var(--primary);
+  --table-blue-ink: var(--primary-deep);
+  --deep-slate: var(--ink);
+  --warm-paper: var(--bg);
+  --cream-table: var(--bg);
+  --breakfast-cream: var(--butter-card);
+  --sun-butter: var(--butter-card);
+  --sun-butter-ink: var(--butter-ink);
+  --fresh-mint: #4CC9A3;
+  --fresh-mint-ink: var(--mint-ink);
+  --mint: #4CC9A3;
+  --soft-apricot: var(--peach-card);
+  --soft-apricot-ink: var(--peach-ink);
+  --peach: #FFB49D;
+  --ink-1: var(--ink);
+  --surface: var(--bg);
+  --surface-2: var(--section);
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { margin: 0; padding: 0; font-family: var(--font-kr); color: var(--ink); background: var(--bg); }
+button { font-family: inherit; cursor: pointer; border: 0; background: none; padding: 0; color: inherit; }
+input, textarea { font-family: inherit; }
