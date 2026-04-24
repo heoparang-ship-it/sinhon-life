@@ -10,16 +10,24 @@
      2026-04-17 키컬러.rtf 제안서 적용. tailwind.config.ts 의
      coral/mint/honey/navy DEFAULT 와 반드시 동일하게 유지할 것.
      ============================================================ */
-  --background: #FDF8F1;     /* Rice Paper — 순면 식탁보 */
-  --foreground: #1E2A3A;     /* Ink Navy — 본문 (AAA 12.8:1) */
-  --coral: #F97066;          /* Hearth Coral — 노을 든 부엌 벽 */
-  --coral-deep: #C8453D;     /* Ember — 고위계 강조·경고 (AA 5.9:1) */
-  --mint: #5EC9A8;           /* Morning Mint — 창가 바질 화분 */
-  --mint-deep: #2F8770;      /* Pine Kitchen — 링크 hover (AA 4.8:1) */
-  --honey: #FBD38D;          /* Honey Butter — 갓 구운 빵 */
+  --background: #FFFFFF;     /* White — V4 디자인 시스템 */
+  --foreground: #172033;     /* Ink — 본문 */
+  --coral: #F97066;          /* Hearth Coral — 레거시 유지 */
+  --coral-deep: #C8453D;     /* Ember — 레거시 유지 */
+  --mint: #5EC9A8;           /* Morning Mint — 레거시 유지 */
+  --mint-deep: #2F8770;      /* Pine Kitchen — 레거시 유지 */
+  --honey: #FBD38D;          /* Honey Butter — 레거시 유지 */
   --navy: #1E2A3A;           /* Ink Navy alias */
   --twilight: #4A5568;       /* 부제·메타 텍스트 */
   --smoke: #A0AEC0;          /* 보조·구분선 */
+  /* V4 Blue-first */
+  --primary: #2196F3;
+  --primary-dark: #1976D2;
+  --sky-card: #EAF6FF;
+  --mint-card: #EAFBF4;
+  --peach-card: #FFF0E8;
+  --butter-card: #FFF7D6;
+  --design-line: #E6ECF2;
 }
 
 /* ----------------------------------------------------------

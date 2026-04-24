@@ -107,6 +107,26 @@ const config: Config = {
           alt: "#FEEBC8",
           line: "#F0E4D2",
         },
+        // V4 Design System — Blue-first palette (2026-04-25 디자인 번들 반영)
+        // Primary: #2196F3, bg: #FFFFFF, card tints: sky/mint/peach/butter
+        blue: {
+          DEFAULT: "#2196F3",
+          50: "#E3F2FD",
+          100: "#BBDEFB",
+          200: "#90CAF9",
+          300: "#64B5F6",
+          400: "#42A5F5",
+          500: "#2196F3",
+          600: "#1E88E5",
+          700: "#1976D2",
+          800: "#1565C0",
+          900: "#0D47A1",
+        },
+        "sky-card": "#EAF6FF",
+        "mint-card": "#EAFBF4",
+        "peach-card": "#FFF0E8",
+        "butter-card": "#FFF7D6",
+        "design-line": "#E6ECF2",
       },
       fontFamily: {
         sans: ["Pretendard", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
@@ -146,6 +166,7 @@ const config: Config = {
         lg: "0 12px 28px rgba(30,42,58,0.10)",
         overlay: "0 -8px 24px rgba(30,42,58,0.08)",
         "ring-brand": "0 0 0 3px rgba(249,112,102,0.35)",
+        "ring-brand-blue": "0 0 0 3px rgba(33,150,243,0.35)",
       },
       transitionDuration: {
         instant: "80ms",

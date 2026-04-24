@@ -3,7 +3,7 @@
 // Three slides: 1억 내러티브 (static) / 이번 주 마감 임박 (dynamic, S2) / AI 1차 점검 (static).
 // Slide 2 dynamic fetch is stubbed in S1 and wired to sinhon-kstartup-matcher in S2.
 
-export type HeroSlideTone = "coral" | "honey" | "mint";
+export type HeroSlideTone = "blue" | "coral" | "honey" | "mint";
 export type HeroVisualKind = "five-icons" | "dday" | "chat-preview";
 
 export interface HeroIcon {
@@ -49,7 +49,7 @@ export type HeroSlide = HeroSlideFiveIcons | HeroSlideDDay | HeroSlideChatPrevie
 
 const SLIDE_BENEFIT_1E: HeroSlideFiveIcons = {
   id: "benefit-1e",
-  tone: "coral",
+  tone: "blue",
   eyebrow: "WEDDING SUPPORT · 1억원",
   headlineLines: ["신랑·신부 부부,", "1억까지 받을 수 있어요."],
   subcopy: "주거·대출이자·출산·세제·지역 — 조건만 맞으면 누적 1.6억",
@@ -68,7 +68,7 @@ const SLIDE_BENEFIT_1E: HeroSlideFiveIcons = {
 
 const SLIDE_AI_INTAKE: HeroSlideChatPreview = {
   id: "ai-intake",
-  tone: "mint",
+  tone: "mint", // mint-card tint (#EAFBF4)
   eyebrow: "AI · 1차 점검",
   headlineLines: ["우리 결혼 준비,", "어디까지 됐는지 묻는 것부터."],
   subcopy: "AI가 50+ 항목을 정리해드려요. 한 번에 체크리스트에 담기",

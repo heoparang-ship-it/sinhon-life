@@ -19,18 +19,21 @@ interface Props {
 }
 
 const BG_BY_TONE: Record<HeroSlideTone, string> = {
+  blue: "bg-[#EAF6FF]",
   coral: "bg-coral-50",
   honey: "bg-honey-50",
-  mint: "bg-mint-50",
+  mint: "bg-[#EAFBF4]",
 };
 
 const CTA_BG_BY_TONE: Record<HeroSlideTone, string> = {
+  blue: "bg-blue-500 hover:bg-blue-600 active:bg-blue-700",
   coral: "bg-coral-500 hover:bg-coral-600 active:bg-coral-700",
-  honey: "bg-honey-600 hover:bg-honey-700 active:bg-honey-800", // honey-500 fails AA on white, step up
-  mint: "bg-mint-600 hover:bg-mint-700 active:bg-mint-800", // same
+  honey: "bg-honey-600 hover:bg-honey-700 active:bg-honey-800",
+  mint: "bg-mint-600 hover:bg-mint-700 active:bg-mint-800",
 };
 
 const EYEBROW_COLOR_BY_TONE: Record<HeroSlideTone, string> = {
+  blue: "text-blue-700",
   coral: "text-coral-700",
   honey: "text-honey-700",
   mint: "text-mint-700",
