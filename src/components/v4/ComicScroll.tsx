@@ -26,7 +26,7 @@ export default function ComicScroll() {
           <Link
             key={i}
             href="/policy/newlywed-jeonse"
-            className="flex-shrink-0 w-[172px] rounded-2xl bg-peach-card p-3.5 active:scale-[.98] transition-transform"
+            className="flex-shrink-0 w-[172px] rounded-2xl bg-[#F8FAFC] border border-[#E6ECF2] p-3.5 active:scale-[.98] transition-transform"
           >
             <div className="text-[10px] font-bold text-[#C85A32] tracking-wide">{c.sub}</div>
             <div className="text-[14.5px] font-extrabold text-[#172033] mt-0.5 leading-[1.3]">

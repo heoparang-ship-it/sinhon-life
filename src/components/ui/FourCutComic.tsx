@@ -8,7 +8,7 @@ export default function FourCutComic({ panels }: { panels: Panel[] }) {
         <div
           key={i}
           className="rounded-xl p-3 flex flex-col items-center gap-2 text-center"
-          style={{ background: "var(--peach-card, #FFF0E8)" }}
+          style={{ background: "#F8FAFC" }}
         >
           <span className="text-3xl">{p.emoji}</span>
           <p className="text-[11px] leading-snug" style={{ color: "#2E3A52" }}>{p.caption}</p>

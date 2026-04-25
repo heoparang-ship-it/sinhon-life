@@ -28,7 +28,7 @@ export default function HeroCard() {
                 어려운 용어를<br />쉬운 말로
               </div>
             </div>
-            <div className="bg-peach-card rounded-xl p-3">
+            <div className="bg-[#F8FAFC] border border-[#E6ECF2] rounded-xl p-3">
               <div className="text-[10.5px] text-[#C85A32] font-bold tracking-wide">4컷 만화</div>
               <div className="text-[12.5px] text-[#172033] font-semibold mt-0.5 leading-[1.35]">
                 공문 말고<br />4컷으로 먼저

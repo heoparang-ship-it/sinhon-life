@@ -4,11 +4,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, MessageCircle, CheckSquare, User } from "lucide-react";
 
-// V4 redesign — 4 tabs: 홈 / AI톡 / 체크리스트 / MY
+// V4 redesign — 4 tabs: 홈 / 체크리스트 / AI톡 / MY
 const tabs = [
   { id: "home", href: "/", icon: Home, label: "홈" },
-  { id: "ai", href: "/chat", icon: MessageCircle, label: "AI톡" },
   { id: "checklist", href: "/checklist", icon: CheckSquare, label: "체크리스트" },
+  { id: "ai", href: "/chat", icon: MessageCircle, label: "AI톡" },
   { id: "my", href: "/my", icon: User, label: "MY" },
 ] as const;
 
