@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>신혼생활 — App Launch UI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: #1A2433;
+  }
+</style>
+</head>
+<body>
+  <template id="__bundler_thumbnail" data-bg-color="#6FB1EA">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#88C0EE"/>
+          <stop offset="100%" stop-color="#6AAAE3"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="800" fill="url(#sky)"/>
+      <g transform="translate(440 200)" fill="#FFFFFF" opacity="0.95">
+        <rect x="0" y="0" width="320" height="420" rx="40" fill="rgba(255,255,255,0.18)"/>
+        <text x="160" y="200" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="48" font-weight="700" fill="#FFFFFF" letter-spacing="-2">신혼생활</text>
+        <text x="160" y="252" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="20" font-weight="500" fill="rgba(255,255,255,0.75)">sinhon.life</text>
+        <circle cx="160" cy="330" r="36" fill="rgba(255,255,255,0.85)"/>
+        <path d="M148 312 L180 330 L148 348 Z" fill="#3B8BCF"/>
+      </g>
+    </svg>
+  </template>
+  <div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tokens.jsx"></script>
+<script type="text/babel" src="archive-home.jsx"></script>
+<script type="text/babel" src="search.jsx"></script>
+<script type="text/babel" src="video-detail.jsx"></script>
+<script type="text/babel" src="ledger.jsx"></script>
+<script type="text/babel" src="my.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+  const W = 390, H = 844;
+
+  function Phone({ children }) {
+    return (
+      <IOSDevice width={W} height={H} dark={true}>
+        {children}
+      </IOSDevice>
+    );
+  }
+
+  function App() {
+    return (
+      <DesignCanvas>
+        <DCSection id="archive" title="01 · Archive" subtitle="해시태그로 신혼 영상을 모은 피드. 무가입 열람.">
+          <DCArtboard id="archive-home" label="아카이브 홈" width={W + 22} height={H + 22}>
+            <Phone><ArchiveHomeScreen /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="search" title="02 · Search" subtitle="해시태그 입력·선택, 다중 필터. 결과 그리드.">
+          <DCArtboard id="search-screen" label="검색" width={W + 22} height={H + 22}>
+            <Phone><SearchScreen /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="detail" title="03 · Video Detail" subtitle="9:16 영상 + 제목 + 해시태그 + 인스타 원본 링크.">
+          <DCArtboard id="detail-screen" label="영상 상세" width={W + 22} height={H + 22}>
+            <Phone><VideoDetailScreen /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="ledger" title="04 · Ledger" subtitle="공동 가계부. 비로그인 진입 시 카카오 로그인 유도.">
+          <DCArtboard id="ledger-gate" label="A · 비로그인 진입" width={W + 22} height={H + 22}>
+            <Phone><LedgerGateScreen /></Phone>
+          </DCArtboard>
+          <DCArtboard id="ledger-screen" label="B · 로그인 후" width={W + 22} height={H + 22}>
+            <Phone><LedgerScreen /></Phone>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="my" title="05 · My" subtitle="로그인 상태 자리만. 데이터는 추후 단계에서.">
+          <DCArtboard id="my-screen" label="MY" width={W + 22} height={H + 22}>
+            <Phone><MyScreen /></Phone>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
+</script>
+</body>
+</html>
