@@ -10,23 +10,90 @@
   <title>신혼생활 · sinhon.life</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <script src="https://unpkg.com/qrcode@1.5.4/build/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
     body {
-      background: #5A9DD8;
       font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      background: #6FB1EA;
     }
-    #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+    #root { height: 100%; }
     * { scrollbar-width: none; }
     *::-webkit-scrollbar { display: none; }
+
+    /* ── 데스크톱 2패널 레이아웃 ── */
+    .layout {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 왼쪽 패널: 모바일에선 숨김 */
+    .left-panel {
+      display: none;
+    }
+
+    /* 오른쪽 앱 패널: 모바일엔 전체화면 */
+    .app-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #6FB1EA;
+    }
+    .app-viewport {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 데스크톱: 768px+ */
+    @media (min-width: 768px) {
+      body { background: #F4F8FC; }
+
+      .left-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 320px;
+        min-width: 280px;
+        flex-shrink: 0;
+        height: 100%;
+        background: #FFFFFF;
+        border-right: 1px solid #E2EBF3;
+        padding: 40px 32px;
+        gap: 0;
+      }
+
+      .app-panel {
+        background: #EAF3FB;
+      }
+
+      .app-viewport {
+        width: 390px;
+        max-width: 390px;
+        height: min(844px, 96vh);
+        border-radius: 0;
+        box-shadow: 0 24px 80px rgba(20,40,80,0.22), 0 2px 8px rgba(20,40,80,0.08);
+      }
+    }
+
+    /* 큰 화면: 1200px+ 에서 여백 더 */
+    @media (min-width: 1200px) {
+      .left-panel { width: 380px; padding: 48px 48px; }
+    }
   </style>
 </head>
 <body>
   <div id="root">
-    <div style="color:rgba(255,255,255,0.7);font-family:sans-serif;font-size:14px;">로딩 중…</div>
+    <div style="display:flex;height:100%;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:14px;">
+      로딩 중…
+    </div>
   </div>
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
@@ -54,7 +121,6 @@ const T = {
   mute:        '#7A8696',
   faint:       '#B5BDC8',
   accentDeep:  '#3B8BCF',
-  income:      '#3B8BCF',
   expense:     '#D97E6A',
   kakao:       '#FEE500',
   kakaoText:   '#191600',
@@ -141,7 +207,7 @@ function CharacterBubble({ size = 108, label = '3D\ncharacter', style }) {
 
 // ─── 탭 바 ─────────────────────────────────────────────────────
 function TabIcon({ name, active }) {
-  const c  = active ? T.ink : 'rgba(26,36,51,0.36)';
+  const c = active ? T.ink : 'rgba(26,36,51,0.36)';
   const sw = 1.5;
   if (name === 'home') return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -304,17 +370,11 @@ function ArchiveHero() {
       }/>
       <div style={{ padding: '20px 28px 0' }}>
         <MicroLabel color={T.onBlueFaint}>The Newlywed Archive · 01</MicroLabel>
-        <div style={{
-          marginTop: 24, fontSize: 38, fontWeight: 700,
-          letterSpacing: '-0.045em', color: T.onBlue, lineHeight: 1.1,
-        }}>
+        <div style={{ marginTop: 24, fontSize: 38, fontWeight: 700, letterSpacing: '-0.045em', color: T.onBlue, lineHeight: 1.1 }}>
           신혼의 모든 순간,<br/>
           <span style={{ color: T.onBlueMute, fontWeight: 500 }}>해시태그로 펼쳐보다.</span>
         </div>
-        <div style={{
-          marginTop: 22, fontSize: 13.5, color: T.onBlueMute,
-          lineHeight: 1.7, letterSpacing: '-0.01em', maxWidth: 270,
-        }}>
+        <div style={{ marginTop: 22, fontSize: 13.5, color: T.onBlueMute, lineHeight: 1.7, letterSpacing: '-0.01em', maxWidth: 270 }}>
           인스타에 흩어진 신혼 영상을 한 곳에 모았어요.<br/>
           태그 하나로 원하는 장면만 골라 보세요.
         </div>
@@ -329,13 +389,13 @@ function ArchiveHero() {
 function ArchiveTagRail() {
   const [active, setActive] = React.useState(0);
   const tags = [
-    { label: '# 전체',   count: '1.2k' },
-    { label: '# 신혼집', count: '324' },
-    { label: '# 혼수',   count: '218' },
-    { label: '# 스드메', count: '186' },
+    { label: '# 전체',    count: '1.2k' },
+    { label: '# 신혼집',  count: '324' },
+    { label: '# 혼수',    count: '218' },
+    { label: '# 스드메',  count: '186' },
     { label: '# 출산준비', count: '142' },
-    { label: '# 청약',   count: '98' },
-    { label: '# 살림',   count: '76' },
+    { label: '# 청약',    count: '98' },
+    { label: '# 살림',    count: '76' },
     { label: '# 신혼여행', count: '64' },
   ];
   return (
@@ -371,24 +431,17 @@ function ArchiveGrid() {
   const nav = useNav();
   return (
     <div style={{ padding: '44px 22px 180px' }}>
-      <div style={{
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-        padding: '0 6px', marginBottom: 24, gap: 12,
-      }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 6px', marginBottom: 24, gap: 12 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <MicroLabel>This Week</MicroLabel>
           <div style={{ marginTop: 10, fontSize: 20, fontWeight: 600, letterSpacing: '-0.03em', color: T.ink, whiteSpace: 'nowrap' }}>
             지금, 신혼이 보는 영상
           </div>
         </div>
-        <span style={{ fontSize: 11, color: T.faint, whiteSpace: 'nowrap', paddingBottom: 4, letterSpacing: '-0.01em' }}>
-          총 {ARCHIVE_CARDS.length}개
-        </span>
+        <span style={{ fontSize: 11, color: T.faint, whiteSpace: 'nowrap', paddingBottom: 4 }}>총 {ARCHIVE_CARDS.length}개</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 32 }}>
-        {ARCHIVE_CARDS.map((c, i) => (
-          <VideoCard key={i} {...c} onClick={() => nav.pushDetail(c)} />
-        ))}
+        {ARCHIVE_CARDS.map((c, i) => <VideoCard key={i} {...c} onClick={() => nav.pushDetail(c)} />)}
       </div>
     </div>
   );
@@ -410,11 +463,7 @@ function ArchiveHomeScreen() {
 function SearchHero() {
   const [chips, setChips] = React.useState(['#신혼집']);
   return (
-    <div style={{
-      position: 'relative', background: G.heroSky,
-      paddingTop: 18, paddingBottom: 28,
-      borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden',
-    }}>
+    <div style={{ position: 'relative', background: G.heroSky, paddingTop: 18, paddingBottom: 28, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' }}>
       <GlassBubble size={56} top={20} right={-16} opacity={0.20} icon={
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.4"/>
@@ -438,25 +487,14 @@ function SearchHero() {
             <circle cx="11" cy="11" r="6.5" stroke={T.accentDeep} strokeWidth="1.6"/>
             <path d="M16 16l4 4" stroke={T.accentDeep} strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
-          <span style={{ color: T.mute, fontSize: 14.5, letterSpacing: '-0.015em', fontWeight: 500, flex: 1 }}>
-            해시태그를 입력하세요
-          </span>
+          <span style={{ color: T.mute, fontSize: 14.5, letterSpacing: '-0.015em', fontWeight: 500, flex: 1 }}>해시태그를 입력하세요</span>
           <span style={{ color: T.faint, fontSize: 12, fontWeight: 500, paddingLeft: 8, borderLeft: '1px solid rgba(120,140,170,0.18)' }}>#</span>
         </div>
         <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {chips.map((t, i) => (
-            <div key={i} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              height: 32, padding: '0 6px 0 14px', borderRadius: 999,
-              background: G.pillActiveOnBlue, color: T.ink, fontSize: 12.5, fontWeight: 600,
-              letterSpacing: '-0.01em', boxShadow: '0 6px 18px -10px rgba(20,40,80,0.35)',
-            }}>
+            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, height: 32, padding: '0 6px 0 14px', borderRadius: 999, background: G.pillActiveOnBlue, color: T.ink, fontSize: 12.5, fontWeight: 600, letterSpacing: '-0.01em', boxShadow: '0 6px 18px -10px rgba(20,40,80,0.35)' }}>
               {t}
-              <span onClick={() => setChips(chips.filter((_, j) => j !== i))} style={{
-                width: 20, height: 20, borderRadius: '50%',
-                background: 'rgba(26,36,51,0.08)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-              }}>
+              <span onClick={() => setChips(chips.filter((_, j) => j !== i))} style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(26,36,51,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
                   <path d="M2 2l6 6M8 2l-6 6" stroke={T.ink} strokeWidth="1.6" strokeLinecap="round"/>
                 </svg>
@@ -470,10 +508,7 @@ function SearchHero() {
 }
 
 function SuggestedTags() {
-  const tags = [
-    ['#예산','120'], ['#인테리어','94'], ['#육아','72'],
-    ['#커플일상','58'], ['#맞벌이','44'], ['#주말루틴','36'],
-  ];
+  const tags = [['#예산','120'],['#인테리어','94'],['#육아','72'],['#커플일상','58'],['#맞벌이','44'],['#주말루틴','36']];
   return (
     <div style={{ padding: '36px 28px 0' }}>
       <MicroLabel>카테고리</MicroLabel>
@@ -489,10 +524,10 @@ function SuggestedTags() {
 }
 
 const SEARCH_CARDS = [
-  { tags: ['#신혼집', '#셀프인테리어'], title: '15평 빌라, 6개월 셀프 인테리어 기록', dur: '0:48', label: 'reel · 신혼집' },
-  { tags: ['#신혼집', '#원룸'],          title: '원룸 신혼집도 충분히 예쁠 수 있다', dur: '0:54', label: 'reel · 신혼집' },
-  { tags: ['#신혼집', '#정리'],          title: '드레스룸이 없을 때 옷장 정리법', dur: '0:42', label: 'reel · 정리' },
-  { tags: ['#신혼집', '#투자'],          title: '신혼집 첫 1년, 가구 투자 후회 없는 5가지', dur: '1:18', label: 'reel · 가구' },
+  { tags: ['#신혼집','#셀프인테리어'], title: '15평 빌라, 6개월 셀프 인테리어 기록', dur: '0:48', label: 'reel · 신혼집' },
+  { tags: ['#신혼집','#원룸'],         title: '원룸 신혼집도 충분히 예쁠 수 있다', dur: '0:54', label: 'reel · 신혼집' },
+  { tags: ['#신혼집','#정리'],         title: '드레스룸이 없을 때 옷장 정리법', dur: '0:42', label: 'reel · 정리' },
+  { tags: ['#신혼집','#투자'],         title: '신혼집 첫 1년, 가구 투자 후회 없는 5가지', dur: '1:18', label: 'reel · 가구' },
 ];
 
 function SearchResults() {
@@ -509,9 +544,7 @@ function SearchResults() {
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 32 }}>
-        {SEARCH_CARDS.map((c, i) => (
-          <VideoCard key={i} {...c} onClick={() => nav.pushDetail(c)} />
-        ))}
+        {SEARCH_CARDS.map((c, i) => <VideoCard key={i} {...c} onClick={() => nav.pushDetail(c)} />)}
       </div>
     </div>
   );
@@ -533,17 +566,8 @@ function SearchScreen() {
 function DetailTopBar() {
   const nav = useNav();
   return (
-    <div style={{
-      position: 'absolute', top: 54, left: 0, right: 0,
-      padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10,
-    }}>
-      <div onClick={() => nav.popDetail()} style={{
-        width: 40, height: 40, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.78)',
-        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 6px 18px -8px rgba(20,40,80,0.25)', cursor: 'pointer',
-      }}>
+    <div style={{ position: 'absolute', top: 54, left: 0, right: 0, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 10 }}>
+      <div onClick={() => nav.popDetail()} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px -8px rgba(20,40,80,0.25)', cursor: 'pointer' }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M15 5l-7 7 7 7" stroke={T.ink} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
@@ -553,13 +577,7 @@ function DetailTopBar() {
           <svg key="h" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.5-7 10-7 10z" stroke={T.ink} strokeWidth="1.6"/></svg>,
           <svg key="m" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M4 6h16M4 18h16" stroke={T.ink} strokeWidth="1.6" strokeLinecap="round"/></svg>,
         ].map((icon, i) => (
-          <div key={i} style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.78)',
-            backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 6px 18px -8px rgba(20,40,80,0.25)',
-          }}>{icon}</div>
+          <div key={i} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px -8px rgba(20,40,80,0.25)' }}>{icon}</div>
         ))}
       </div>
     </div>
@@ -568,20 +586,9 @@ function DetailTopBar() {
 
 function VideoStage({ card }) {
   return (
-    <div style={{
-      position: 'relative', background: G.heroSky,
-      paddingTop: 104, paddingBottom: 14, paddingLeft: 10, paddingRight: 10,
-      borderBottomLeftRadius: 22, borderBottomRightRadius: 22, overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'relative', width: '100%', aspectRatio: '9 / 16',
-        borderRadius: 16, overflow: 'hidden', background: T.surface,
-        boxShadow: '0 30px 60px -28px rgba(20,40,80,0.45)',
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'repeating-linear-gradient(135deg, rgba(90,130,180,0.05) 0 1px, transparent 1px 18px)',
-        }} />
+    <div style={{ position: 'relative', background: G.heroSky, paddingTop: 104, paddingBottom: 14, paddingLeft: 10, paddingRight: 10, borderBottomLeftRadius: 22, borderBottomRightRadius: 22, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '9 / 16', borderRadius: 16, overflow: 'hidden', background: T.surface, boxShadow: '0 30px 60px -28px rgba(20,40,80,0.45)' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(90,130,180,0.05) 0 1px, transparent 1px 18px)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
             <defs>
@@ -595,16 +602,9 @@ function VideoStage({ card }) {
             <path d="M30 24L48 36L30 48V24Z" fill="#3B8BCF" opacity="0.85"/>
           </svg>
         </div>
-        <div style={{
-          position: 'absolute', bottom: 16, right: 16, padding: '6px 14px', borderRadius: 999,
-          background: G.glassChip, color: T.accentDeep, fontSize: 12, fontWeight: 700,
-          fontVariantNumeric: 'tabular-nums', boxShadow: '0 4px 12px -6px rgba(20,40,80,0.20)',
-        }}>{card?.dur || '0:48'}</div>
+        <div style={{ position: 'absolute', bottom: 16, right: 16, padding: '6px 14px', borderRadius: 999, background: G.glassChip, color: T.accentDeep, fontSize: 12, fontWeight: 700, fontVariantNumeric: 'tabular-nums', boxShadow: '0 4px 12px -6px rgba(20,40,80,0.20)' }}>{card?.dur || '0:48'}</div>
         <div style={{ position: 'absolute', top: 18, left: 20 }}>
-          <span style={{
-            fontFamily: T.font, fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
-            color: '#3B8BCF', opacity: 0.65, textTransform: 'uppercase',
-          }}>{card?.label || 'reel · 신혼집'}</span>
+          <span style={{ fontFamily: T.font, fontSize: 11, fontWeight: 600, letterSpacing: '0.04em', color: '#3B8BCF', opacity: 0.65, textTransform: 'uppercase' }}>{card?.label || 'reel · 신혼집'}</span>
         </div>
       </div>
     </div>
@@ -613,7 +613,6 @@ function VideoStage({ card }) {
 
 function DetailMeta({ card }) {
   const tags = card?.tags?.length ? card.tags : ['#신혼집', '#셀프인테리어', '#15평'];
-  const counts = ['248', '62', '34'];
   return (
     <div style={{ padding: '36px 28px 0' }}>
       <MicroLabel>Newlywed Reel</MicroLabel>
@@ -623,19 +622,12 @@ function DetailMeta({ card }) {
       <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {tags.map((t, i) => (
           <Pill key={i} onWhite size={32} style={{ fontSize: 12 }}>
-            {t}
-            <span style={{ marginLeft: 8, opacity: 0.55, fontSize: 10.5, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
-              {counts[i] || ''}
-            </span>
+            {t}<span style={{ marginLeft: 8, opacity: 0.55, fontSize: 10.5, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{['248','62','34'][i] || ''}</span>
           </Pill>
         ))}
       </div>
       <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: '50%', background: G.pillIdleOnWhite,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: T.accentDeep, fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em',
-        }}>@</div>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: G.pillIdleOnWhite, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accentDeep, fontSize: 14, fontWeight: 700 }}>@</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, letterSpacing: '-0.01em' }}>@newlywed_diary</div>
           <div style={{ fontSize: 11.5, color: T.mute }}>인스타그램 · 4일 전</div>
@@ -643,20 +635,12 @@ function DetailMeta({ card }) {
       </div>
       <div style={{ marginTop: 22, fontSize: 13.5, color: T.inkSoft, lineHeight: 1.75, letterSpacing: '-0.01em' }}>
         예산 800만 원으로 시작한 첫 신혼집.<br/>
-        벽지부터 가구 배치까지, 둘이 결정한 모든 것을 6개월 동안 기록했어요.
-        가장 후회 없는 선택과, 다시 한다면 바꿀 한 가지를 솔직하게 정리했습니다.
+        벽지부터 가구 배치까지, 둘이 결정한 모든 것을 6개월 동안 기록했어요. 가장 후회 없는 선택과, 다시 한다면 바꿀 한 가지를 솔직하게 정리했습니다.
       </div>
       <div style={{ marginTop: 28 }}>
-        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          height: 54, borderRadius: 16, background: G.pillActiveOnWhite,
-          color: '#FFFFFF', fontSize: 14.5, fontWeight: 600, letterSpacing: '-0.015em',
-          boxShadow: '0 18px 36px -16px rgba(74,155,224,0.55)', textDecoration: 'none',
-        }}>
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, height: 54, borderRadius: 16, background: G.pillActiveOnWhite, color: '#FFFFFF', fontSize: 14.5, fontWeight: 600, letterSpacing: '-0.015em', boxShadow: '0 18px 36px -16px rgba(74,155,224,0.55)', textDecoration: 'none' }}>
           인스타그램에서 원본 보기
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M9 5l7 7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </a>
       </div>
     </div>
@@ -677,11 +661,7 @@ function RelatedRail() {
         <div style={{ marginTop: 10, fontSize: 18, fontWeight: 600, letterSpacing: '-0.03em', color: T.ink }}>비슷한 결의 영상</div>
       </div>
       <div style={{ marginTop: 22, display: 'flex', gap: 14, overflowX: 'auto', padding: '0 6px 8px' }}>
-        {cards.map((c, i) => (
-          <div key={i} style={{ flex: '0 0 132px' }}>
-            <VideoCard {...c} onClick={() => nav.pushDetail(c)} />
-          </div>
-        ))}
+        {cards.map((c, i) => <div key={i} style={{ flex: '0 0 132px' }}><VideoCard {...c} onClick={() => nav.pushDetail(c)} /></div>)}
       </div>
     </div>
   );
@@ -689,10 +669,7 @@ function RelatedRail() {
 
 function VideoDetailScreen({ card }) {
   return (
-    <div style={{
-      width: '100%', height: '100%', background: T.white,
-      position: 'relative', overflow: 'hidden', fontFamily: T.font, color: T.ink,
-    }}>
+    <div style={{ width: '100%', height: '100%', background: T.white, position: 'relative', overflow: 'hidden', fontFamily: T.font, color: T.ink }}>
       <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
         <VideoStage card={card} />
         <DetailMeta card={card} />
@@ -733,13 +710,7 @@ function LedgerGateScreen() {
           </div>
         </div>
         <div style={{ position: 'absolute', left: 22, right: 22, bottom: 130 }}>
-          <div onClick={() => nav.setLoggedIn(true)} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            height: 56, borderRadius: 16, background: T.kakao, color: T.kakaoText,
-            fontSize: 15, fontWeight: 700, letterSpacing: '-0.015em',
-            boxShadow: '0 18px 36px -12px rgba(254,229,0,0.45), 0 4px 10px rgba(0,0,0,0.06)',
-            cursor: 'pointer', userSelect: 'none', WebkitUserSelect: 'none',
-          }}>
+          <div onClick={() => nav.setLoggedIn(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, height: 56, borderRadius: 16, background: T.kakao, color: T.kakaoText, fontSize: 15, fontWeight: 700, letterSpacing: '-0.015em', boxShadow: '0 18px 36px -12px rgba(254,229,0,0.45), 0 4px 10px rgba(0,0,0,0.06)', cursor: 'pointer', userSelect: 'none', WebkitUserSelect: 'none' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M12 4C7 4 3 7 3 11c0 2.4 1.6 4.5 4 5.7L6 21l4.8-2.4c.4 0 .8 0 1.2 0 5 0 9-3 9-7s-4-7-9-7z" fill={T.kakaoText}/>
             </svg>
@@ -757,11 +728,7 @@ function LedgerGateScreen() {
 // ═══ 04b · 가계부 — 로그인 후 ════════════════════════════════════
 function LedgerHero() {
   return (
-    <div style={{
-      position: 'relative', background: G.heroSky,
-      paddingTop: 18, paddingBottom: 36,
-      borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden',
-    }}>
+    <div style={{ position: 'relative', background: G.heroSky, paddingTop: 18, paddingBottom: 36, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' }}>
       <GlassBubble size={56} top={20} right={-16} opacity={0.20} icon={
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <rect x="4" y="6" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/>
@@ -774,12 +741,7 @@ function LedgerHero() {
           이번 달, 우리 둘<br/>
           <span style={{ color: T.onBlueMute, fontWeight: 500 }}>이렇게 살았어요.</span>
         </div>
-        <div style={{
-          marginTop: 26, padding: '22px 22px 20px', borderRadius: 22,
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-          boxShadow: '0 18px 40px -18px rgba(20,40,80,0.30)',
-        }}>
+        <div style={{ marginTop: 26, padding: '22px 22px 20px', borderRadius: 22, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', boxShadow: '0 18px 40px -18px rgba(20,40,80,0.30)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <MicroLabel>Balance</MicroLabel>
             <span style={{ fontSize: 11, color: T.faint }}>2026.05.01 — 18</span>
@@ -787,17 +749,15 @@ function LedgerHero() {
           <div style={{ marginTop: 12, fontSize: 36, fontWeight: 700, letterSpacing: '-0.04em', color: T.ink, fontVariantNumeric: 'tabular-nums' }}>
             +1,842,300<span style={{ fontSize: 18, fontWeight: 600, color: T.mute, marginLeft: 4 }}>원</span>
           </div>
-          <div style={{ marginTop: 4, fontSize: 11.5, color: T.mute, letterSpacing: '-0.01em' }}>
-            지난달보다 320,400원 더 모았어요
-          </div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: T.mute }}>지난달보다 320,400원 더 모았어요</div>
           <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, color: T.mute, letterSpacing: '0.04em', textTransform: 'uppercase' }}>수입</div>
-              <div style={{ marginTop: 6, fontSize: 19, fontWeight: 700, color: T.accentDeep, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>+5,820,000</div>
+              <div style={{ marginTop: 6, fontSize: 19, fontWeight: 700, color: T.accentDeep, fontVariantNumeric: 'tabular-nums' }}>+5,820,000</div>
             </div>
             <div style={{ borderLeft: '1px solid rgba(120,140,170,0.16)', paddingLeft: 14 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: T.mute, letterSpacing: '0.04em', textTransform: 'uppercase' }}>지출</div>
-              <div style={{ marginTop: 6, fontSize: 19, fontWeight: 700, color: T.expense, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>−3,977,700</div>
+              <div style={{ marginTop: 6, fontSize: 19, fontWeight: 700, color: T.expense, fontVariantNumeric: 'tabular-nums' }}>−3,977,700</div>
             </div>
           </div>
           <div style={{ marginTop: 18, height: 8, borderRadius: 999, background: G.pillIdleOnWhite, overflow: 'hidden' }}>
@@ -815,14 +775,12 @@ function LedgerHero() {
 
 function CategoryRail() {
   const [active, setActive] = React.useState(0);
-  const cats = ['전체', '식비', '주거', '교통', '쇼핑', '문화', '경조사'];
+  const cats = ['전체','식비','주거','교통','쇼핑','문화','경조사'];
   return (
     <div style={{ marginTop: 36 }}>
       <div style={{ padding: '0 28px' }}><MicroLabel>Categories</MicroLabel></div>
       <div style={{ marginTop: 14, display: 'flex', gap: 8, overflowX: 'auto', padding: '4px 28px 8px' }}>
-        {cats.map((c, i) => (
-          <Pill key={i} onWhite active={i === active} size={34} onClick={() => setActive(i)}>{c}</Pill>
-        ))}
+        {cats.map((c, i) => <Pill key={i} onWhite active={i === active} size={34} onClick={() => setActive(i)}>{c}</Pill>)}
       </div>
     </div>
   );
@@ -832,21 +790,15 @@ function LedgerRow({ kind, cat, memo, who, time, amount }) {
   const isIn = kind === 'in';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 4px', borderBottom: '1px solid rgba(120,140,170,0.10)' }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: 12,
-        background: isIn
-          ? 'linear-gradient(135deg, rgba(74,155,224,0.16), rgba(140,200,242,0.10))'
-          : 'linear-gradient(135deg, rgba(217,126,106,0.16), rgba(240,180,162,0.10))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
+      <div style={{ width: 40, height: 40, borderRadius: 12, background: isIn ? 'linear-gradient(135deg, rgba(74,155,224,0.16), rgba(140,200,242,0.10))' : 'linear-gradient(135deg, rgba(217,126,106,0.16), rgba(240,180,162,0.10))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {isIn
           ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke={T.accentDeep} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          : <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M19 12l-7 7-7-7" stroke={T.expense}    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          : <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M19 12l-7 7-7-7" stroke={T.expense} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
         }
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, letterSpacing: '-0.015em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{memo}</div>
-        <div style={{ marginTop: 3, fontSize: 11, color: T.mute, letterSpacing: '-0.005em' }}>{cat} · {who} · {time}</div>
+        <div style={{ marginTop: 3, fontSize: 11, color: T.mute }}>{cat} · {who} · {time}</div>
       </div>
       <div style={{ fontSize: 14, fontWeight: 700, color: isIn ? T.accentDeep : T.expense, letterSpacing: '-0.015em', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
         {isIn ? '+' : '−'}{amount}
@@ -857,27 +809,18 @@ function LedgerRow({ kind, cat, memo, who, time, amount }) {
 
 function LedgerList() {
   const days = [
-    {
-      date: '5월 18일 · 토', day: '−84,200',
-      rows: [
-        { kind: 'out', cat: '식비', memo: '연남동 브런치',   who: '아내', time: '11:20', amount: '48,000' },
-        { kind: 'out', cat: '쇼핑', memo: '리빙숍 무드등',   who: '남편', time: '15:40', amount: '36,200' },
-      ],
-    },
-    {
-      date: '5월 17일 · 금', day: '+2,820,000',
-      rows: [
-        { kind: 'in',  cat: '월급', memo: '5월 급여',        who: '남편', time: '10:00', amount: '2,820,000' },
-        { kind: 'out', cat: '주거', memo: '관리비',          who: '공동', time: '18:10', amount: '128,400' },
-        { kind: 'out', cat: '식비', memo: '장보기 (홈플)',   who: '아내', time: '20:30', amount: '62,800' },
-      ],
-    },
-    {
-      date: '5월 16일 · 목', day: '−42,100',
-      rows: [
-        { kind: 'out', cat: '교통', memo: '주유', who: '남편', time: '08:40', amount: '42,100' },
-      ],
-    },
+    { date: '5월 18일 · 토', day: '−84,200', rows: [
+      { kind:'out', cat:'식비', memo:'연남동 브런치',  who:'아내', time:'11:20', amount:'48,000' },
+      { kind:'out', cat:'쇼핑', memo:'리빙숍 무드등',  who:'남편', time:'15:40', amount:'36,200' },
+    ]},
+    { date: '5월 17일 · 금', day: '+2,820,000', rows: [
+      { kind:'in',  cat:'월급', memo:'5월 급여',       who:'남편', time:'10:00', amount:'2,820,000' },
+      { kind:'out', cat:'주거', memo:'관리비',         who:'공동', time:'18:10', amount:'128,400' },
+      { kind:'out', cat:'식비', memo:'장보기 (홈플)',  who:'아내', time:'20:30', amount:'62,800' },
+    ]},
+    { date: '5월 16일 · 목', day: '−42,100', rows: [
+      { kind:'out', cat:'교통', memo:'주유', who:'남편', time:'08:40', amount:'42,100' },
+    ]},
   ];
   return (
     <div style={{ padding: '32px 26px 200px' }}>
@@ -891,29 +834,12 @@ function LedgerList() {
       {days.map((d, i) => (
         <div key={i} style={{ marginTop: i === 0 ? 0 : 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0 4px 6px' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: T.inkSoft, letterSpacing: '-0.01em' }}>{d.date}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: T.inkSoft }}>{d.date}</span>
             <span style={{ fontSize: 11.5, fontWeight: 600, color: d.day.startsWith('+') ? T.accentDeep : T.expense, fontVariantNumeric: 'tabular-nums' }}>{d.day}</span>
           </div>
           {d.rows.map((r, j) => <LedgerRow key={j} {...r} />)}
         </div>
       ))}
-    </div>
-  );
-}
-
-function AddFab() {
-  return (
-    <div style={{
-      position: 'absolute', right: 26, bottom: 110,
-      width: 60, height: 60, borderRadius: '50%',
-      background: G.pillActiveOnWhite,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 16px 32px -10px rgba(74,155,224,0.55), 0 2px 6px rgba(20,40,80,0.10)',
-      zIndex: 20, cursor: 'pointer',
-    }}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M12 5v14M5 12h14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/>
-      </svg>
     </div>
   );
 }
@@ -926,124 +852,160 @@ function LedgerScreen() {
       </div>
       <CategoryRail />
       <LedgerList />
-      <AddFab />
+      {/* FAB */}
+      <div style={{ position: 'absolute', right: 26, bottom: 110, width: 60, height: 60, borderRadius: '50%', background: G.pillActiveOnWhite, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 16px 32px -10px rgba(74,155,224,0.55)', zIndex: 20, cursor: 'pointer' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/></svg>
+      </div>
     </ScreenShell>
   );
 }
 
 // ═══ 05 · MY ════════════════════════════════════════════════════
-function MyHero() {
-  return (
-    <div style={{
-      position: 'relative', background: G.heroSky,
-      paddingTop: 18, paddingBottom: 56,
-      borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden',
-    }}>
-      <GlassBubble size={48} top={30} right={-12} opacity={0.18} icon={
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
-          <path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-        </svg>
-      }/>
-      <div style={{ padding: '20px 28px 0' }}>
-        <MicroLabel color={T.onBlueFaint}>My Profile · 05</MicroLabel>
-        <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', gap: 18 }}>
-          <CharacterBubble size={84} label={'캐릭터\n만들기'} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.035em', color: T.onBlue, lineHeight: 1.2 }}>닉네임 자리</div>
-            <div style={{ marginTop: 6, fontSize: 12.5, color: T.onBlueMute, letterSpacing: '-0.01em' }}>
-              kakao · 결혼 2년차 · 둘이서 이용중
-            </div>
-          </div>
-        </div>
-        <div style={{
-          marginTop: 26, padding: '16px 18px', borderRadius: 18,
-          background: 'rgba(255,255,255,0.18)',
-          backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-        }}>
-          {[
-            { label: '저장한 영상', value: '24' },
-            { label: '이번달 내역', value: '18' },
-            { label: '함께한 일',   value: '2년 3개월' },
-          ].map((s, i) => (
-            <div key={i} style={{ borderLeft: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.22)', paddingLeft: i === 0 ? 0 : 14, paddingRight: i === 2 ? 0 : 8 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: T.onBlue, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
-              <div style={{ marginTop: 4, fontSize: 10.5, fontWeight: 500, color: T.onBlueMute, letterSpacing: '-0.005em' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MyMenuItem({ icon, title, sub, badge }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 4px', borderBottom: '1px solid rgba(120,140,170,0.10)', cursor: 'pointer' }}>
-      <div style={{ width: 40, height: 40, borderRadius: 12, background: G.pillIdleOnWhite, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.accentDeep }}>
-        {icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, letterSpacing: '-0.015em' }}>{title}</div>
-        {sub && <div style={{ marginTop: 3, fontSize: 11.5, color: T.mute, letterSpacing: '-0.005em' }}>{sub}</div>}
-      </div>
-      {badge && (
-        <span style={{ fontSize: 10.5, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: G.pillIdleOnWhite, color: T.accentDeep, letterSpacing: '-0.005em' }}>
-          {badge}
-        </span>
-      )}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-        <path d="M9 5l7 7-7 7" stroke={T.faint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </div>
-  );
-}
-
 function MyScreen() {
   const nav = useNav();
   return (
     <ScreenShell>
+      {/* Hero */}
       <div style={{ paddingTop: 54, background: T.blueSoft }}>
-        <MyHero />
+        <div style={{ position: 'relative', background: G.heroSky, paddingTop: 18, paddingBottom: 56, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' }}>
+          <GlassBubble size={48} top={30} right={-12} opacity={0.18} icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+          }/>
+          <div style={{ padding: '20px 28px 0' }}>
+            <MicroLabel color={T.onBlueFaint}>My Profile · 05</MicroLabel>
+            <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <CharacterBubble size={84} label={'캐릭터\n만들기'} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.035em', color: T.onBlue, lineHeight: 1.2 }}>닉네임 자리</div>
+                <div style={{ marginTop: 6, fontSize: 12.5, color: T.onBlueMute }}>kakao · 결혼 2년차 · 둘이서 이용중</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 26, padding: '16px 18px', borderRadius: 18, background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+              {[{label:'저장한 영상', value:'24'},{label:'이번달 내역', value:'18'},{label:'함께한 일', value:'2년 3개월'}].map((s,i)=>(
+                <div key={i} style={{ borderLeft: i===0?'none':'1px solid rgba(255,255,255,0.22)', paddingLeft: i===0?0:14, paddingRight: i===2?0:8 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: T.onBlue, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
+                  <div style={{ marginTop: 4, fontSize: 10.5, fontWeight: 500, color: T.onBlueMute }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
+      {/* Menu */}
       <div style={{ padding: '36px 28px 0' }}>
         <MicroLabel>Account</MicroLabel>
         <div style={{ marginTop: 14 }}>
-          <MyMenuItem
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.6"/><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>}
-            title="내 정보" sub="닉네임, 결혼 시기, 알림 설정"
-          />
-          <MyMenuItem
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.5-7 10-7 10z" stroke="currentColor" strokeWidth="1.6"/></svg>}
-            title="저장한 영상" sub="나중에 다시 볼 영상 모음" badge="24"
-          />
-          <MyMenuItem
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" strokeWidth="1.6"/><path d="M8 10h8M8 14h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>}
-            title="가계부 설정" sub="예산, 카테고리, 함께 쓰는 파트너"
-          />
+          {[
+            { icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.6"/><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>, title:'내 정보', sub:'닉네임, 결혼 시기, 알림 설정' },
+            { icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.5-7 10-7 10z" stroke="currentColor" strokeWidth="1.6"/></svg>, title:'저장한 영상', sub:'나중에 다시 볼 영상 모음', badge:'24' },
+            { icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" strokeWidth="1.6"/><path d="M8 10h8M8 14h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>, title:'가계부 설정', sub:'예산, 카테고리, 함께 쓰는 파트너' },
+          ].map((m,i)=>(
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 4px', borderBottom:'1px solid rgba(120,140,170,0.10)', cursor:'pointer' }}>
+              <div style={{ width:40, height:40, borderRadius:12, background:G.pillIdleOnWhite, display:'flex', alignItems:'center', justifyContent:'center', color:T.accentDeep }}>{m.icon}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:14, fontWeight:600, color:T.ink }}>{m.title}</div>
+                {m.sub && <div style={{ marginTop:3, fontSize:11.5, color:T.mute }}>{m.sub}</div>}
+              </div>
+              {m.badge && <span style={{ fontSize:10.5, fontWeight:600, padding:'4px 10px', borderRadius:999, background:G.pillIdleOnWhite, color:T.accentDeep }}>{m.badge}</span>}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={T.faint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          ))}
         </div>
         <div style={{ marginTop: 36 }}>
           <MicroLabel>Support</MicroLabel>
           <div style={{ marginTop: 14 }}>
-            <MyMenuItem
-              icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6"/><path d="M10 9.5a2 2 0 113 1.7c-.6.3-1 .8-1 1.5v.3M12 16.2v.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>}
-              title="도움말 & 문의"
-            />
-            <MyMenuItem
-              icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>}
-              title="약관 및 정책"
-            />
+            {[
+              { icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6"/><path d="M10 9.5a2 2 0 113 1.7c-.6.3-1 .8-1 1.5v.3M12 16.2v.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>, title:'도움말 & 문의' },
+              { icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>, title:'약관 및 정책' },
+            ].map((m,i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 4px', borderBottom:'1px solid rgba(120,140,170,0.10)', cursor:'pointer' }}>
+                <div style={{ width:40, height:40, borderRadius:12, background:G.pillIdleOnWhite, display:'flex', alignItems:'center', justifyContent:'center', color:T.accentDeep }}>{m.icon}</div>
+                <div style={{ flex:1 }}><div style={{ fontSize:14, fontWeight:600, color:T.ink }}>{m.title}</div></div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={T.faint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+            ))}
           </div>
         </div>
         <div style={{ marginTop: 40, marginBottom: 160, textAlign: 'center' }}>
-          <span onClick={() => nav.setLoggedIn(false)} style={{ fontSize: 12, color: T.faint, fontWeight: 500, letterSpacing: '-0.005em', cursor: 'pointer' }}>
-            로그아웃
-          </span>
+          <span onClick={() => nav.setLoggedIn(false)} style={{ fontSize: 12, color: T.faint, fontWeight: 500, cursor: 'pointer' }}>로그아웃</span>
           <div style={{ marginTop: 18, fontSize: 11, color: T.faint, letterSpacing: '0.02em' }}>sinhon.life · v0.1.0</div>
         </div>
       </div>
     </ScreenShell>
+  );
+}
+
+// ═══ 왼쪽 패널 — 폰 목업 + QR ══════════════════════════════════
+function LandingLeft() {
+  const qrRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const tryRender = () => {
+      if (qrRef.current && window.QRCode) {
+        window.QRCode.toCanvas(qrRef.current, 'https://sinhon.life', {
+          width: 148,
+          margin: 2,
+          color: { dark: '#1A2433', light: '#FFFFFF' },
+        }, (err) => { if (err) console.warn('QR:', err); });
+        return true;
+      }
+      return false;
+    };
+    if (!tryRender()) {
+      const t = setInterval(() => { if (tryRender()) clearInterval(t); }, 200);
+      return () => clearInterval(t);
+    }
+  }, []);
+
+  return (
+    <div className="left-panel">
+      {/* 폰 목업 */}
+      <div style={{
+        width: 168, height: 300,
+        background: '#111827',
+        borderRadius: 30,
+        padding: 10,
+        boxShadow: '0 28px 60px rgba(17,24,39,0.40), 0 0 0 1px rgba(255,255,255,0.06)',
+        marginBottom: 36,
+        flexShrink: 0,
+      }}>
+        {/* 다이나믹 아일랜드 */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 22, overflow: 'hidden', background: G.heroSky }}>
+          <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 56, height: 14, borderRadius: 7, background: '#000', zIndex: 10 }} />
+          {/* 앱 미리보기 내용 */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: 8 }}>
+            {/* 캐릭터 버블 */}
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'radial-gradient(circle at 30% 25%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 55%, rgba(255,255,255,0.10) 100%)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 24px -10px rgba(20,40,80,0.35)' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M3 9a3 3 0 013-3h12a3 3 0 013 3v6a3 3 0 01-3 3H6a3 3 0 01-3-3V9z" stroke="rgba(255,255,255,0.85)" strokeWidth="1.4"/>
+                <path d="M8 12h8M8 15h5" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div style={{ color: 'white', fontWeight: 700, fontSize: 15, letterSpacing: '-0.03em', fontFamily: T.font }}>신혼생활</div>
+            <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10, fontWeight: 500, fontFamily: T.font, letterSpacing: '0.02em' }}>sinhon.life</div>
+            <div style={{ marginTop: 4, fontSize: 9, color: 'rgba(255,255,255,0.55)', fontFamily: T.font, textAlign: 'center', lineHeight: 1.5, padding: '0 16px' }}>
+              신혼부부를 위한<br/>영상 아카이브 + 가계부
+            </div>
+          </div>
+          {/* 하단 홈 인디케이터 */}
+          <div style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', width: 52, height: 3, borderRadius: 99, background: 'rgba(255,255,255,0.5)' }} />
+        </div>
+      </div>
+
+      {/* QR 섹션 */}
+      <div style={{ textAlign: 'center', marginBottom: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, letterSpacing: '-0.01em' }}>QR로 바로 열기</div>
+      </div>
+      <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(20,40,80,0.10)', background: '#fff', padding: 8 }}>
+        <canvas ref={qrRef} style={{ display: 'block', borderRadius: 10 }} />
+      </div>
+      <div style={{ marginTop: 12, fontSize: 11.5, color: T.mute, textAlign: 'center', letterSpacing: '-0.005em' }}>
+        카메라로 비추면 PWA가 바로 열려요
+      </div>
+    </div>
   );
 }
 
@@ -1063,32 +1025,23 @@ function App() {
   };
 
   let Screen;
-  if (detail !== null) {
-    Screen = <VideoDetailScreen card={detail} />;
-  } else if (tab === 'home') {
-    Screen = <ArchiveHomeScreen />;
-  } else if (tab === 'search') {
-    Screen = <SearchScreen />;
-  } else if (tab === 'ledger') {
-    Screen = loggedIn ? <LedgerScreen /> : <LedgerGateScreen />;
-  } else {
-    Screen = <MyScreen />;
-  }
+  if (detail !== null)   Screen = <VideoDetailScreen card={detail} />;
+  else if (tab === 'home')   Screen = <ArchiveHomeScreen />;
+  else if (tab === 'search') Screen = <SearchScreen />;
+  else if (tab === 'ledger') Screen = loggedIn ? <LedgerScreen /> : <LedgerGateScreen />;
+  else                       Screen = <MyScreen />;
 
   return (
     <NavCtx.Provider value={nav}>
-      <div style={{
-        position: 'fixed', inset: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#5A9DD8',
-      }}>
-        <div style={{
-          width: '100%', maxWidth: 430,
-          height: '100%', maxHeight: 932,
-          position: 'relative', overflow: 'hidden',
-          boxShadow: '0 0 80px rgba(0,0,0,0.25)',
-        }}>
-          {Screen}
+      <div className="layout">
+        {/* 왼쪽: 폰 목업 + QR (데스크톱만) */}
+        <LandingLeft />
+
+        {/* 오른쪽: 앱 */}
+        <div className="app-panel">
+          <div className="app-viewport">
+            {Screen}
+          </div>
         </div>
       </div>
     </NavCtx.Provider>
