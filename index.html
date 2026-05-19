@@ -53,24 +53,35 @@
 
     /* 데스크톱: 768px+ */
     @media (min-width: 768px) {
-      body { background: #FFFFFF; }
+      body {
+        background:
+          radial-gradient(120% 90% at 30% 40%, rgba(0,0,0,0.045) 0%, rgba(0,0,0,0) 60%),
+          #F5F1EC;
+      }
+
+      .layout {
+        align-items: center;
+        justify-content: center;
+        padding: 24px 32px;
+      }
 
       .left-panel {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         justify-content: center;
-        width: 520px;
-        min-width: 440px;
+        width: 280px;
         flex-shrink: 0;
-        height: 100%;
-        background: #FFFFFF;
-        padding: 40px 48px;
-        gap: 0;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        gap: 22px;
+        margin-right: 24px;
       }
 
       .app-panel {
-        background: #FFFFFF;
+        background: transparent;
+        flex: 0 0 auto;
       }
 
       .app-viewport {
@@ -78,13 +89,16 @@
         max-width: 390px;
         height: min(844px, 92vh);
         border-radius: 0;
-        box-shadow: 0 24px 80px rgba(20,40,80,0.18), 0 2px 8px rgba(20,40,80,0.06);
+        box-shadow:
+          0 1px 2px rgba(20,40,80,0.08),
+          0 22px 44px -22px rgba(20,40,80,0.28),
+          0 40px 72px -32px rgba(20,40,80,0.22);
       }
     }
 
-    /* 큰 화면: 1200px+ 에서 여백 더 */
+    /* 큰 화면: 1200px+ — 약간만 여유 */
     @media (min-width: 1200px) {
-      .left-panel { width: 600px; padding: 48px 64px; }
+      .layout { padding: 32px 48px; }
     }
   </style>
 </head>
@@ -945,9 +959,9 @@ function LandingLeft() {
     const tryRender = () => {
       if (qrRef.current && window.QRCode) {
         window.QRCode.toCanvas(qrRef.current, 'https://sinhon.life', {
-          width: 124,
+          width: 168,
           margin: 1,
-          color: { dark: '#1A2433', light: '#FFFFFF' },
+          color: { dark: '#1F1B16', light: '#FFFFFF' },
         }, (err) => { if (err) console.warn('QR:', err); });
         return true;
       }
@@ -961,48 +975,50 @@ function LandingLeft() {
 
   return (
     <div className="left-panel">
-      {/* 폰 목업 (크게) */}
+      {/* Wedding 포스터 — 메탈릭 베젤 */}
       <div style={{
-        width: 320, height: 'min(640px, 70vh)',
-        background: '#111827',
-        borderRadius: 48,
-        padding: 14,
-        boxShadow: '0 40px 80px rgba(17,24,39,0.35), 0 0 0 1px rgba(255,255,255,0.06)',
-        marginBottom: 32,
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '280 / 388',
+        borderRadius: 14,
+        padding: 3,
+        background: 'linear-gradient(135deg, #F4F5F7 0%, #D6D9DE 14%, #9DA2AB 32%, #7E838D 50%, #ADB1B9 68%, #E2E4E8 86%, #F6F7F9 100%)',
+        boxShadow: '0 1px 2px rgba(20,40,80,0.08), 0 18px 36px -18px rgba(20,40,80,0.28), 0 36px 64px -32px rgba(20,40,80,0.22), inset 0 0 0 0.5px rgba(255,255,255,0.55)',
+        isolation: 'isolate',
         flexShrink: 0,
       }}>
-        {/* 다이나믹 아일랜드 */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 36, overflow: 'hidden', background: G.heroSky }}>
-          <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', width: 96, height: 24, borderRadius: 12, background: '#000', zIndex: 10 }} />
-          {/* 앱 미리보기 내용 */}
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, paddingTop: 12 }}>
-            {/* 캐릭터 버블 */}
-            <div style={{ width: 104, height: 104, borderRadius: '50%', background: 'radial-gradient(circle at 30% 25%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.28) 55%, rgba(255,255,255,0.10) 100%)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 18px 40px -16px rgba(20,40,80,0.45)' }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                <path d="M3 9a3 3 0 013-3h12a3 3 0 013 3v6a3 3 0 01-3 3H6a3 3 0 01-3-3V9z" stroke="rgba(255,255,255,0.9)" strokeWidth="1.4"/>
-                <path d="M8 12h8M8 15h5" stroke="rgba(255,255,255,0.65)" strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div style={{ color: 'white', fontWeight: 700, fontSize: 28, letterSpacing: '-0.03em', fontFamily: T.font }}>신혼생활</div>
-            <div style={{ color: 'rgba(255,255,255,0.68)', fontSize: 14, fontWeight: 500, fontFamily: T.font, letterSpacing: '0.02em' }}>sinhon.life</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: 'rgba(255,255,255,0.62)', fontFamily: T.font, textAlign: 'center', lineHeight: 1.55, padding: '0 28px' }}>
-              신혼부부를 위한<br/>영상 아카이브 + 가계부
-            </div>
-          </div>
-          {/* 하단 홈 인디케이터 */}
-          <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', width: 108, height: 5, borderRadius: 99, background: 'rgba(255,255,255,0.55)' }} />
-        </div>
+        <picture>
+          <source srcSet="assets/poster.webp" type="image/webp" />
+          <img
+            src="assets/poster.jpg"
+            alt="신혼생활 — 함께 준비하는 결혼의 모든 순간"
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', borderRadius: 11 }}
+          />
+        </picture>
       </div>
 
-      {/* QR 섹션 — 텍스트(왼쪽) + QR(오른쪽) 가로 배치 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: T.ink, letterSpacing: '-0.02em', lineHeight: 1.4 }}>
-            QR찍고 앱에서<br/>더 자세히 보기
-          </div>
+      {/* QR 행 — 텍스트(좌) + QR(우) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '0 4px' }}>
+        <div style={{
+          flex: 1,
+          fontSize: 13,
+          fontWeight: 500,
+          color: '#6B6056',
+          letterSpacing: '-0.01em',
+          lineHeight: 1.45,
+        }}>
+          QR 찍고 앱에서<br/>더 자세히 보기
         </div>
-        <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff', padding: 6, flexShrink: 0 }}>
-          <canvas ref={qrRef} style={{ display: 'block', borderRadius: 8 }} />
+        <div style={{
+          width: 96,
+          height: 96,
+          background: '#fff',
+          borderRadius: 6,
+          padding: 6,
+          boxShadow: '0 1px 2px rgba(20,40,80,0.06), 0 6px 18px -10px rgba(20,40,80,0.18)',
+          flexShrink: 0,
+        }}>
+          <canvas ref={qrRef} style={{ display: 'block', width: '100%', height: '100%', borderRadius: 4 }} />
         </div>
       </div>
     </div>
