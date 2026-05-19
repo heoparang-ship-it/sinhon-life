@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#88C0EE">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>신혼생활 · sinhon.life</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
@@ -106,6 +109,29 @@
       로딩 중…
     </div>
   </div>
+
+  <script>
+  // Old CloudFront PWA installed a Service Worker on visitors' browsers that
+  // still serves stale cached HTML. Detect, kill it, clear caches, reload.
+  (function () {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      if (!regs.length) return;
+      var work = regs.map(function (r) { return r.unregister(); });
+      if (window.caches) {
+        work.push(caches.keys().then(function (keys) {
+          return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        }));
+      }
+      Promise.all(work).then(function () {
+        if (!sessionStorage.getItem('__sw_killed')) {
+          sessionStorage.setItem('__sw_killed', '1');
+          location.reload();
+        }
+      });
+    }).catch(function () {});
+  })();
+  </script>
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
