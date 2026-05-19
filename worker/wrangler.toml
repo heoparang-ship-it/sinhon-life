@@ -1,0 +1,51 @@
+# ============================================================
+# sinhon-life-api — Cloudflare Worker 설정
+# ============================================================
+# 셋업 순서는 worker/README.md 참고.
+# 처음 배포 전 반드시 아래 두 가지를 채워야 한다:
+#   1) D1 DB id : `wrangler d1 create sinhon-life-media` 출력값
+#   2) Secret   : `wrangler secret put IG_ACCESS_TOKEN`, `IG_USER_ID`
+# ============================================================
+
+name = "sinhon-life-api"
+main = "src/index.ts"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
+
+# Cron Trigger
+#   첫 번째: 10분마다 인스타 폴링 (스펙 요구사항)
+#   두 번째: 매주 일요일 03:00 UTC (KST 정오) Long-Lived Token 자동 갱신
+[triggers]
+crons = ["*/10 * * * *"]
+
+# D1 데이터베이스 — wrangler d1 create sinhon-life-media 실행 후
+# 출력된 database_id 를 아래에 채워 넣을 것.
+[[d1_databases]]
+binding = "DB"
+database_name = "sinhon-life-media"
+database_id = "df3992ea-550c-4fc4-95db-2c80ceb65530"
+
+# 공개 변수 (비밀 아님)
+[vars]
+ALLOWED_ORIGIN = "https://sinhon.life"
+INSTAGRAM_GRAPH_VERSION = "v21.0"
+POLL_LIMIT = "25"
+
+# 시크릿 (절대 wrangler.toml 에 적지 말 것)
+# wrangler secret put IG_ACCESS_TOKEN   # Long-Lived User Access Token (60일)
+# wrangler secret put IG_USER_ID        # 비즈/크리에이터 계정의 Instagram User ID
+
+# 개발용 별도 환경 (선택)
+[env.dev]
+name = "sinhon-life-api-dev"
+[env.dev.vars]
+ALLOWED_ORIGIN = "*"
+INSTAGRAM_GRAPH_VERSION = "v21.0"
+POLL_LIMIT = "25"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "sinhon-life-media-dev"
+database_id = "REPLACE_WITH_DEV_D1_DATABASE_ID"
