@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#88C0EE">
+  <title>아카이브 · 신혼생활</title>
+  <meta name="description" content="신혼생활 인스타그램에 올라온 영상·콘텐츠 모음.">
+  <link rel="canonical" href="https://sinhon.life/archive">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#6FB1EA; --ink:#1A2433; --twilight:#4A5568; --smoke:#A0AEC0;
+      --coral:#F97066; --coral-deep:#C8453D; --peach:#FFF0E8;
+      --paper:#FDF8F1; --surface:#FFFFFF; --line:#E6ECF2;
+    }
+    html,body{min-height:100%}
+    body{
+      font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      background:var(--bg); color:var(--ink); line-height:1.5;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .wrap{max-width:760px;margin:0 auto;padding:24px 16px 80px;background:var(--paper);min-height:100vh}
+    @media(min-width:760px){.wrap{margin-top:24px;border-radius:24px;padding:32px 28px}}
+    header{padding:8px 4px 20px}
+    .eyebrow{font-size:12px;font-weight:600;color:var(--twilight);letter-spacing:.02em}
+    h1{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.01em}
+    .sub{font-size:13px;color:var(--twilight);margin-top:4px}
+    .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--twilight);text-decoration:none;margin-bottom:8px}
+    .back:hover{color:var(--ink)}
+    .tags{display:flex;gap:8px;overflow-x:auto;margin:0 -4px 20px;padding:0 4px 6px;scrollbar-width:none}
+    .tags::-webkit-scrollbar{display:none}
+    .pill{flex-shrink:0;padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;border:0;cursor:pointer;background:#F4F6F9;color:var(--ink);white-space:nowrap;transition:all .15s}
+    .pill.active{background:var(--coral);color:#fff}
+    .pill .count{margin-left:6px;opacity:.7;font-size:10px;font-weight:500}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}}
+    .card{display:block;border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:inherit;transition:transform .15s}
+    .card:active{transform:scale(.98)}
+    .thumb{position:relative;aspect-ratio:3/4;background:#EAF6FF;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);pointer-events:none}
+    .thumb .play .dot{width:44px;height:44px;border-radius:50%;background:var(--coral);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+    .thumb .play svg{margin-left:3px;fill:#fff}
+    .meta{padding:10px 12px 12px}
+    .caption{font-size:13px;font-weight:600;line-height:1.35;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .hashtags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+    .hashtag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--peach);color:var(--coral-deep)}
+    .state{padding:60px 24px;text-align:center}
+    .state .icon{width:56px;height:56px;border-radius:50%;background:#EAF6FF;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .state .icon svg{color:#2196F3}
+    .state h2{font-size:15px;font-weight:700;color:var(--ink)}
+    .state p{font-size:13px;color:var(--twilight);margin-top:4px}
+    .state.err .icon{background:var(--peach)}
+    .state.err .icon svg{color:var(--coral-deep)}
+    .skeleton{aspect-ratio:3/4;background:#EEF1F4;border-radius:16px;animation:pulse 1.4s infinite}
+    @keyframes pulse{50%{opacity:.6}}
+    .footer{margin-top:24px;text-align:center;font-size:11px;color:var(--twilight)}
+    .footer a{color:var(--twilight);text-decoration:underline}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a href="/" class="back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      sinhon.life
+    </a>
+    <header>
+      <div class="eyebrow">@sinhon.life</div>
+      <h1>아카이브</h1>
+      <p class="sub">인스타에 올라온 신혼 콘텐츠를 한 곳에서.</p>
+    </header>
+
+    <div id="tags" class="tags" hidden></div>
+    <div id="state" class="state">
+      <div class="grid" id="loading-grid">
+        <div class="skeleton"></div><div class="skeleton"></div>
+        <div class="skeleton"></div><div class="skeleton"></div>
+        <div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+    </div>
+    <div id="grid" class="grid" hidden></div>
+
+    <div class="footer">
+      게시물 © @sinhon.life · 10분마다 동기화 · <a href="https://github.com/heoparang-ship-it/sinhon-life" target="_blank" rel="noopener">github</a>
+    </div>
+  </main>
+
+  <script>
+  (function(){
+    var API='https://sinhon-life-api.999pr.workers.dev';
+    var state={tag:null,items:[],tags:[],err:null,loading:true};
+
+    function el(tag,attrs,kids){
+      var e=document.createElement(tag);
+      if(attrs)for(var k in attrs){if(k==='cls')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
+      if(kids)for(var i=0;i<kids.length;i++){var c=kids[i];e.appendChild(typeof c==='string'?document.createTextNode(c):c);}
+      return e;
+    }
+
+    function renderTags(){
+      var box=document.getElementById('tags');
+      box.innerHTML='';
+      if(!state.tags.length){box.hidden=true;return;}
+      box.hidden=false;
+      var all=el('button',{cls:'pill'+(state.tag===null?' active':'')},['전체']);
+      all.onclick=function(){state.tag=null;load();};
+      box.appendChild(all);
+      state.tags.forEach(function(t){
+        var p=el('button',{cls:'pill'+(state.tag===t.tag?' active':'')});
+        p.textContent='#'+t.tag;
+        var c=el('span',{cls:'count'});
+        c.textContent=t.count;
+        p.appendChild(c);
+        p.onclick=function(){state.tag=t.tag;load();};
+        box.appendChild(p);
+      });
+    }
+
+    function escape(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+    function renderItems(){
+      var g=document.getElementById('grid');
+      var s=document.getElementById('state');
+      g.innerHTML='';
+      if(state.loading){s.hidden=false;g.hidden=true;return;}
+      if(state.err){
+        s.hidden=false;g.hidden=true;
+        s.className='state err';
+        s.innerHTML='<div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h2>아카이브를 불러오지 못했어요</h2><p style="font-family:monospace;font-size:11px;word-break:break-all;margin-top:8px">'+escape(state.err)+'</p>';
+        return;
+      }
+      if(!state.items.length){
+        s.hidden=false;g.hidden=true;
+        s.className='state';
+        s.innerHTML='<div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><h2>'+(state.tag?'#'+escape(state.tag)+' 게시물이 없어요':'아직 올라온 게시물이 없어요')+'</h2><p>@sinhon.life 에 새 게시물이 올라오면 10분 안에 여기에 동기화돼요.</p>';
+        return;
+      }
+      s.hidden=true;g.hidden=false;
+      state.items.forEach(function(it){
+        var isVideo=it.media_type==='VIDEO'||it.media_type==='REELS';
+        var cover=it.thumbnail_url||it.media_url;
+        var caption=(it.caption||'').replace(/\s+/g,' ').trim();
+        var card=el('a',{cls:'card',href:it.permalink,target:'_blank',rel:'noopener'});
+        var thumb=el('div',{cls:'thumb'});
+        if(cover){
+          var img=el('img',{src:cover,loading:'lazy',alt:caption.slice(0,40)||'sinhon.life 아카이브'});
+          img.onerror=function(){this.style.display='none';};
+          thumb.appendChild(img);
+        }
+        if(isVideo){
+          var play=el('div',{cls:'play'});
+          play.innerHTML='<div class="dot"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
+          thumb.appendChild(play);
+        }
+        var meta=el('div',{cls:'meta'});
+        var cap=el('p',{cls:'caption'});
+        cap.textContent=caption||'@sinhon.life';
+        meta.appendChild(cap);
+        if(it.tags&&it.tags.length){
+          var hs=el('div',{cls:'hashtags'});
+          it.tags.slice(0,3).forEach(function(t){
+            var h=el('span',{cls:'hashtag'});
+            h.textContent='#'+t;
+            hs.appendChild(h);
+          });
+          meta.appendChild(hs);
+        }
+        card.appendChild(thumb);
+        card.appendChild(meta);
+        g.appendChild(card);
+      });
+    }
+
+    function load(){
+      state.loading=true;state.err=null;renderTags();renderItems();
+      var url=API+'/api/media?limit=24'+(state.tag?'&tag='+encodeURIComponent(state.tag):'');
+      fetch(url).then(function(r){
+        if(!r.ok)throw new Error('API '+r.status+' '+r.statusText);
+        return r.json();
+      }).then(function(d){
+        state.items=d.items||[];state.loading=false;renderItems();
+      }).catch(function(e){
+        state.err=e.message;state.loading=false;renderItems();
+      });
+      // tags 도 같이
+      fetch(API+'/api/tags').then(function(r){return r.json();}).then(function(d){
+        state.tags=d.tags||[];renderTags();
+      }).catch(function(){/* ignore */});
+    }
+
+    // 초기 로드 + URL ?tag= 파라미터 지원
+    var urlTag=new URLSearchParams(location.search).get('tag');
+    if(urlTag)state.tag=urlTag;
+    load();
+  })();
+  </script>
+</body>
+</html>
