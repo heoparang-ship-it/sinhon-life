@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-node_modules/
-=======
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
@@ -50,4 +47,6 @@ worker/node_modules/
 worker/.wrangler/
 worker/*.bak
 src/lib/instagram/*.bak
->>>>>>> 34353a1 (feat(archive): Instagram → sinhon.life 미러링 (Cloudflare Worker + D1))
+
+# Claude Code worktrees (added 2026-05-20)
+.claude/
