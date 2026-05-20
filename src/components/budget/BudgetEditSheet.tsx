@@ -13,7 +13,7 @@ export function BudgetEditSheet({
   focusCategoryId,
 }: {
   onClose: () => void;
-  onSave: (b: BudgetMap) => void;
+  onSave: (b: BudgetMap) => void | Promise<void>;
   initialBudgets: BudgetMap | null;
   isFirstSetup: boolean;
   focusCategoryId?: string;

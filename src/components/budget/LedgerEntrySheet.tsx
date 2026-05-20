@@ -18,8 +18,8 @@ export function LedgerEntrySheet({
   initial,
 }: {
   onClose: () => void;
-  onSave: (entry: LedgerEntry) => void;
-  onDelete: (id: string) => void;
+  onSave: (entry: LedgerEntry) => void | Promise<void>;
+  onDelete: (id: string) => void | Promise<void>;
   initial: LedgerEntry | null;
 }) {
   const editing = !!initial;

@@ -9,8 +9,14 @@ import {
   type ChecklistGroup,
   type ChecklistItem,
 } from "@/lib/checklist/seed";
+import { fetchRemoteDoneMap, pushChecklistItem } from "@/lib/checklist/sync";
+import { useSession } from "@/lib/supabase/useSession";
 
 export function ChecklistScreen() {
+  const session = useSession();
+  const userId = session.user?.id ?? null;
+  const isAuthed = session.status === "authenticated";
+
   const [mounted, setMounted] = useState(false);
   const [doneMap, setDoneMap] = useState<Record<string, boolean>>({});
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -24,6 +30,18 @@ export function ChecklistScreen() {
     if (mounted) writeDoneMap(doneMap);
   }, [doneMap, mounted]);
 
+  // 로그인 시 원격 데이터로 덮어쓰기
+  useEffect(() => {
+    if (!isAuthed || !userId) return;
+    let cancelled = false;
+    fetchRemoteDoneMap(userId).then((remote) => {
+      if (!cancelled && remote) setDoneMap(remote);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthed, userId]);
+
   const stats = useMemo(() => {
     const total = CHECKLIST_SEED.reduce((sum, g) => sum + g.items.length, 0);
     const done = CHECKLIST_SEED.reduce(
@@ -33,7 +51,15 @@ export function ChecklistScreen() {
     return { total, done, rate: total ? Math.round((done / total) * 100) : 0 };
   }, [doneMap]);
 
-  const toggle = (id: string) => setDoneMap((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggle = (id: string) => {
+    setDoneMap((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (isAuthed && userId) {
+        void pushChecklistItem(userId, id, next[id]);
+      }
+      return next;
+    });
+  };
   const toggleGroup = (id: string) => setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
 
   if (!mounted) {

@@ -8,12 +8,24 @@ import { LedgerEntrySheet } from "./LedgerEntrySheet";
 import { LedgerList } from "./LedgerList";
 import { loadBudgets, loadEntries, saveBudgets, saveEntries } from "@/lib/budget/storage";
 import { summarizeLedger } from "@/lib/budget/summary";
+import {
+  deleteEntryRemote,
+  fetchRemoteBudgets,
+  fetchRemoteEntries,
+  pushBudgetsRemote,
+  pushEntryRemote,
+} from "@/lib/budget/sync";
 import type { BudgetMap, LedgerEntry } from "@/lib/budget/types";
+import { useSession } from "@/lib/supabase/useSession";
 
 type EntrySheetState = { initial: LedgerEntry | null } | null;
 type BudgetSheetState = { firstSetup: boolean; focusCategoryId?: string } | null;
 
 export function BudgetScreen() {
+  const session = useSession();
+  const userId = session.user?.id ?? null;
+  const isAuthed = session.status === "authenticated";
+
   const [mounted, setMounted] = useState(false);
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [budgets, setBudgets] = useState<BudgetMap | null>(null);
@@ -21,7 +33,7 @@ export function BudgetScreen() {
   const [entrySheet, setEntrySheet] = useState<EntrySheetState>(null);
   const [budgetSheet, setBudgetSheet] = useState<BudgetSheetState>(null);
 
-  // SSR-safe localStorage 로딩
+  // 초기 로딩: 로컬에서 먼저 채우고 mounted 표시
   useEffect(() => {
     const loadedEntries = loadEntries();
     const loadedBudgets = loadBudgets();
@@ -33,6 +45,28 @@ export function BudgetScreen() {
     }
   }, []);
 
+  // 로그인 후: 원격 데이터로 덮어쓰기 (last-write-wins)
+  useEffect(() => {
+    if (!isAuthed || !userId) return;
+    let cancelled = false;
+    (async () => {
+      const [remoteEntries, remoteBudgets] = await Promise.all([
+        fetchRemoteEntries(userId),
+        fetchRemoteBudgets(userId),
+      ]);
+      if (cancelled) return;
+      if (remoteEntries) setEntries(remoteEntries);
+      if (remoteBudgets) {
+        setBudgets(remoteBudgets);
+        setBudgetSheet(null); // 원격에 예산 있으면 첫 셋업 시트 닫기
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthed, userId]);
+
+  // 변경 시 로컬에 저장
   useEffect(() => {
     if (mounted) saveEntries(entries);
   }, [entries, mounted]);
@@ -43,26 +77,35 @@ export function BudgetScreen() {
 
   const summary = summarizeLedger(entries, budgets);
 
-  const upsertEntry = (entry: LedgerEntry) => {
+  const upsertEntry = async (entry: LedgerEntry) => {
+    let finalEntry = entry;
+    if (isAuthed && userId) {
+      const pushed = await pushEntryRemote(userId, entry);
+      if (pushed) finalEntry = pushed;
+    }
     setEntries((prev) => {
-      const idx = prev.findIndex((e) => e.id === entry.id);
+      const idx = prev.findIndex((e) => e.id === entry.id || e.id === finalEntry.id);
       if (idx >= 0) {
         const next = prev.slice();
-        next[idx] = entry;
+        next[idx] = finalEntry;
         return next;
       }
-      return [entry, ...prev];
+      return [finalEntry, ...prev];
     });
   };
 
-  const deleteEntry = (id: string) => {
+  const deleteEntry = async (id: string) => {
+    if (isAuthed && userId) await deleteEntryRemote(userId, id);
     setEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
+  const saveBudgetsCombined = async (next: BudgetMap) => {
+    setBudgets(next);
+    if (isAuthed && userId) await pushBudgetsRemote(userId, next);
+  };
+
   if (!mounted) {
-    return (
-      <div className="pt-16 px-6 text-mute text-sm">불러오는 중…</div>
-    );
+    return <div className="pt-16 px-6 text-mute text-sm">불러오는 중…</div>;
   }
 
   return (
@@ -97,7 +140,7 @@ export function BudgetScreen() {
         <div className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
           <BudgetEditSheet
             onClose={() => setBudgetSheet(null)}
-            onSave={setBudgets}
+            onSave={saveBudgetsCombined}
             initialBudgets={budgets}
             isFirstSetup={budgetSheet.firstSetup}
             focusCategoryId={budgetSheet.focusCategoryId}
