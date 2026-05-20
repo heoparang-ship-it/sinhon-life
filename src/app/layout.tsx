@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { BottomNav } from "@/components/ui/BottomNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,7 +30,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-white text-ink flex flex-col">
-        {children}
+        <div className="flex-1 max-w-[480px] mx-auto w-full relative">
+          {children}
+          <BottomNav />
+        </div>
       </body>
     </html>
   );

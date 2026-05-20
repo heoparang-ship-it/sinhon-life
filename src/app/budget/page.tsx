@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function BudgetPage() {
-  return (
-    <main className="flex-1 max-w-[480px] mx-auto w-full min-h-[100dvh] bg-white">
-      <BudgetScreen />
-    </main>
-  );
+  return <BudgetScreen />;
 }

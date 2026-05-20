@@ -66,41 +66,43 @@ export function BudgetScreen() {
   }
 
   return (
-    <div className="relative w-full h-full bg-white overflow-hidden">
-      <div className="absolute inset-0 overflow-y-auto">
-        <div className="pt-[54px] bg-surface">
-          <BudgetHero summary={summary} />
-        </div>
-        <CategoryRail activeCategory={activeCategory} onSelect={setActiveCategory} />
-        <CategoryBudgetCard
-          summary={summary}
-          activeCategory={activeCategory}
-          onEditAll={() => setBudgetSheet({ firstSetup: false })}
-          onEditOne={(id) => setBudgetSheet({ firstSetup: false, focusCategoryId: id })}
-        />
-        <LedgerList
-          entries={entries}
-          activeCategory={activeCategory}
-          onAddClick={() => setEntrySheet({ initial: null })}
-          onEntryClick={(entry) => setEntrySheet({ initial: entry })}
-        />
+    <div className="relative bg-white min-h-[100dvh]">
+      <div className="pt-[18px] bg-surface">
+        <BudgetHero summary={summary} />
       </div>
+      <CategoryRail activeCategory={activeCategory} onSelect={setActiveCategory} />
+      <CategoryBudgetCard
+        summary={summary}
+        activeCategory={activeCategory}
+        onEditAll={() => setBudgetSheet({ firstSetup: false })}
+        onEditOne={(id) => setBudgetSheet({ firstSetup: false, focusCategoryId: id })}
+      />
+      <LedgerList
+        entries={entries}
+        activeCategory={activeCategory}
+        onAddClick={() => setEntrySheet({ initial: null })}
+        onEntryClick={(entry) => setEntrySheet({ initial: entry })}
+      />
       {entrySheet && (
-        <LedgerEntrySheet
-          onClose={() => setEntrySheet(null)}
-          onSave={upsertEntry}
-          onDelete={deleteEntry}
-          initial={entrySheet.initial}
-        />
+        <div className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
+          <LedgerEntrySheet
+            onClose={() => setEntrySheet(null)}
+            onSave={upsertEntry}
+            onDelete={deleteEntry}
+            initial={entrySheet.initial}
+          />
+        </div>
       )}
       {!entrySheet && budgetSheet && (
-        <BudgetEditSheet
-          onClose={() => setBudgetSheet(null)}
-          onSave={setBudgets}
-          initialBudgets={budgets}
-          isFirstSetup={budgetSheet.firstSetup}
-          focusCategoryId={budgetSheet.focusCategoryId}
-        />
+        <div className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
+          <BudgetEditSheet
+            onClose={() => setBudgetSheet(null)}
+            onSave={setBudgets}
+            initialBudgets={budgets}
+            isFirstSetup={budgetSheet.firstSetup}
+            focusCategoryId={budgetSheet.focusCategoryId}
+          />
+        </div>
       )}
     </div>
   );
