@@ -53,10 +53,14 @@ export async function fetchMyMedia(opts: {
   url.searchParams.set("limit", String(opts.limit));
   url.searchParams.set("access_token", opts.accessToken);
 
+  // Cloudflare Workers fetch — Meta 가 CF-* 헤더에 민감해서 cf 옵션으로 최소화
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: { "Accept": "application/json" },
-  });
+    headers: {
+      "Accept": "application/json",
+      "User-Agent": "facebookexternalua",
+    },
+  } as RequestInit);
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`IG /media ${res.status}: ${text.slice(0, 400)}`);
@@ -87,7 +91,10 @@ export async function refreshLongLivedToken(opts: {
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: { "Accept": "application/json" },
+    headers: {
+      "Accept": "application/json",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    },
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");

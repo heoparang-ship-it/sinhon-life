@@ -1,0 +1,34 @@
+name: Instagram → D1 폴링
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # 매 10분
+  workflow_dispatch:           # 수동 실행 지원
+
+permissions:
+  contents: read
+
+# 동시 실행 방지 (이전 폴링이 안 끝났으면 새 거는 스킵)
+concurrency:
+  group: ig-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run polling script
+        env:
+          IG_APP_ID: "1342464554055798"
+          IG_APP_SECRET: ${{ secrets.IG_APP_SECRET }}
+          IG_USER_ID: "17841438349918112"
+          IG_LONG_LIVED_TOKEN: ${{ secrets.IG_LONG_LIVED_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "644f1eac9372926f59604b1203134142"
+          D1_DATABASE_ID: "df3992ea-550c-4fc4-95db-2c80ceb65530"
+        run: node scripts/ig-poll.mjs
