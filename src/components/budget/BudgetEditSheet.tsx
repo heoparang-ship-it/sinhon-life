@@ -51,9 +51,9 @@ export function BudgetEditSheet({
     <div className="absolute inset-0 z-[60]">
       <div
         onClick={isFirstSetup ? undefined : onClose}
-        className="absolute inset-0 bg-[rgba(20,40,80,0.04)]"
+        className="absolute inset-0"
       />
-      <div className="absolute left-3.5 right-3.5 top-10 bottom-[18px] rounded-[26px] bg-white border border-hairline shadow-[0_24px_60px_-20px_rgba(20,40,80,0.18)] p-[18px] pb-[22px] flex flex-col">
+      <div className="absolute left-3.5 right-3.5 top-10 bottom-[18px] rounded-[26px] bg-white border border-hairline p-[18px] pb-[22px] flex flex-col">
         <div className="flex items-center justify-between">
           <div>
             <MicroLabel>{isFirstSetup ? "Setup Budget" : "Edit Budget"}</MicroLabel>
