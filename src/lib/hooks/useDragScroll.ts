@@ -1,15 +1,17 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 /**
- * PC 마우스로 가로 컨테이너를 클릭-드래그 스크롤할 수 있게 한다.
- * 터치 디바이스는 native 스크롤이 이미 동작하므로 영향 없음.
+ * PC 마우스로 가로 컨테이너를 클릭-드래그 스크롤하게 한다.
+ * 콜백 ref 사용 — 요소가 늦게 마운트돼도 안전하게 리스너 연결.
  */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
-  const ref = useRef<T | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    const el = ref.current;
+  return useCallback((el: T | null) => {
+    // 이전 요소 정리
+    cleanupRef.current?.();
+    cleanupRef.current = null;
     if (!el) return;
 
     let isDown = false;
@@ -19,7 +21,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
-      // 텍스트 선택 + 이미지 ghost 드래그 방지하면서 mousemove는 그대로 받음
       if ((e.target as HTMLElement).tagName === "IMG") {
         e.preventDefault();
       }
@@ -51,7 +52,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     const onDragStart = (e: DragEvent) => e.preventDefault();
 
-    // 자식 img/a 의 기본 드래그도 막기
     el.querySelectorAll("img, a").forEach((node) => {
       (node as HTMLElement).setAttribute("draggable", "false");
     });
@@ -64,15 +64,14 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     el.addEventListener("mouseleave", stop);
     el.addEventListener("click", onClickCapture, true);
 
-    return () => {
+    cleanupRef.current = () => {
       el.removeEventListener("mousedown", onMouseDown);
       el.removeEventListener("dragstart", onDragStart);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", stop);
       el.removeEventListener("mouseleave", stop);
       el.removeEventListener("click", onClickCapture, true);
+      el.style.cursor = "";
     };
   }, []);
-
-  return ref;
 }
