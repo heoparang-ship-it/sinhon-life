@@ -69,10 +69,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-white text-ink lg:h-screen lg:overflow-hidden">
-        <div className="w-full flex justify-center lg:items-start lg:gap-12 lg:px-8 lg:py-12 lg:h-screen">
+        <div className="w-full flex justify-center lg:items-center lg:gap-16 lg:px-8 lg:py-12 lg:h-screen">
           <LandingLeft />
           <div className="flex-1 max-w-[480px] w-full relative lg:h-full lg:rounded-[32px] lg:shadow-[0_30px_60px_-32px_rgba(20,40,80,0.25)] lg:border lg:border-hairline lg:bg-white lg:overflow-hidden">
-            <div className="lg:absolute lg:inset-0 lg:overflow-y-auto">
+            <div className="lg:absolute lg:inset-0 lg:overflow-y-auto scrollbar-hide">
               {children}
             </div>
             <BottomNav />
