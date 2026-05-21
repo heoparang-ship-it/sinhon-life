@@ -93,3 +93,18 @@ input, select, textarea, button {
     font-size: 16px;
   }
 }
+
+/* ═══ 아카이브 스켈레톤 펄스 ════════════════════════════════════ */
+@keyframes archivePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ═══ 가로 스크롤 영역 스크롤바 숨김 ═══════════════════════════ */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

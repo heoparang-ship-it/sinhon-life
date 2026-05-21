@@ -20,6 +20,7 @@ function LoginForm() {
         provider: "kakao",
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/my`,
+          scopes: "profile_nickname profile_image",
         },
       });
       if (error) throw error;

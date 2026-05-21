@@ -14,7 +14,7 @@ const iconColor = (active: boolean) => (active ? "#1A2433" : "rgba(26,36,51,0.36
 const TABS: Tab[] = [
   {
     href: "/",
-    label: "홈",
+    label: "아카이브",
     icon: (a) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path
@@ -27,12 +27,12 @@ const TABS: Tab[] = [
     ),
   },
   {
-    href: "/archive",
-    label: "아카이브",
+    href: "/search",
+    label: "검색",
     icon: (a) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="5" width="16" height="14" rx="2.5" stroke={iconColor(a)} strokeWidth={sw} />
-        <path d="M8 9h8M8 13h6" stroke={iconColor(a)} strokeWidth={sw} strokeLinecap="round" />
+        <circle cx="11" cy="11" r="6.5" stroke={iconColor(a)} strokeWidth={sw} />
+        <path d="M16 16l4 4" stroke={iconColor(a)} strokeWidth={sw} strokeLinecap="round" />
       </svg>
     ),
   },
