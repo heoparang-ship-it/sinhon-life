@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { LandingLeft } from "@/components/legacy/LandingLeft";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -68,9 +69,12 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-white text-ink flex flex-col">
-        <div className="flex-1 max-w-[480px] mx-auto w-full relative">
-          {children}
-          <BottomNav />
+        <div className="flex-1 w-full flex justify-center lg:gap-12 lg:px-8 lg:py-12">
+          <LandingLeft />
+          <div className="flex-1 max-w-[480px] w-full relative">
+            {children}
+            <BottomNav />
+          </div>
         </div>
       </body>
     </html>
