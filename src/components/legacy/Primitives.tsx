@@ -198,6 +198,7 @@ export function VideoThumb({
           alt={label}
           loading="lazy"
           referrerPolicy="no-referrer"
+          draggable={false}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
@@ -208,7 +209,8 @@ export function VideoThumb({
             height: "100%",
             objectFit: "cover",
             display: "block",
-          }}
+            WebkitUserDrag: "none",
+          } as CSSProperties}
         />
       )}
       {!imageUrl && (
