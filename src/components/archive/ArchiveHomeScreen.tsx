@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ARCHIVE_API, T, G } from "@/lib/design/tokens";
+import { useDragScroll } from "@/lib/hooks/useDragScroll";
 import {
   MicroLabel,
   Pill,
@@ -226,6 +227,7 @@ function ArchiveGrid({
   activeTag: string | null;
   error: string | null;
 }) {
+  const carouselRef = useDragScroll<HTMLDivElement>();
   const all = items || [];
   const filtered = activeTag
     ? all.filter((it) => (it.tags || []).includes(activeTag))
@@ -412,6 +414,7 @@ function ArchiveGrid({
 
       {!error && total > 0 && isCarousel && (
         <div
+          ref={carouselRef}
           style={{
             display: "flex",
             gap: 16,
@@ -421,6 +424,8 @@ function ArchiveGrid({
             margin: "0 -22px",
             paddingLeft: 22,
             paddingRight: 22,
+            userSelect: "none",
+            WebkitUserSelect: "none",
           }}
           className="scrollbar-hide"
         >
