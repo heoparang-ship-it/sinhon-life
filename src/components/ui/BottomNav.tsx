@@ -67,7 +67,7 @@ export function BottomNav() {
   const pathname = usePathname() || "/";
   return (
     <nav
-      className="fixed left-3.5 right-3.5 bottom-6 max-w-[452px] mx-auto bg-white rounded-[26px] px-2 py-3 z-30 shadow-[0_18px_40px_-14px_rgba(20,40,80,0.22),0_2px_6px_rgba(20,40,80,0.05)]"
+      className="fixed left-3.5 right-3.5 bottom-6 max-w-[452px] mx-auto bg-white rounded-[26px] px-2 py-3 z-30 shadow-[0_18px_40px_-14px_rgba(20,40,80,0.22),0_2px_6px_rgba(20,40,80,0.05)] lg:absolute lg:left-3.5 lg:right-3.5 lg:bottom-6 lg:max-w-none lg:mx-0"
       style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}
     >
       <div className="grid grid-cols-4">
