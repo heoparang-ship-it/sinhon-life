@@ -19,7 +19,10 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
-      e.preventDefault();
+      // 텍스트 선택 + 이미지 ghost 드래그 방지하면서 mousemove는 그대로 받음
+      if ((e.target as HTMLElement).tagName === "IMG") {
+        e.preventDefault();
+      }
       isDown = true;
       moved = false;
       startX = e.clientX;
