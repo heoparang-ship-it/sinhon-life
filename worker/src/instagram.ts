@@ -37,7 +37,7 @@ const FIELDS = [
 ].join(",");
 
 function ensureFullUrl(graphVersion: string, path: string): string {
-  return `https://graph.instagram.com/${graphVersion}${path}`;
+  return `https://graph.facebook.com/${graphVersion}${path}`;
 }
 
 export async function fetchMyMedia(opts: {
