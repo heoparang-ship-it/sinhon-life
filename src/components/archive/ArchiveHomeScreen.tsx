@@ -419,13 +419,13 @@ function ArchiveGrid({
             display: "flex",
             gap: 16,
             overflowX: "auto",
-            scrollSnapType: "x mandatory",
             padding: "0 0 4px",
             margin: "0 -22px",
             paddingLeft: 22,
             paddingRight: 22,
             userSelect: "none",
             WebkitUserSelect: "none",
+            scrollBehavior: "auto",
           }}
           className="scrollbar-hide"
         >
@@ -434,7 +434,6 @@ function ArchiveGrid({
               key={it.id}
               style={{
                 flex: "0 0 calc(50% - 8px)",
-                scrollSnapAlign: "start",
                 minWidth: 0,
               }}
             >
