@@ -29,7 +29,7 @@ database_id = "df3992ea-550c-4fc4-95db-2c80ceb65530"
 
 # 공개 변수 (비밀 아님)
 [vars]
-ALLOWED_ORIGIN = "https://sinhon.life"
+ALLOWED_ORIGIN = "*"
 INSTAGRAM_GRAPH_VERSION = "v21.0"
 POLL_LIMIT = "25"
 

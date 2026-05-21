@@ -44,8 +44,15 @@ export interface Env {
 // HTTP helpers
 // ─────────────────────────────────────────────────────────────
 
-function corsHeaders(env: Env, extra: HeadersInit = {}): HeadersInit {
-  const origin = env.ALLOWED_ORIGIN || "*";
+function corsHeaders(env: Env, extra: HeadersInit = {}, request?: Request): HeadersInit {
+  const allowList = (env.ALLOWED_ORIGIN || "*").split(",").map((s) => s.trim());
+  const reqOrigin = request?.headers.get("Origin") || "";
+  let origin: string = allowList[0];
+  if (allowList.includes("*")) {
+    origin = reqOrigin || "*";
+  } else if (reqOrigin && allowList.includes(reqOrigin)) {
+    origin = reqOrigin;
+  }
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -56,7 +63,7 @@ function corsHeaders(env: Env, extra: HeadersInit = {}): HeadersInit {
   };
 }
 
-function json(env: Env, body: unknown, init: ResponseInit = {}): Response {
+function json(env: Env, body: unknown, init: ResponseInit = {}, request?: Request): Response {
   return new Response(JSON.stringify(body), {
     status: init.status ?? 200,
     headers: {
@@ -64,7 +71,7 @@ function json(env: Env, body: unknown, init: ResponseInit = {}): Response {
       // 브라우저는 30초 캐시, CDN(Cloudflare 자체)은 60초 캐시.
       // SWR 패턴이라 짧게 잡아도 체감은 즉시.
       "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
-      ...corsHeaders(env),
+      ...corsHeaders(env, {}, request),
       ...(init.headers ?? {}),
     },
   });
@@ -158,7 +165,7 @@ async function handleHttp(req: Request, env: Env): Promise<Response> {
   const path = url.pathname.replace(/\/+$/, "") || "/";
 
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders(env) });
+    return new Response(null, { status: 204, headers: corsHeaders(env, {}, req) });
   }
 
   // GET /api/health — 운영 디버깅용
