@@ -36,11 +36,13 @@ export function Pill({
     justifyContent: "center",
     color: active ? "#FFFFFF" : onWhite ? "#3A4A5E" : "#FFFFFF",
     background: active
-      ? "linear-gradient(90deg, #4A9BE0 0%, #6FB1EA 55%, #9CC8F2 100%)"
+      ? "linear-gradient(90deg, #2B7BC5 0%, #3B8BCF 55%, #5AA3DC 100%)"
       : onWhite
         ? "linear-gradient(90deg, #E6F0FA 0%, #EEF5FC 60%, #F2F7FC 100%)"
         : "rgba(255,255,255,0.20)",
-    boxShadow: active ? "0 10px 24px -16px rgba(74,155,224,0.55)" : "none",
+    boxShadow: active
+      ? "0 6px 14px -4px rgba(43,123,197,0.45), 0 2px 4px -1px rgba(43,123,197,0.30)"
+      : "none",
     ...style,
   };
   return (
