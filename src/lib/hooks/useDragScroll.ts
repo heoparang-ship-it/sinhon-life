@@ -19,6 +19,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
+      e.preventDefault();
       isDown = true;
       moved = false;
       startX = e.clientX;
@@ -45,8 +46,16 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
       }
     };
 
+    const onDragStart = (e: DragEvent) => e.preventDefault();
+
+    // 자식 img/a 의 기본 드래그도 막기
+    el.querySelectorAll("img, a").forEach((node) => {
+      (node as HTMLElement).setAttribute("draggable", "false");
+    });
+
     el.style.cursor = "grab";
     el.addEventListener("mousedown", onMouseDown);
+    el.addEventListener("dragstart", onDragStart);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", stop);
     el.addEventListener("mouseleave", stop);
@@ -54,6 +63,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     return () => {
       el.removeEventListener("mousedown", onMouseDown);
+      el.removeEventListener("dragstart", onDragStart);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", stop);
       el.removeEventListener("mouseleave", stop);
