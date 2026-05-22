@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import Footer from "@/components/Footer";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PushNotificationInit from "@/components/PushNotificationInit";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -239,7 +240,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <PushNotificationInit />
         <AuthProvider>
           <ToastProvider>
-            <main className="max-w-lg mx-auto min-h-screen pb-16">{children}</main>
+            <main className="max-w-lg mx-auto min-h-screen pb-24">
+              {children}
+              <Footer />
+            </main>
             <BottomNav />
             <PWAInstallPrompt />
           </ToastProvider>
