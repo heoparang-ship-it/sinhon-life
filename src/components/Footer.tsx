@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer
       aria-label="사업자 정보"
-      className="mt-8 border-t px-5 py-6"
+      className="mt-8 border-t px-5 pt-6 pb-28"
       style={{
         borderColor: "var(--color-hairline)",
         background: "var(--color-paper)",
