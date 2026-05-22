@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BudgetV2Screen } from "@/components/budget/v2/BudgetV2Screen";
 
 export const metadata: Metadata = {
   title: "가계부 · 신혼생활",
@@ -6,16 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default function BudgetPage() {
-  // wedding-budget.html?embed=1 을 iframe으로 풀스크린 임베드.
-  // 임베드 모드는 자체 Tabbar/iPhone 프레임을 숨겨 sinhon.life BottomNav와 충돌 안 함.
+  // v2 — wedding-budget.html iframe 제거하고 React 컴포넌트로 직접 렌더.
+  // root layout 의 폰 패널 안 BottomNav(높이 88px) 만큼 빼고 자체 스크롤.
   return (
-    <main className="absolute inset-0 bg-white">
-      <iframe
-        src="/wedding-budget.html?embed=1"
-        title="가계부"
-        className="w-full h-full border-0 block"
-        style={{ height: "calc(100% - 88px)" }}
-      />
+    <main className="absolute inset-0 bg-white" style={{ height: "calc(100% - 88px)" }}>
+      <BudgetV2Screen />
     </main>
   );
 }
