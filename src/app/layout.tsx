@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { LandingLeft } from "@/components/legacy/LandingLeft";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -74,6 +75,7 @@ export default function RootLayout({
           <div className="flex-1 max-w-[480px] w-full relative lg:h-full lg:rounded-[32px] lg:shadow-[0_30px_60px_-32px_rgba(20,40,80,0.25)] lg:border lg:border-hairline lg:bg-white lg:overflow-hidden">
             <div className="lg:absolute lg:inset-0 lg:overflow-y-auto scrollbar-hide">
               {children}
+              <Footer />
             </div>
             <BottomNav />
           </div>
