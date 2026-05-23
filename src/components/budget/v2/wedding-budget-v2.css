@@ -164,3 +164,29 @@
 .wbv2 .recent-title{font-size:13px;font-weight:600;color:var(--ink-900)}
 .wbv2 .recent-sub{font-size:10.5px;color:var(--ink-400);margin-top:1px}
 .wbv2 .recent-amt{font-size:13px;font-weight:700;color:var(--ink-900);font-variant-numeric:tabular-nums}
+
+/* ─── 만원 단위 입력 헬퍼 ─── */
+.wbv2 .manwon-input-wrap{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--ink-100);border-radius:10px;padding:0 12px;transition:border-color .12s ease}
+.wbv2 .manwon-input-wrap:focus-within{border-color:var(--sky-400)}
+.wbv2 .manwon-input{flex:1;min-width:0;padding:10px 0;background:transparent;border:none;outline:none;font-size:14px;font-weight:700;color:var(--ink-900);text-align:right;font-variant-numeric:tabular-nums;font-family:inherit;-moz-appearance:textfield}
+.wbv2 .manwon-input::-webkit-outer-spin-button,
+.wbv2 .manwon-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.wbv2 .manwon-input-suffix{font-size:12px;font-weight:700;color:var(--ink-500);letter-spacing:-0.01em;flex-shrink:0}
+
+/* ParseSheet 안 picker 칸 안에서 사용 시 — 가로 꽉 채우기 */
+.wbv2 .picker-manwon{width:100%;padding:0 14px}
+.wbv2 .picker-manwon .manwon-input{font-size:15px}
+
+/* EditModal 안 edit-field 안에서 사용 시 — 회색 톤 */
+.wbv2 .edit-field-manwon{width:100%;background:var(--ink-50);padding:0 14px}
+.wbv2 .edit-field-manwon .manwon-input{font-size:14.5px}
+.wbv2 .edit-field-manwon:focus-within{background:white}
+
+/* GiftTracker 축의금 그룹 줄 안에서 인라인 사용 시 — 폭 좁게 */
+.wbv2 .gift-group-manwon{padding:0 8px;background:var(--ink-50)}
+.wbv2 .gift-group-manwon .manwon-input{width:48px;padding:4px 0;font-size:11px}
+.wbv2 .gift-group-manwon .manwon-input-suffix{font-size:10.5px}
+
+/* tier3 (실수령) gift-tier3-input 안에서 사용 시 — flex 채움 */
+.wbv2 .gift-tier3-input .manwon-input-wrap{flex:1}
+.wbv2 .gift-tier3-input .manwon-input{padding:8px 0}

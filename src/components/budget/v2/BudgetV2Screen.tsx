@@ -51,6 +51,57 @@ import "./wedding-budget-v2.css";
 // Sub-components
 // ════════════════════════════════════════════════════════════════════════
 
+/**
+ * 만원 단위 입력 헬퍼.
+ * - 표시는 만원 (예: 150)
+ * - 외부 value/onChange 는 원 단위 (예: 1,500,000)
+ * - 오른쪽에 "만원" suffix 표시
+ * 가계부 전체 금액 입력칸에서 공용으로 사용.
+ */
+function ManwonInput({
+  value,
+  onChange,
+  placeholder = "0",
+  className,
+  suffixLabel = "만원",
+  min,
+  max,
+}: {
+  value: number; // 원 단위
+  onChange: (won: number) => void;
+  placeholder?: string;
+  className?: string;
+  suffixLabel?: string;
+  min?: number; // 만 단위
+  max?: number; // 만 단위
+}) {
+  const display = value === 0 ? "" : String(Math.round(value / 10000));
+  return (
+    <div className={`manwon-input-wrap ${className ?? ""}`}>
+      <input
+        type="number"
+        inputMode="numeric"
+        className="manwon-input"
+        value={display}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        onChange={(e) => {
+          const raw = e.target.value.trim();
+          if (raw === "") {
+            onChange(0);
+            return;
+          }
+          const man = Number(raw);
+          if (!Number.isFinite(man)) return;
+          onChange(Math.max(0, Math.round(man)) * 10000);
+        }}
+      />
+      <span className="manwon-input-suffix">{suffixLabel}</span>
+    </div>
+  );
+}
+
 function Header({ dDay, weddingDate }: { dDay: number | null; weddingDate: string | null }) {
   const dDayLabel = dDay == null ? "결혼식 날짜 미설정" : dDay >= 0 ? `D−${dDay}` : `D+${-dDay}`;
   const dateLabel = weddingDate
@@ -263,13 +314,12 @@ function GiftTracker({ gifts, setGifts }: { gifts: Gifts; setGifts: (g: Gifts) =
                     onChange={(e) => update2(group, { count: +e.target.value || 0 })}
                   />
                   명 ×{" "}
-                  <input
-                    className="gift-group-input"
-                    type="number"
-                    value={Math.round(g.avg / 10000)}
-                    onChange={(e) => update2(group, { avg: (+e.target.value || 0) * 10000 })}
+                  <ManwonInput
+                    className="gift-group-manwon"
+                    value={g.avg}
+                    onChange={(won) => update2(group, { avg: won })}
+                    suffixLabel="만원"
                   />
-                  만
                 </div>
                 <div className="gift-group-amt">{fmt만(g.count * g.avg)}</div>
               </div>
@@ -280,12 +330,10 @@ function GiftTracker({ gifts, setGifts }: { gifts: Gifts; setGifts: (g: Gifts) =
       {gifts.tier === 3 && (
         <div className="gift-tier3-input">
           <span style={{ fontSize: 11, color: "var(--ink-500)", fontWeight: 700 }}>실제 받은 총액</span>
-          <input
-            type="number"
+          <ManwonInput
             value={gifts.actual}
-            onChange={(e) => setGifts({ ...gifts, actual: +e.target.value || 0 })}
+            onChange={(won) => setGifts({ ...gifts, actual: won })}
           />
-          <span style={{ fontSize: 12, color: "var(--ink-500)", fontWeight: 700 }}>원</span>
         </div>
       )}
       {gifts.sideSplit && (
@@ -471,12 +519,11 @@ function ParseSheet({
         </div>
         {editing === "amount" && (
           <div className="picker">
-            <div className="picker-label">금액 정정 (원)</div>
-            <input
-              className="picker-input"
-              type="number"
+            <div className="picker-label">금액 정정</div>
+            <ManwonInput
+              className="picker-manwon"
               value={data.amount}
-              onChange={(e) => setData({ ...data, amount: +e.target.value || 0 })}
+              onChange={(won) => setData({ ...data, amount: won })}
             />
           </div>
         )}
@@ -578,11 +625,11 @@ function EditModal({
       <div className="edit-modal">
         <h3>{title} 수정</h3>
         <div className="edit-field">
-          <div className="edit-field-label">금액 (원)</div>
-          <input
-            type="number"
+          <div className="edit-field-label">금액</div>
+          <ManwonInput
+            className="edit-field-manwon"
             value={amount}
-            onChange={(e) => setAmount(+e.target.value || 0)}
+            onChange={setAmount}
           />
         </div>
         <div className="edit-field">

@@ -38,14 +38,24 @@ export type Parsed = {
  * v1 으로 충분히 동작하는 키워드·정규식 매칭.
  */
 export function parseNL(text: string): Parsed {
-  // 금액 파싱
+  // 금액 파싱.
+  // 우선순위: 억 > 만 > "원" 명시 > 단위 없는 숫자(= 만원 기본).
+  // 가계부 UX 통일을 위해 "150"처럼 단위 없는 숫자는 만원으로 해석한다.
   let amount = 0;
   const eok = text.match(/(\d+\.?\d*)\s*억/);
   const man = text.match(/(\d+\.?\d*)\s*만(?:원)?/);
-  const won = text.match(/(\d[\d,]{2,})\s*원?/);
+  const wonExplicit = text.match(/(\d[\d,]*)\s*원/); // 반드시 "원" 명시
+  const bare = text.match(/(\d[\d,]*)/); // 그냥 숫자
   if (eok) amount += parseFloat(eok[1]) * 100_000_000;
   if (man) amount += parseFloat(man[1]) * 10_000;
-  if (!eok && !man && won) amount = parseInt(won[1].replace(/,/g, ""));
+  if (!eok && !man) {
+    if (wonExplicit) {
+      amount = parseInt(wonExplicit[1].replace(/,/g, ""));
+    } else if (bare) {
+      // 단위 없는 숫자 → 만원으로 해석 (예: "스드메 150" → 1,500,000원)
+      amount = parseInt(bare[1].replace(/,/g, "")) * 10_000;
+    }
+  }
 
   // 카테고리 파싱
   let category: CategoryId = "etc";
