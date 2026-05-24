@@ -1,6 +1,6 @@
 export function LandingLeft() {
   return (
-    <div className="hidden lg:flex flex-col gap-6 w-[280px] flex-shrink-0">
+    <div className="hidden lg:flex flex-col gap-7 w-[500px] flex-shrink-0">
       {/* Wedding 포스터 — 메탈릭 베젤 */}
       <div
         style={{
@@ -57,11 +57,11 @@ export function LandingLeft() {
         </div>
         <div
           style={{
-            width: 110,
-            height: 110,
+            width: 150,
+            height: 150,
             background: "#fff",
-            borderRadius: 18,
-            padding: 7,
+            borderRadius: 24,
+            padding: 10,
             boxShadow:
               "0 1px 2px rgba(20,40,80,0.06), 0 8px 20px -10px rgba(20,40,80,0.18)",
             flexShrink: 0,
