@@ -30,7 +30,7 @@
   --color-on-blue-faint: rgba(255, 255, 255, 0.55);
 
   /* — Font — */
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+  --font-sans: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "SinhonPretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 :root {
@@ -52,13 +52,13 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* — Pretendard 가변 폰트 CDN — */
+/* — Korean-safe font fallback stack — */
 @font-face {
-  font-family: "Pretendard Variable";
+  font-family: "SinhonPretendard";
   font-weight: 45 920;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/PretendardVariable.woff2") format("woff2-variations");
+  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/PretendardVariable.woff2") format("woff2");
 }
 
 /* ═══ 그라데이션 유틸 (재사용) ═══════════════════════════════════ */

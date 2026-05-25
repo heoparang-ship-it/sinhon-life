@@ -13,7 +13,7 @@
   --ink-100:#eff2f6; --ink-50:#f7f9fb; --white:#ffffff;
   --expense:#d65656; --expense-bg:#fbeaea; --warn:#c98a2a; --warn-bg:#faedd4;
 
-  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+  font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","SinhonPretendard",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   color:var(--ink-900);
   background:#ffffff;
   -webkit-font-smoothing:antialiased;

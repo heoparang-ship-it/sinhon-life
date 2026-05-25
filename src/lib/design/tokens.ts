@@ -19,7 +19,7 @@ export const T = {
   expense: "#D97E6A",
   kakao: "#FEE500",
   kakaoText: "#191600",
-  font: '"Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif',
+  font: '"Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "SinhonPretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 } as const;
 
 export const G = {
