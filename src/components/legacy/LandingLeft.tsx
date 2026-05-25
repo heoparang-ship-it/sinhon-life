@@ -1,14 +1,14 @@
 export function LandingLeft() {
   return (
-    <div className="hidden lg:flex flex-col gap-7 w-[500px] flex-shrink-0">
+    <div className="hidden lg:flex flex-col gap-[38px] desktop-left justify-end pb-[48px]">
       {/* Wedding 포스터 — 메탈릭 베젤 */}
       <div
         style={{
           position: "relative",
           width: "100%",
-          aspectRatio: "280 / 388",
-          borderRadius: 26,
-          padding: 1.5,
+          aspectRatio: "480 / 568",
+          borderRadius: 18,
+          padding: 0,
           background:
             "linear-gradient(135deg, #E8EAEE 0%, #B7BCC4 30%, #8A9099 50%, #B7BCC4 70%, #E8EAEE 100%)",
           boxShadow:
@@ -27,7 +27,7 @@ export function LandingLeft() {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              borderRadius: 25,
+              borderRadius: 18,
             }}
           />
         </picture>
@@ -38,17 +38,17 @@ export function LandingLeft() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 18,
-          padding: "0 4px",
+          gap: 42,
+          padding: "0 20px",
         }}
       >
         <div
           style={{
             flex: 1,
-            fontSize: 13,
-            fontWeight: 500,
-            color: "#6B6056",
-            letterSpacing: "-0.01em",
+            fontSize: 24,
+            fontWeight: 800,
+            color: "#111827",
+            letterSpacing: "0",
             lineHeight: 1.45,
           }}
         >
@@ -57,13 +57,12 @@ export function LandingLeft() {
         </div>
         <div
           style={{
-            width: 150,
-            height: 150,
-            background: "#fff",
-            borderRadius: 24,
-            padding: 10,
-            boxShadow:
-              "0 1px 2px rgba(20,40,80,0.06), 0 8px 20px -10px rgba(20,40,80,0.18)",
+            width: 198,
+            height: 198,
+            background: "transparent",
+            borderRadius: 0,
+            padding: 0,
+            boxShadow: "none",
             flexShrink: 0,
           }}
         >
@@ -75,7 +74,7 @@ export function LandingLeft() {
               display: "block",
               width: "100%",
               height: "100%",
-              borderRadius: 10,
+              borderRadius: 0,
             }}
           />
         </div>
