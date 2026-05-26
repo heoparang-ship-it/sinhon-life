@@ -1,11 +1,11 @@
 export function LandingLeft() {
   return (
-    <div className="hidden lg:flex flex-col gap-[38px] desktop-left justify-end pb-[48px]">
+    <div className="hidden lg:flex flex-col items-center gap-[30px] desktop-left justify-end pb-[48px]">
       {/* Wedding 포스터 — 메탈릭 베젤 */}
       <div
         style={{
           position: "relative",
-          width: "100%",
+          width: "min(100%, 400px)",
           aspectRatio: "480 / 568",
           borderRadius: 18,
           padding: 0,
@@ -38,14 +38,15 @@ export function LandingLeft() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 42,
-          padding: "0 20px",
+          gap: 28,
+          width: "min(100%, 400px)",
+          padding: 0,
         }}
       >
         <div
           style={{
             flex: 1,
-            fontSize: 24,
+            fontSize: 21,
             fontWeight: 800,
             color: "#111827",
             letterSpacing: "0",
@@ -57,8 +58,8 @@ export function LandingLeft() {
         </div>
         <div
           style={{
-            width: 198,
-            height: 198,
+            width: 168,
+            height: 168,
             background: "transparent",
             borderRadius: 0,
             padding: 0,
