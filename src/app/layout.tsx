@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { LandingLeft } from "@/components/legacy/LandingLeft";
-import { Footer } from "@/components/Footer";
+import { AppFooter } from "@/components/AppFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -75,7 +75,7 @@ export default function RootLayout({
           <div className="flex-1 max-w-[480px] w-full relative desktop-phone">
             <div className="lg:absolute lg:inset-0 lg:overflow-y-auto scrollbar-hide">
               {children}
-              <Footer />
+              <AppFooter />
             </div>
             <BottomNav />
           </div>
