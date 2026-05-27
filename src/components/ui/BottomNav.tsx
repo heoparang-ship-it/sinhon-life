@@ -37,6 +37,26 @@ const TABS: Tab[] = [
     ),
   },
   {
+    href: "/ai",
+    label: "AI톡",
+    icon: (a) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 8a3 3 0 013-3h10a3 3 0 013 3v4a3 3 0 01-3 3h-5l-5 3.5V15H7a3 3 0 01-3-3V8z"
+          stroke={iconColor(a)}
+          strokeWidth={sw}
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 10h6M9 12.5h3.5"
+          stroke={iconColor(a)}
+          strokeWidth={sw}
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     href: "/my",
     label: "MY",
     icon: (a) => (
@@ -60,7 +80,7 @@ export function BottomNav() {
       className="fixed left-3.5 right-3.5 bottom-6 max-w-[452px] mx-auto bg-white rounded-[26px] px-2 py-3 z-30 shadow-[0_18px_40px_-14px_rgba(20,40,80,0.22),0_2px_6px_rgba(20,40,80,0.05)] lg:absolute lg:left-0 lg:right-0 lg:bottom-0 lg:max-w-none lg:mx-0 lg:rounded-none lg:border-t lg:border-hairline lg:shadow-none lg:px-4 lg:py-4"
       style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}
     >
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-4">
         {TABS.map((tab) => {
           const active =
             tab.href === "/"
