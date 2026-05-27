@@ -39,12 +39,12 @@ export function AiTalkScreen() {
         </div>
 
         <h2 className="mt-6 text-center text-[19px] font-bold tracking-tight text-ink">
-          어떤 지원이 궁금하세요?
+          무엇이든 편하게 물어보세요
         </h2>
         <p className="mt-1.5 text-center text-[12.5px] font-medium leading-relaxed text-ink-soft">
-          전세대출, 출산지원금, 청약, 우리 동네 혜택까지
+          전세대출부터 출산지원금까지,
           <br />
-          바로 물어보세요
+          우리 부부에게 딱 맞는 혜택을 함께 찾아드릴게요
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-2.5">
@@ -69,7 +69,7 @@ export function AiTalkScreen() {
       {/* 입력바 — 하단 고정 (탭 네비 위) */}
       <div
         className="shrink-0 px-3.5 pt-2"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 88px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 108px)" }}
       >
         <div className="flex items-center gap-1 rounded-full border border-[#CFDDEB] bg-white py-2 pl-4 pr-2 shadow-[0_8px_22px_-10px_rgba(20,50,90,0.3)]">
           <input
