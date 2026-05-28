@@ -53,3 +53,7 @@ src/lib/instagram/*.bak
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/awesome-design/
+!.claude/skills/bmad-*/
+
+# BMAD-METHOD: 도구 자체와 docs는 추적, 생성 산출물은 제외
+_bmad-output/
