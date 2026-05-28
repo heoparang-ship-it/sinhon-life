@@ -686,7 +686,7 @@ export function BudgetV2Screen() {
           </div>
           {state.recentExpenses.length === 0 && (
             <div style={{ padding: "12px 0", fontSize: 12, color: "var(--ink-400)" }}>
-              아직 기록된 지출이 없어요. 위 입력창에 한 줄로 적어보세요.
+              아직 기록된 지출이 없어요. 아래 카테고리를 눌러 추가하세요.
             </div>
           )}
           {state.recentExpenses.map((t) => {
