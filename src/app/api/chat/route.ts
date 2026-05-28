@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -15,8 +16,12 @@ const SYSTEM_PROMPT = `당신은 한국 신혼생활 서비스 'sinhon.life'의 
 - 정책·금액 수치는 항상 "검색·확인 권장"임을 덧붙임.
 - 단순 정보 나열보다, 사용자 상황을 한두 가지 짧게 되묻고 맞춤 도움 주려 함.`;
 
+const isValidUuid = (s: unknown): s is string =>
+  typeof s === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
 export async function POST(request: Request) {
-  let body: { message?: string; history?: Turn[] };
+  let body: { message?: string; history?: Turn[]; sessionId?: string };
   try {
     body = await request.json();
   } catch {
@@ -28,13 +33,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "메시지가 비어 있어요." }, { status: 400 });
   }
 
+  const sessionId = isValidUuid(body.sessionId) ? body.sessionId : crypto.randomUUID();
+  const model = process.env.OPENAI_CHAT_MODEL || "gpt-5-mini";
+
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    // 키가 없으면 친절한 안내. 사용자에겐 자연스럽게 보임.
     return NextResponse.json({
       reply:
         "AI 연결이 아직 준비 중이에요. 잠시만 기다려주세요 🙏\n(서비스 설정에서 OpenAI 키를 등록하면 바로 답변할게요)",
       degraded: true,
+      sessionId,
     });
   }
 
@@ -47,26 +55,68 @@ export async function POST(request: Request) {
     { role: "user" as const, content: message },
   ];
 
+  const startedAt = Date.now();
+  let reply: string;
+  let degraded = false;
   try {
     const client = new OpenAI({ apiKey });
     const completion = await client.chat.completions.create({
-      model: process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini",
+      model,
       messages,
       temperature: 0.6,
       max_tokens: 600,
     });
-    const reply =
+    reply =
       completion.choices?.[0]?.message?.content?.trim() ??
       "죄송해요, 답변을 만들지 못했어요. 다시 한 번 보내주실래요?";
-    return NextResponse.json({ reply });
   } catch (e) {
-    console.error("/api/chat error:", e);
-    return NextResponse.json(
-      {
-        reply: "지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.",
-        degraded: true,
-      },
-      { status: 200 },
-    );
+    console.error("/api/chat openai error:", e);
+    reply = "지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.";
+    degraded = true;
   }
+  const latencyMs = Date.now() - startedAt;
+
+  // ─── 대화 로그 저장 (Supabase) ────────────────────────────────────
+  // 실패해도 응답은 정상 반환 (fire-and-forget이지만 await로 짧게)
+  let assistantMessageId: string | null = null;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id ?? null;
+
+    const { data: inserted } = await supabase
+      .from("chat_logs")
+      .insert([
+        {
+          user_id: userId,
+          session_id: sessionId,
+          role: "user",
+          content: message,
+          model,
+        },
+        {
+          user_id: userId,
+          session_id: sessionId,
+          role: "assistant",
+          content: reply,
+          model,
+          latency_ms: latencyMs,
+        },
+      ])
+      .select("id, role");
+
+    if (inserted) {
+      const assistantRow = inserted.find((r) => r.role === "assistant");
+      assistantMessageId = (assistantRow?.id as string) ?? null;
+    }
+  } catch (e) {
+    console.warn("/api/chat logging skipped:", e);
+  }
+
+  return NextResponse.json({
+    reply,
+    sessionId,
+    messageId: assistantMessageId,
+    degraded,
+  });
 }
