@@ -54,18 +54,6 @@
 .wbv2 .cum-hero-row .dot{display:inline-block;width:6px;height:6px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .wbv2 .cum-hero-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--ink-100);font-size:11px;color:var(--ink-500);display:flex;align-items:center;justify-content:space-between}
 
-/* NL input bar */
-.wbv2 .nl-input{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--sky-200);border-radius:16px;padding:12px 14px;box-shadow:0 4px 14px -8px rgba(43,123,197,0.20)}
-.wbv2 .nl-input-ic{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--sky-500),var(--sky-700));color:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
-.wbv2 .nl-input input{flex:1;border:none;outline:none;background:transparent;font-size:14px;font-weight:500;color:var(--ink-900);font-family:inherit;min-width:0}
-.wbv2 .nl-input input::placeholder{color:var(--ink-400)}
-.wbv2 .nl-input-go{background:var(--sky-500);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer}
-.wbv2 .nl-input-go:disabled{background:var(--ink-200);color:var(--ink-400);cursor:not-allowed}
-.wbv2 .nl-mic{width:34px;height:34px;border-radius:10px;background:var(--ink-50);border:1px solid var(--ink-100);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;position:relative;flex-shrink:0}
-.wbv2 .nl-mic:hover{background:var(--sky-100);border-color:var(--sky-200)}
-.wbv2 .nl-mic-soon{position:absolute;top:-5px;right:-5px;background:var(--sky-500);color:white;font-size:8px;font-weight:800;padding:1px 4px;border-radius:4px;letter-spacing:0.02em;line-height:1.4}
-.wbv2 .nl-hint{margin-top:-2px;padding:0 6px;font-size:10.5px;color:var(--ink-400)}
-
 /* 비용 수정 모달 (작은) */
 .wbv2 .edit-modal-bg{position:absolute;inset:0;z-index:55;background:rgba(20,40,80,0.18);display:flex;align-items:center;justify-content:center;padding:18px}
 .wbv2 .edit-modal{background:var(--white);border-radius:16px;padding:18px;width:100%;max-width:340px;box-shadow:0 18px 40px -14px rgba(20,40,80,0.30)}
