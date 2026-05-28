@@ -11,8 +11,8 @@
  *   로그인 → sync_v2.fetchV2Remote()    (원격으로 덮어쓰기)
  *   변경 → setState + storage_v2.saveV2 + (로그인 시) sync_v2.push*Remote
  *
- * 단일 파일 안에 sub-component(Header / Hero / NLInput / GiftTracker /
- * ForecastCard / CategoryX / ParseSheet / EditModal) 모두 둠.
+ * 단일 파일 안에 sub-component(Header / Hero / GiftTracker /
+ * ForecastCard / CategoryX / EditModal) 모두 둠.
  * 분리하기보다 HTML 원본 1:1 대응을 우선했다.
  */
 
@@ -23,10 +23,7 @@ import {
   fmt만,
   fmtKRW,
   formatWeddingDate,
-  labelToDate,
-  parseNL,
   recentSubLabel,
-  type Parsed,
 } from "@/lib/budget/format_v2";
 import { defaultV2State, loadV2, saveV2 } from "@/lib/budget/storage_v2";
 import {
@@ -173,49 +170,6 @@ function CumulativeHero({
           </b>
         </span>
         <span>{formatWeddingDate(weddingDate)}</span>
-      </div>
-    </div>
-  );
-}
-
-function NLInput({ onParsed }: { onParsed: (p: Parsed & { original: string }) => void }) {
-  const [text, setText] = useState("");
-  const submit = () => {
-    if (!text.trim()) return;
-    const parsed = parseNL(text);
-    onParsed({ ...parsed, original: text });
-    setText("");
-  };
-  const onMic = () => {
-    alert(
-      "🎙️ 음성 입력 — 곧 출시\n\n" +
-        "마이크 길게 눌러 자연스럽게 말하면 AI가 자동 정리:\n" +
-        '"오늘 스드메 175만 카드로, 어제 청첩장 18만 썼어"\n' +
-        "→ 항목 2건 자동 분리 + 카테고리 매칭 + 저장\n\n" +
-        "기술: GPT-4o-mini-transcribe (한국어 STT) + Claude 파싱\n" +
-        "비용: 1회 ≈ 3원 (사용자 부담 없음)\n" +
-        "현재 일정: v2 후속 스프린트",
-    );
-  };
-  return (
-    <div>
-      <div className="nl-input">
-        <div className="nl-input-ic">AI</div>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="오늘 뭐 썼어요? 예: 스드메 175만"
-        />
-        <div className="nl-mic" onClick={onMic} title="음성 입력 (출시 예정)">
-          🎙️<span className="nl-mic-soon">SOON</span>
-        </div>
-        <button className="nl-input-go" onClick={submit} disabled={!text.trim()}>
-          저장
-        </button>
-      </div>
-      <div className="nl-hint">
-        💡 &quot;어제 다이아 커플링 240만 카드&quot; 같이 자연스럽게 · 🎙️ 곧 음성 입력 출시
       </div>
     </div>
   );
@@ -466,132 +420,6 @@ function CategoryX({
   );
 }
 
-type ParsedDraft = Parsed & { original: string };
-
-function ParseSheet({
-  parsed,
-  onClose,
-  onSave,
-}: {
-  parsed: ParsedDraft;
-  onClose: () => void;
-  onSave: (p: ParsedDraft) => void;
-}) {
-  const [data, setData] = useState<ParsedDraft>(parsed);
-  const [editing, setEditing] = useState<null | "amount" | "category" | "date" | "method">(null);
-
-  return (
-    <div
-      className="sheet-backdrop"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="sheet">
-        <div className="sheet-handle" />
-        <div className="sheet-title">이렇게 저장할까요?</div>
-        <div className="sheet-orig">{data.original}</div>
-        <div className="sheet-chips">
-          <div
-            className={`chip chip-amount ${editing === "amount" ? "active" : ""}`}
-            onClick={() => setEditing(editing === "amount" ? null : "amount")}
-          >
-            {fmt만(data.amount)}원
-          </div>
-          <div
-            className={`chip ${editing === "category" ? "active" : ""}`}
-            onClick={() => setEditing(editing === "category" ? null : "category")}
-          >
-            <span className="chip-label">카테고리</span> {CATEGORY_BY_ID[data.category].name}
-          </div>
-          <div
-            className={`chip ${editing === "date" ? "active" : ""}`}
-            onClick={() => setEditing(editing === "date" ? null : "date")}
-          >
-            <span className="chip-label">날짜</span> {data.dateLabel}
-          </div>
-          <div
-            className={`chip ${editing === "method" ? "active" : ""}`}
-            onClick={() => setEditing(editing === "method" ? null : "method")}
-          >
-            <span className="chip-label">결제</span> {data.method}
-          </div>
-        </div>
-        {editing === "amount" && (
-          <div className="picker">
-            <div className="picker-label">금액 정정</div>
-            <ManwonInput
-              className="picker-manwon"
-              value={data.amount}
-              onChange={(won) => setData({ ...data, amount: won })}
-            />
-          </div>
-        )}
-        {editing === "category" && (
-          <div className="picker">
-            <div className="picker-label">카테고리 변경</div>
-            <div className="picker-row">
-              {CATEGORIES_V2.map((c) => (
-                <div
-                  key={c.id}
-                  className={`picker-opt ${data.category === c.id ? "selected" : ""}`}
-                  onClick={() => {
-                    setData({ ...data, category: c.id });
-                    setEditing(null);
-                  }}
-                >
-                  {c.icon} {c.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {editing === "date" && (
-          <div className="picker">
-            <div className="picker-label">날짜</div>
-            <div className="picker-row">
-              {["오늘", "어제", "그제"].map((d) => (
-                <div
-                  key={d}
-                  className={`picker-opt ${data.dateLabel === d ? "selected" : ""}`}
-                  onClick={() => {
-                    setData({ ...data, dateLabel: d });
-                    setEditing(null);
-                  }}
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {editing === "method" && (
-          <div className="picker">
-            <div className="picker-label">결제수단</div>
-            <div className="picker-row">
-              {(["카드", "현금", "이체"] as const).map((m) => (
-                <div
-                  key={m}
-                  className={`picker-opt ${data.method === m ? "selected" : ""}`}
-                  onClick={() => {
-                    setData({ ...data, method: m });
-                    setEditing(null);
-                  }}
-                >
-                  {m}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        <button className="sheet-save" onClick={() => onSave(data)}>
-          저장하기
-        </button>
-      </div>
-    </div>
-  );
-}
-
 type EditTarget =
   | { source: "category"; categoryId: CategoryId; amount: number }
   | { source: "recent"; entry: RecentExpense };
@@ -670,7 +498,6 @@ export function BudgetV2Screen() {
 
   const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<BudgetV2State>(defaultV2State);
-  const [parsedDraft, setParsedDraft] = useState<ParsedDraft | null>(null);
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
   // 초기 로딩: localStorage
@@ -739,42 +566,6 @@ export function BudgetV2Screen() {
       if (isAuthed && userId) await pushGiftsRemote(userId, gifts);
     },
     [isAuthed, userId],
-  );
-
-  const saveParsed = useCallback(
-    async (p: ParsedDraft) => {
-      // 1) recentExpenses 에 추가
-      const entry: RecentExpense = {
-        id: `local-${Date.now()}`,
-        title: p.title,
-        date: labelToDate(p.dateLabel),
-        categoryId: p.category,
-        amount: p.amount,
-        method: p.method,
-      };
-      let saved = entry;
-      if (isAuthed && userId) {
-        const remote = await pushRecentExpenseRemote(userId, entry);
-        if (remote) saved = remote;
-      }
-
-      // 2) 카테고리 spent 누적
-      setState((prev) => {
-        const expenses = prev.expenses.map((e) =>
-          e.categoryId === p.category ? { ...e, spent: e.spent + p.amount } : e,
-        );
-        const recentExpenses = [saved, ...prev.recentExpenses].slice(0, 12);
-        return { ...prev, expenses, recentExpenses };
-      });
-      if (isAuthed && userId) {
-        const updated = state.expenses.find((e) => e.categoryId === p.category);
-        if (updated) {
-          await pushExpenseRemote(userId, { ...updated, spent: updated.spent + p.amount });
-        }
-      }
-      setParsedDraft(null);
-    },
-    [isAuthed, userId, state.expenses],
   );
 
   const editCategorySpent = useCallback(
@@ -877,7 +668,6 @@ export function BudgetV2Screen() {
           dDay={dDay}
           weddingDate={state.weddingDate}
         />
-        <NLInput onParsed={setParsedDraft} />
         <GiftTracker gifts={state.gifts} setGifts={setGifts} />
         <ForecastCard
           spent={totalSpent}
@@ -921,13 +711,6 @@ export function BudgetV2Screen() {
         </div>
       </div>
 
-      {parsedDraft && (
-        <ParseSheet
-          parsed={parsedDraft}
-          onClose={() => setParsedDraft(null)}
-          onSave={saveParsed}
-        />
-      )}
       {editTarget && (
         <EditModal
           target={editTarget}
