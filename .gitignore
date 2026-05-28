@@ -48,5 +48,8 @@ worker/.wrangler/
 worker/*.bak
 src/lib/instagram/*.bak
 
-# Claude Code worktrees (added 2026-05-20)
-.claude/
+# Claude Code: ignore local config, but share committed skills
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/awesome-design/
