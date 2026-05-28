@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Building2, Gift, Home, MapPin, Mic, Send } from "lucide-react";
-import { CharacterBubble } from "@/components/legacy/Primitives";
 
 const SUGGESTIONS = [
   { icon: Home, label: "신혼부부 전세대출" },
@@ -33,9 +33,15 @@ export function AiTalkScreen() {
 
       {/* 가운데 — 내용이 길면 이 영역만 스크롤 */}
       <div className="min-h-0 flex-1 overflow-y-auto px-5">
-        <div className="flex h-[180px] items-center justify-center overflow-hidden rounded-[22px] bg-gradient-to-b from-[#CFE4F6] to-[#E4F0FB] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
-          {/* 디자인의 커플 일러스트 에셋으로 교체 예정 — 현재는 자리표시자 */}
-          <CharacterBubble size={124} label={"COUPLE\n3D"} />
+        <div className="relative h-[180px] overflow-hidden rounded-[22px] bg-[#E3EEF8]">
+          <Image
+            src="/ai/couple.png"
+            alt="신혼부부 캐릭터"
+            width={836}
+            height={440}
+            priority
+            className="h-full w-full object-cover"
+          />
         </div>
 
         <h2 className="mt-6 text-center text-[19px] font-bold tracking-tight text-ink">
