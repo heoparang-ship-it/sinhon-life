@@ -10,9 +10,16 @@ import {
   Mic,
   Send,
   Sparkles,
+  ThumbsDown,
+  ThumbsUp,
 } from "lucide-react";
 
-type Turn = { role: "user" | "assistant"; content: string };
+type Turn = {
+  role: "user" | "assistant";
+  content: string;
+  messageId?: string | null;
+  feedback?: 1 | 0 | -1;
+};
 
 const SUGGESTIONS = [
   { icon: Home, label: "신혼부부 전세대출" },
@@ -21,11 +28,28 @@ const SUGGESTIONS = [
   { icon: MapPin, label: "우리 동네 혜택" },
 ] as const;
 
+const SESSION_KEY = "sinhon.ai.sessionId";
+
+function ensureSessionId(): string {
+  if (typeof window === "undefined") return "";
+  let id = sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
 export function AiTalkScreen() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Turn[]>([]);
   const [pending, setPending] = useState(false);
+  const [sessionId, setSessionId] = useState("");
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSessionId(ensureSessionId());
+  }, []);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -35,6 +59,7 @@ export function AiTalkScreen() {
   const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || pending) return;
+    const history = messages.map((m) => ({ role: m.role, content: m.content }));
     const nextHistory: Turn[] = [...messages, { role: "user", content: trimmed }];
     setMessages(nextHistory);
     setDraft("");
@@ -43,17 +68,30 @@ export function AiTalkScreen() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, history: messages }),
+        body: JSON.stringify({ message: trimmed, history, sessionId }),
       });
-      const data = (await res.json()) as { reply?: string; error?: string };
+      const data = (await res.json()) as {
+        reply?: string;
+        error?: string;
+        messageId?: string | null;
+      };
       const reply = data.reply || data.error || "답변을 받지 못했어요.";
-      setMessages([...nextHistory, { role: "assistant", content: reply }]);
+      setMessages([
+        ...nextHistory,
+        {
+          role: "assistant",
+          content: reply,
+          messageId: data.messageId ?? null,
+          feedback: 0,
+        },
+      ]);
     } catch {
       setMessages([
         ...nextHistory,
         {
           role: "assistant",
           content: "지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.",
+          feedback: 0,
         },
       ]);
     } finally {
@@ -61,11 +99,31 @@ export function AiTalkScreen() {
     }
   };
 
+  const submitFeedback = async (index: number, value: 1 | -1) => {
+    const target = messages[index];
+    if (!target || target.role !== "assistant") return;
+    const next: 1 | 0 | -1 = target.feedback === value ? 0 : value;
+    // 낙관적 업데이트
+    setMessages((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, feedback: next } : m)),
+    );
+    if (!target.messageId) return; // 서버 저장 안 된 메시지(로깅 실패 등)
+    try {
+      await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: target.messageId, feedback: next }),
+      });
+    } catch {
+      /* 무시 — UI는 이미 반영됨 */
+    }
+  };
+
   const hasMessages = messages.length > 0;
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-white lg:h-full">
-      {/* 채팅방 헤더 — 컴팩트 */}
+      {/* 채팅방 헤더 */}
       <header className="flex shrink-0 items-center gap-2.5 border-b border-[#EAF0F7] bg-white px-4 py-2.5">
         <div
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-[0_4px_10px_-3px_rgba(43,123,197,0.5)]"
@@ -86,7 +144,7 @@ export function AiTalkScreen() {
         ref={scrollerRef}
         className="min-h-0 flex-1 overflow-y-auto bg-[#F4F8FC] px-4 py-4"
       >
-        {/* AI 첫 메시지 — 항상 노출 */}
+        {/* AI 첫 메시지 */}
         <div className="flex items-end gap-2">
           <AiAvatar />
           <div className="max-w-[78%] rounded-[18px] rounded-bl-[6px] border border-[#D8E5F0] bg-white p-2 shadow-[0_2px_10px_-5px_rgba(20,50,90,0.18)]">
@@ -113,7 +171,7 @@ export function AiTalkScreen() {
           </div>
         </div>
 
-        {/* 추천 칩 — 첫 진입(메시지 없음)에만 노출 */}
+        {/* 추천 칩 */}
         {!hasMessages && (
           <div className="ml-10 mt-3 grid grid-cols-2 gap-2">
             {SUGGESTIONS.map(({ icon: Icon, label }) => (
@@ -153,11 +211,29 @@ export function AiTalkScreen() {
           ) : (
             <div key={i} className="mt-3 flex items-end gap-2">
               <AiAvatar />
-              <div
-                className="max-w-[78%] rounded-[18px] rounded-bl-[6px] border border-[#D8E5F0] bg-white px-3.5 py-2.5 text-[14px] font-medium leading-relaxed text-ink-soft shadow-[0_2px_10px_-5px_rgba(20,50,90,0.18)]"
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                {m.content}
+              <div className="flex max-w-[78%] flex-col gap-1.5">
+                <div
+                  className="rounded-[18px] rounded-bl-[6px] border border-[#D8E5F0] bg-white px-3.5 py-2.5 text-[14px] font-medium leading-relaxed text-ink-soft shadow-[0_2px_10px_-5px_rgba(20,50,90,0.18)]"
+                  style={{ whiteSpace: "pre-wrap" }}
+                >
+                  {m.content}
+                </div>
+                <div className="flex items-center gap-1 pl-1">
+                  <FeedbackButton
+                    active={m.feedback === 1}
+                    aria-label="도움이 됐어요"
+                    onClick={() => submitFeedback(i, 1)}
+                  >
+                    <ThumbsUp size={12} strokeWidth={2.2} />
+                  </FeedbackButton>
+                  <FeedbackButton
+                    active={m.feedback === -1}
+                    aria-label="아쉬워요"
+                    onClick={() => submitFeedback(i, -1)}
+                  >
+                    <ThumbsDown size={12} strokeWidth={2.2} />
+                  </FeedbackButton>
+                </div>
               </div>
             </div>
           ),
@@ -174,7 +250,7 @@ export function AiTalkScreen() {
         )}
       </div>
 
-      {/* 입력바 — 하단 고정 (탭 네비 위) */}
+      {/* 입력바 + 동의 고지 */}
       <div
         className="shrink-0 bg-white px-3.5 pt-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 108px)" }}
@@ -213,6 +289,9 @@ export function AiTalkScreen() {
             <Send size={17} strokeWidth={2.2} />
           </button>
         </form>
+        <p className="mt-1.5 text-center text-[10.5px] font-medium leading-tight text-mute">
+          대화 내용은 서비스 개선 목적으로 저장될 수 있어요
+        </p>
       </div>
     </div>
   );
@@ -236,5 +315,32 @@ function TypingDots() {
       <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-[#9EB6CC] [animation-delay:-0.15s]" />
       <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-[#9EB6CC]" />
     </span>
+  );
+}
+
+function FeedbackButton({
+  active,
+  onClick,
+  children,
+  ...rest
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  "aria-label": string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-6 w-6 items-center justify-center rounded-full border transition active:scale-90 ${
+        active
+          ? "border-blue-accent bg-blue-accent text-white"
+          : "border-[#D8E5F0] bg-white text-ink-soft hover:bg-[#F4F8FC]"
+      }`}
+      {...rest}
+    >
+      {children}
+    </button>
   );
 }
