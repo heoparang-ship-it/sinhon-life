@@ -32,8 +32,8 @@ export function AiTalkScreen() {
           <Sparkles size={16} strokeWidth={2.2} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[14.5px] font-bold leading-tight text-ink">정책 챗봇</div>
-          <div className="mt-0.5 text-[11px] font-medium leading-none text-mute">
+          <div className="text-[15.5px] font-bold leading-tight text-ink">정책 챗봇</div>
+          <div className="mt-0.5 text-[12px] font-medium leading-none text-mute">
             AI 정책 도우미
           </div>
         </div>
@@ -60,10 +60,10 @@ export function AiTalkScreen() {
               />
             </div>
             <div className="px-1.5 pb-1 pt-2">
-              <p className="text-[13.5px] font-bold leading-tight text-ink">
+              <p className="text-[15px] font-bold leading-tight text-ink">
                 무엇이든 편하게 물어보세요
               </p>
-              <p className="mt-1 text-[11.5px] font-medium leading-relaxed text-ink-soft">
+              <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-ink-soft">
                 전세대출부터 출산지원금까지,
                 <br />
                 우리 부부에게 딱 맞는 혜택을 함께 찾아드릴게요
@@ -84,7 +84,7 @@ export function AiTalkScreen() {
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DCEBF9] text-blue-deepest">
                 <Icon size={12} strokeWidth={2.2} />
               </span>
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[11.5px] font-bold text-ink">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] font-bold text-ink">
                 {label}
               </span>
             </button>
@@ -102,7 +102,7 @@ export function AiTalkScreen() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="궁금한 정책을 입력해보세요"
-            className="min-w-0 flex-1 bg-transparent text-[13.5px] font-medium text-ink placeholder:text-mute focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-[14.5px] font-medium text-ink placeholder:text-mute focus:outline-none"
           />
           <button
             type="button"
