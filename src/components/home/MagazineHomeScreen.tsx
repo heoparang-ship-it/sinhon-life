@@ -241,6 +241,11 @@ export function MagazineHomeScreen() {
                     {slide.emoji}
                   </span>
                 </div>
+                {/* 페이지 카운터 1 / 3 */}
+                <div className="absolute right-[14px] top-[14px] z-[3] rounded-full bg-white/70 px-2.5 py-[3px] text-[11.5px] font-bold tabular-nums text-ink backdrop-blur-[2px]">
+                  <span className="text-blue-accent">{heroIndex + 1}</span>
+                  <span className="text-mute"> / {HERO_SLIDES.length}</span>
+                </div>
                 <div className="absolute bottom-[18px] left-6 z-[3] flex gap-1.5">
                   {HERO_SLIDES.map((_, di) => (
                     <i
