@@ -3,12 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import {
-  Bell,
-  Menu,
-  Play,
-  ChevronRight,
-} from "lucide-react";
+import { Play, ChevronRight } from "lucide-react";
 import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
 
@@ -59,9 +54,9 @@ type QuickItem = {
 };
 
 const QUICK_ITEMS: QuickItem[] = [
-  { label: "혼수·가전·가구", href: "/ai?seed=goods", category: "goods", icon: "/icons/goods.png" },
-  { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/honeymoon.png" },
-  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/ai.png" },
+  { label: "혼수·가전·가구", href: "/ai?seed=goods", category: "goods", icon: "/icons/01_honsu_appliances_furniture.png" },
+  { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/02_honeymoon_travel.png" },
+  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png" },
 ];
 
 type InfoCard = {
@@ -78,21 +73,21 @@ const INFO_CARDS: InfoCard[] = [
     sub: "3천~5천만원대",
     href: "/ai?seed=interior",
     bg: "linear-gradient(135deg,#EAF2FB 0%,#CFE2F6 100%)",
-    icon: "/icons/house.png",
+    icon: "/icons/09_budget_recommendation.png",
   },
   {
     title: "스드메·예물\n추천",
     sub: "187쌍이 고른 옵션",
     href: "/ai?seed=sdm",
     bg: "linear-gradient(135deg,#EEF1FB 0%,#D7DEF4 100%)",
-    icon: "/icons/ring.png",
+    icon: "/icons/04_studio_dress_makeup.png",
   },
   {
-    title: "신혼여행 인기\nTOP 5",
-    sub: "요즘 가장 많이 가는",
-    href: "/ai?seed=honeymoon",
-    bg: "linear-gradient(135deg,#D9EBFC 0%,#B5D6F4 100%)",
-    icon: "/icons/honeymoon.png",
+    title: "혼수 가전\n체크리스트",
+    sub: "빠짐없이 한 번에",
+    href: "/checklist",
+    bg: "linear-gradient(135deg,#E5EEFD 0%,#C2D6F4 100%)",
+    icon: "/icons/10_checklist.png",
   },
 ];
 
@@ -189,21 +184,21 @@ export function MagazineHomeScreen() {
           </svg>
           <span className="text-[20px] font-extrabold tracking-tight">신혼생활</span>
         </div>
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             aria-label="알림"
-            className="relative grid h-[27px] w-[27px] place-items-center"
+            className="relative grid h-[30px] w-[30px] place-items-center"
           >
-            <span className="absolute right-[2px] top-[1px] block h-[7px] w-[7px] rounded-full border-[1.5px] border-white bg-blue-accent" />
-            <Bell size={22} strokeWidth={1.8} className="text-ink" />
+            <span className="absolute right-0 top-0 z-[2] block h-[7px] w-[7px] rounded-full border-[1.5px] border-white bg-[#FF6B6B]" />
+            <Image src="/icons/12_notification_bell.png" alt="알림" width={26} height={26} className="h-[26px] w-[26px] object-contain" />
           </button>
           <button
             type="button"
             aria-label="메뉴"
-            className="grid h-[27px] w-[27px] place-items-center"
+            className="grid h-[30px] w-[30px] place-items-center"
           >
-            <Menu size={23} strokeWidth={2} className="text-ink" />
+            <Image src="/icons/13_menu.png" alt="메뉴" width={24} height={24} className="h-[24px] w-[24px] object-contain" />
           </button>
         </div>
       </header>
