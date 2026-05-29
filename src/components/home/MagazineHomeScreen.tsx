@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Play, ChevronRight } from "lucide-react";
+import { Play } from "lucide-react";
 import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
 import { useArchiveList } from "@/lib/instagram/client";
@@ -294,20 +294,20 @@ export function MagazineHomeScreen() {
         </div>
 
         {/* Quick row */}
-        <div className="mx-5 mt-[22px] grid grid-cols-3 rounded-[18px] border border-[#EEF2F6] bg-white py-6 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
+        <div className="mx-5 mt-[22px] grid grid-cols-3 rounded-[18px] border border-[#EEF2F6] bg-white py-5 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
           {QUICK_ITEMS.map((q, i) => (
             <Link
               key={q.label}
               href={q.href}
               onClick={() => track("decision_card_click", { category: q.category ?? null, from: "home_quick" })}
-              className={`relative flex flex-col items-center gap-[13px] ${
+              className={`relative flex flex-col items-center gap-2.5 ${
                 i > 0 ? "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#EEF2F6] before:content-['']" : ""
               }`}
             >
-              <span className="relative drop-shadow-[0_6px_9px_rgba(31,94,158,0.2)] transition-transform active:translate-y-[1px] active:scale-95">
+              <span className="relative drop-shadow-[0_5px_8px_rgba(31,94,158,0.18)] transition-transform active:translate-y-[1px] active:scale-95">
                 {q.badge && (
                   <span
-                    className="absolute -right-[9px] -top-[7px] rounded-full px-[7px] py-[3px] text-[10px] font-extrabold text-white shadow-[0_3px_7px_rgba(59,139,207,0.4)]"
+                    className="absolute -right-[8px] -top-[6px] rounded-full px-[6px] py-[2px] text-[9px] font-extrabold text-white shadow-[0_3px_7px_rgba(59,139,207,0.4)]"
                     style={{ background: "linear-gradient(135deg,#3B8BCF,#4F9CDB)" }}
                   >
                     {q.badge}
@@ -316,12 +316,12 @@ export function MagazineHomeScreen() {
                 <Image
                   src={q.icon}
                   alt={q.label}
-                  width={52}
-                  height={52}
-                  className="block h-[52px] w-[52px] object-contain"
+                  width={40}
+                  height={40}
+                  className="block h-[40px] w-[40px] object-contain"
                 />
               </span>
-              <span className="text-[13.5px] font-bold tracking-tight text-ink">{q.label}</span>
+              <span className="text-[12.5px] font-bold tracking-tight text-ink">{q.label}</span>
             </Link>
           ))}
         </div>
@@ -337,36 +337,27 @@ export function MagazineHomeScreen() {
               전체보기 ›
             </Link>
           </div>
-          <div className="flex snap-x snap-proximity gap-[13px] overflow-x-auto px-5 pt-0.5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="grid grid-cols-3 gap-2.5 px-5">
             {INFO_CARDS.map((c) => (
               <Link
                 key={c.title}
                 href={c.href}
-                className="relative h-[158px] w-[232px] shrink-0 snap-start overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
+                className="flex flex-col items-start rounded-[16px] border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
               >
-                <div className="absolute left-[18px] right-[14px] top-[18px] z-[2]">
-                  <h3
-                    className="m-0 text-[16px] font-extrabold leading-[1.3] tracking-tight text-ink"
-                    style={{ whiteSpace: "pre-line" }}
-                  >
-                    {c.title}
-                  </h3>
-                  <span className="mt-1.5 block text-[12px] font-semibold text-mute">{c.sub}</span>
-                </div>
-                <span className="absolute bottom-4 left-[18px] z-[3] grid h-[30px] w-[30px] place-items-center rounded-full border-[1.5px] border-[#DCE6EF] bg-white">
-                  <ChevronRight size={13} strokeWidth={2.4} className="text-ink" />
-                </span>
-                <div
-                  className="absolute bottom-0 right-0 flex h-[104px] w-[118px] items-center justify-center rounded-tl-[14px]"
-                  style={{ background: c.bg }}
-                  aria-hidden
+                <h3
+                  className="m-0 text-[14px] font-extrabold leading-[1.3] tracking-tight text-ink"
+                  style={{ whiteSpace: "pre-line" }}
                 >
+                  {c.title}
+                </h3>
+                <span className="mt-1 block text-[11px] font-semibold text-mute">{c.sub}</span>
+                <div className="mt-3 flex w-full justify-center">
                   <Image
                     src={c.icon}
                     alt=""
-                    width={78}
-                    height={78}
-                    className="h-[78px] w-[78px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
+                    width={64}
+                    height={64}
+                    className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
                   />
                 </div>
               </Link>
