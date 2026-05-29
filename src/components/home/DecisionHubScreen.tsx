@@ -225,12 +225,15 @@ export function DecisionHubScreen() {
 
       {/* 부평 인덱스 한 줄 */}
       <section className="mt-5 px-4">
-        <div className="rounded-[16px] border border-[#E8EFF6] bg-white p-3.5">
+        <Link
+          href="/index/bupyeong"
+          className="block rounded-[16px] border border-[#E8EFF6] bg-white p-3.5"
+        >
           <div className="flex items-center justify-between">
             <div className="text-[11px] font-bold tracking-wide text-blue-deepest">
               {regionShort ?? "부평"} 이번주 인덱스
             </div>
-            <span className="text-[10px] font-bold text-mute">데모 데이터</span>
+            <span className="text-[10px] font-bold text-blue-deepest">전체 보기 →</span>
           </div>
           <p className="mt-1.5 text-[13px] font-semibold leading-snug text-ink-soft">
             스드메 평균 <b className="text-ink">1,420만원</b> · 예식장 식대 <b className="text-ink">7.8만원</b> · 셀프인테리어 <b className="text-ink">920만원</b>
@@ -238,7 +241,24 @@ export function DecisionHubScreen() {
           <p className="mt-0.5 text-[10.5px] font-medium text-mute">
             * 사용자 가계부·리드 데이터가 쌓이면 실제 인덱스로 교체돼요
           </p>
-        </div>
+        </Link>
+      </section>
+
+      {/* B2B 파트너 입점 */}
+      <section className="mt-4 px-4">
+        <Link
+          href="/partners"
+          className="block rounded-[16px] p-3.5 text-white"
+          style={{ background: "linear-gradient(135deg,#1F3654 0%,#2566A8 70%,#3B8BCF 100%)" }}
+          onClick={() => track("partners_cta_click")}
+        >
+          <div className="text-[10.5px] font-bold tracking-wide opacity-80">
+            FOR PARTNERS
+          </div>
+          <div className="mt-0.5 text-[14px] font-extrabold">
+            부평·송도 신혼 결정 슬롯에 입점하시려면 →
+          </div>
+        </Link>
       </section>
 
       {/* 보조 진입점 */}

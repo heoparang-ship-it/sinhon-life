@@ -17,7 +17,9 @@ type EventName =
   | "chat_intent"
   | "lead_card_shown"
   | "lead_submitted"
-  | "feedback_click";
+  | "feedback_click"
+  | "partners_cta_click"
+  | "partner_loi_submitted";
 
 type EventProps = Record<string, string | number | boolean | null | undefined>;
 

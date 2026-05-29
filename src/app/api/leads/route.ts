@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { sendKakaoNotify } from "@/lib/notifications/kakao";
 
 export const runtime = "nodejs";
 
@@ -104,6 +105,13 @@ export async function POST(request: Request) {
       console.warn("/api/leads insert error:", error.message);
       return NextResponse.json({ error: "접수에 실패했어요. 잠시 후 다시 시도해 주세요." }, { status: 500 });
     }
+
+    // 카카오 알림톡 (stub — provider 미설정 시 콘솔 로그만)
+    void sendKakaoNotify({
+      to: phone,
+      template: "lead.created",
+      vars: { category: body.category, region: slots.region ?? null, name },
+    });
 
     return NextResponse.json({ ok: true, id: data?.id });
   } catch (e) {

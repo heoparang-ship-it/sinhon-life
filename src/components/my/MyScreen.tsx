@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { T, G } from "@/lib/design/tokens";
@@ -9,11 +9,33 @@ import {
   CharacterBubble,
 } from "@/components/legacy/Primitives";
 import { signOut, useSession } from "@/lib/supabase/useSession";
+import { useUserProfile, type DecisionCategory } from "@/lib/profile/useUserProfile";
+
+const DECISION_LABEL: Record<DecisionCategory, string> = {
+  sdm: "스드메",
+  venue: "예식장",
+  interior: "신혼집",
+  goods: "혼수",
+  honeymoon: "신혼여행",
+};
+
+function daysUntil(date: string | null): number | null {
+  if (!date) return null;
+  const d = new Date(date + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.round((d.getTime() - now.getTime()) / 86400000);
+}
 
 export function MyScreen() {
   const session = useSession();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+  const { profile } = useUserProfile();
+  const dday = useMemo(() => daysUntil(profile.weddingDate), [profile.weddingDate]);
+  const completed = profile.completedDecisions.length;
+  const ratio = Math.round((completed / 5) * 100);
 
   const handleSignOut = async () => {
     if (typeof window !== "undefined" && !window.confirm("로그아웃할까요?")) return;
@@ -142,9 +164,18 @@ export function MyScreen() {
               }}
             >
               {[
-                { label: "저장한 영상", value: "—" },
-                { label: "이번달 내역", value: "—" },
-                { label: "함께한 일", value: "—" },
+                {
+                  label: "결정 진행률",
+                  value: `${completed}/5`,
+                },
+                {
+                  label: "예식 D-day",
+                  value: dday !== null && dday >= 0 ? `D-${dday}` : "—",
+                },
+                {
+                  label: "Choice Share",
+                  value: ratio + "%",
+                },
               ].map((s, i) => (
                 <div
                   key={i}
@@ -205,8 +236,51 @@ export function MyScreen() {
         </div>
       </div>
 
+      {/* Decision Portfolio */}
+      <div style={{ padding: "28px 28px 0" }}>
+        <MicroLabel>My Decision Portfolio</MicroLabel>
+        <div
+          style={{
+            marginTop: 12,
+            padding: "14px 16px",
+            borderRadius: 16,
+            border: "1px solid #E8EFF6",
+            background: "#FFF",
+          }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {(["sdm", "venue", "interior", "goods", "honeymoon"] as DecisionCategory[]).map(
+              (c) => {
+                const done = profile.completedDecisions.includes(c);
+                return (
+                  <span
+                    key={c}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "5px 10px",
+                      borderRadius: 999,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      background: done ? "#3B8BCF" : "#F1F5FA",
+                      color: done ? "#FFF" : T.mute,
+                    }}
+                  >
+                    {done ? "✓" : "○"} {DECISION_LABEL[c]}
+                  </span>
+                );
+              },
+            )}
+          </div>
+          <div style={{ marginTop: 10, fontSize: 11.5, color: T.mute }}>
+            홈에서 카테고리별로 ‘결정 완료’ 표시할 수 있어요.
+          </div>
+        </div>
+      </div>
+
       {/* Menu */}
-      <div style={{ padding: "36px 28px 0" }}>
+      <div style={{ padding: "28px 28px 0" }}>
         <MicroLabel>Account</MicroLabel>
         <div style={{ marginTop: 14 }}>
           <MenuRow
