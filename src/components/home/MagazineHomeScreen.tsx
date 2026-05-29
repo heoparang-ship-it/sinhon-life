@@ -8,7 +8,7 @@ import {
   Play,
   ChevronRight,
 } from "lucide-react";
-import { useUserProfile, type DecisionCategory } from "@/lib/profile/useUserProfile";
+import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
 
 /* ───────────────────────────── 데이터 ───────────────────────────── */
@@ -173,12 +173,31 @@ const MAGAZINES: Magazine[] = [
   },
 ];
 
+/* 홈 하단 상시 노출 세로 아카이브 그리드 (인스타 영상 피드) */
+type ArchiveItem = {
+  time: string;
+  title: string;
+  tag: string;
+  bg: string;
+  emoji: string;
+};
+
+const ARCHIVE_FEED: ArchiveItem[] = [
+  { time: "0:31", title: "20평 신혼집 셀프 인테리어", tag: "#신혼집", bg: "linear-gradient(135deg,#E8EEF8,#CBD9EE)", emoji: "🏠" },
+  { time: "0:45", title: "스드메 200만원 후기", tag: "#스드메", bg: "linear-gradient(135deg,#F6E7EC,#ECCAD6)", emoji: "💐" },
+  { time: "0:22", title: "예단·예물 요즘 트렌드", tag: "#예단", bg: "linear-gradient(135deg,#EAF1F7,#CFE0F0)", emoji: "💍" },
+  { time: "0:38", title: "혼수 가전 리스트 공유", tag: "#혼수", bg: "linear-gradient(135deg,#E9F3EC,#CBE6D4)", emoji: "🧺" },
+  { time: "0:50", title: "다낭 5박 6일 허니문", tag: "#신혼여행", bg: "linear-gradient(135deg,#E5F0F7,#C2DCEF)", emoji: "✈️" },
+  { time: "0:27", title: "송도 예식장 실내 투어", tag: "#예식장", bg: "linear-gradient(135deg,#F3ECE2,#E2D0BC)", emoji: "⛪" },
+  { time: "0:34", title: "부평 신혼집 발품 브이로그", tag: "#부평신혼", bg: "linear-gradient(135deg,#ECE8F7,#D3C9EE)", emoji: "🔑" },
+  { time: "0:19", title: "본식 스냅 vs DVD 비교", tag: "#웨딩촬영", bg: "linear-gradient(135deg,#E8EEF8,#C9D9EE)", emoji: "📷" },
+];
+
 /* ───────────────────────────── 컴포넌트 ───────────────────────────── */
 
 export function MagazineHomeScreen() {
   const heroTrackRef = useRef<HTMLDivElement>(null);
   const [heroIndex, setHeroIndex] = useState(0);
-  const { profile } = useUserProfile();
 
   useEffect(() => {
     const el = heroTrackRef.current;
@@ -393,12 +412,51 @@ export function MagazineHomeScreen() {
           </div>
         </section>
 
-        {/* 비로그인 카카오 CTA (옵션) */}
-        {profile.onboardedAt && (
-          <div className="mx-5 mt-8 text-center text-[10.5px] font-semibold text-mute">
-            sinhon.life · 부평·송도 신혼 결정 데이터
+        {/* 영상 아카이브 — 상시 노출 세로 그리드 */}
+        <section className="mt-[34px]">
+          <div className="mb-3.5 flex items-center justify-between px-5">
+            <h2 className="text-[20px] font-extrabold tracking-tight">영상 아카이브</h2>
+            <Link
+              href="/archive"
+              className="flex items-center gap-1 whitespace-nowrap text-[13.5px] font-bold text-blue-accent"
+            >
+              전체보기 ›
+            </Link>
           </div>
-        )}
+          <div className="grid grid-cols-2 gap-3 px-5">
+            {ARCHIVE_FEED.map((a) => (
+              <Link key={a.title} href="/archive" className="block">
+                <div className="relative w-full overflow-hidden rounded-[16px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]" style={{ aspectRatio: "9 / 16" }}>
+                  <span className="absolute left-[10px] top-[10px] z-[2] rounded-full bg-black/60 px-2 py-[3px] text-[11px] font-bold text-white backdrop-blur-[2px]">
+                    {a.time}
+                  </span>
+                  <span className="absolute right-[9px] top-[9px] z-[2] grid h-[30px] w-[30px] place-items-center rounded-full bg-black/50 backdrop-blur-[2px]">
+                    <Play size={12} fill="#fff" stroke="none" />
+                  </span>
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: a.bg }} aria-hidden>
+                    <span className="text-[56px]">{a.emoji}</span>
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/55 to-transparent p-2.5 pt-6">
+                    <div className="text-[12.5px] font-bold leading-snug text-white">{a.title}</div>
+                    <div className="mt-0.5 text-[11px] font-semibold text-white/85">{a.tag}</div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-5 px-5">
+            <Link
+              href="/archive"
+              className="flex h-[46px] items-center justify-center rounded-full border border-[#DCE6EF] bg-white text-[14px] font-bold text-blue-accent"
+            >
+              아카이브 더보기
+            </Link>
+          </div>
+        </section>
+
+        <div className="mx-5 mt-8 text-center text-[10.5px] font-semibold text-mute">
+          sinhon.life · 부평·송도 신혼 결정 데이터
+        </div>
       </div>
     </div>
   );
