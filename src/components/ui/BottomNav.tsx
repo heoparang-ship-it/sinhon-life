@@ -1,109 +1,66 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-
-type Tab = {
-  href: string;
-  label: string;
-  icon: (active: boolean) => React.ReactNode;
-};
-
-const sw = 1.5;
-const iconColor = (active: boolean) => (active ? "#1A2433" : "rgba(26,36,51,0.36)");
-
-const TABS: Tab[] = [
-  {
-    href: "/",
-    label: "홈",
-    icon: (a) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 11l8-6 8 6v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z"
-          stroke={iconColor(a)}
-          strokeWidth={sw}
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "/budget",
-    label: "가계부",
-    icon: (a) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="5" width="16" height="15" rx="2.5" stroke={iconColor(a)} strokeWidth={sw} />
-        <path d="M8 10h8M8 14h5" stroke={iconColor(a)} strokeWidth={sw} strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    href: "/ai",
-    label: "AI톡",
-    icon: (a) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 8a3 3 0 013-3h10a3 3 0 013 3v4a3 3 0 01-3 3h-5l-5 3.5V15H7a3 3 0 01-3-3V8z"
-          stroke={iconColor(a)}
-          strokeWidth={sw}
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 10h6M9 12.5h3.5"
-          stroke={iconColor(a)}
-          strokeWidth={sw}
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "/my",
-    label: "MY",
-    icon: (a) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="9" r="3.5" stroke={iconColor(a)} strokeWidth={sw} />
-        <path
-          d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5"
-          stroke={iconColor(a)}
-          strokeWidth={sw}
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-];
 
 export function BottomNav() {
   const pathname = usePathname() || "/";
+  const homeActive = pathname === "/";
+  const myActive =
+    pathname === "/my" || pathname.startsWith("/my/") || pathname === "/budget" || pathname.startsWith("/budget/");
+
   return (
     <nav
-      className="fixed left-3.5 right-3.5 bottom-6 max-w-[452px] mx-auto bg-white rounded-[26px] px-2 py-3 z-30 shadow-[0_18px_40px_-14px_rgba(20,40,80,0.22),0_2px_6px_rgba(20,40,80,0.05)] lg:absolute lg:left-0 lg:right-0 lg:bottom-0 lg:max-w-none lg:mx-0 lg:rounded-none lg:border-t lg:border-hairline lg:shadow-none lg:px-4 lg:py-4"
-      style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}
+      className="fixed left-0 right-0 bottom-0 z-30 mx-auto flex h-[82px] max-w-[480px] items-start justify-around border-t border-[#EEF2F6] bg-white/95 pt-[11px] backdrop-blur-md lg:absolute"
+      style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
     >
-      <div className="grid grid-cols-4">
-        {TABS.map((tab) => {
-          const active =
-            tab.href === "/"
-              ? pathname === "/"
-              : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className="flex flex-col items-center gap-1.5 cursor-pointer select-none"
-            >
-              {tab.icon(active)}
-              <div
-                className={`text-[10.5px] tracking-tight ${
-                  active ? "font-semibold text-ink" : "font-medium text-[rgba(26,36,51,0.40)]"
-                }`}
-              >
-                {tab.label}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      {/* 홈 */}
+      <Link href="/" className="flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap">
+        <Image
+          src="/icons/14_tab_home.png"
+          alt="홈"
+          width={26}
+          height={26}
+          className={`h-[26px] w-[26px] object-contain transition-opacity ${homeActive ? "opacity-100" : "opacity-45"}`}
+        />
+        <span className={`text-[11.5px] font-bold ${homeActive ? "text-blue-accent" : "text-[#A9B4C0]"}`}>홈</span>
+      </Link>
+
+      {/* 가운데 떠있는 AI톡 */}
+      <Link
+        href="/ai"
+        className="flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap"
+        aria-label="AI톡"
+      >
+        <span
+          className="-mt-[28px] mb-1 grid h-[60px] w-[60px] place-items-center rounded-full"
+          style={{
+            background: "linear-gradient(150deg,#4F9CDB,#2F77BE)",
+            boxShadow: "0 12px 24px rgba(47,119,190,0.42), 0 0 0 5px #fff",
+          }}
+        >
+          <Image
+            src="/icons/03_ai_talk.png"
+            alt="AI톡"
+            width={34}
+            height={34}
+            className="h-[34px] w-[34px] object-contain"
+          />
+        </span>
+        <span className="text-[11.5px] font-bold text-blue-accent">AI톡</span>
+      </Link>
+
+      {/* MY */}
+      <Link href="/my" className="flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap">
+        <Image
+          src="/icons/15_tab_my.png"
+          alt="MY"
+          width={26}
+          height={26}
+          className={`h-[26px] w-[26px] object-contain transition-opacity ${myActive ? "opacity-100" : "opacity-45"}`}
+        />
+        <span className={`text-[11.5px] font-bold ${myActive ? "text-blue-accent" : "text-[#A9B4C0]"}`}>MY</span>
+      </Link>
     </nav>
   );
 }

@@ -1,5 +1,5 @@
-import { DecisionHubScreen } from "@/components/home/DecisionHubScreen";
+import { MagazineHomeScreen } from "@/components/home/MagazineHomeScreen";
 
 export default function HomePage() {
-  return <DecisionHubScreen />;
+  return <MagazineHomeScreen />;
 }
