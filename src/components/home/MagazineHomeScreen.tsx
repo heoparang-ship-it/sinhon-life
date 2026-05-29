@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Play, ChevronRight } from "lucide-react";
 import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
+import { useArchiveList } from "@/lib/instagram/client";
 
 /* ───────────────────────────── 데이터 ───────────────────────────── */
 
@@ -165,6 +166,35 @@ export function MagazineHomeScreen() {
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // 자동 슬라이드 (4초). 사용자가 직접 스와이프하면 잠시 멈췄다 재개.
+  useEffect(() => {
+    const el = heroTrackRef.current;
+    if (!el) return;
+    let paused = false;
+    let resumeTimer: ReturnType<typeof setTimeout> | undefined;
+    const pause = () => {
+      paused = true;
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => (paused = false), 6000);
+    };
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("pointerdown", pause, { passive: true });
+    const id = setInterval(() => {
+      if (paused) return;
+      const step = el.clientWidth - 28;
+      if (step <= 0) return;
+      const cur = Math.round(el.scrollLeft / step);
+      const next = cur + 1 >= HERO_SLIDES.length ? 0 : cur + 1;
+      el.scrollTo({ left: next * step, behavior: "smooth" });
+    }, 4000);
+    return () => {
+      clearInterval(id);
+      if (resumeTimer) clearTimeout(resumeTimer);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("pointerdown", pause);
+    };
   }, []);
 
   return (
@@ -344,10 +374,10 @@ export function MagazineHomeScreen() {
           </div>
         </section>
 
-        {/* 매거진 */}
+        {/* 지금 찾는 꿀팁 (기존 매거진 더미) */}
         <section className="mt-[30px]">
           <div className="mb-3.5 flex items-center justify-between px-5">
-            <h2 className="text-[20px] font-extrabold tracking-tight">신혼생활 매거진</h2>
+            <h2 className="text-[20px] font-extrabold tracking-tight">지금 찾는 꿀팁</h2>
             <Link
               href="/archive"
               className="flex items-center gap-1 whitespace-nowrap text-[13.5px] font-bold text-blue-accent"
@@ -386,52 +416,104 @@ export function MagazineHomeScreen() {
           </div>
         </section>
 
-        {/* 영상 아카이브 — 상시 노출 세로 그리드 */}
-        <section className="mt-[34px]">
-          <div className="mb-3.5 flex items-center justify-between px-5">
-            <h2 className="text-[20px] font-extrabold tracking-tight">영상 아카이브</h2>
-            <Link
-              href="/archive"
-              className="flex items-center gap-1 whitespace-nowrap text-[13.5px] font-bold text-blue-accent"
-            >
-              전체보기 ›
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3 px-5">
-            {ARCHIVE_FEED.map((a) => (
-              <Link key={a.title} href="/archive" className="block">
-                <div className="relative w-full overflow-hidden rounded-[16px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]" style={{ aspectRatio: "9 / 16" }}>
-                  <span className="absolute left-[10px] top-[10px] z-[2] rounded-full bg-black/60 px-2 py-[3px] text-[11px] font-bold text-white backdrop-blur-[2px]">
-                    {a.time}
-                  </span>
-                  <span className="absolute right-[9px] top-[9px] z-[2] grid h-[30px] w-[30px] place-items-center rounded-full bg-black/50 backdrop-blur-[2px]">
-                    <Play size={12} fill="#fff" stroke="none" />
-                  </span>
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: a.bg }} aria-hidden>
-                    <span className="text-[56px]">{a.emoji}</span>
-                  </div>
-                  <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/55 to-transparent p-2.5 pt-6">
-                    <div className="text-[12.5px] font-bold leading-snug text-white">{a.title}</div>
-                    <div className="mt-0.5 text-[11px] font-semibold text-white/85">{a.tag}</div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-5 px-5">
-            <Link
-              href="/archive"
-              className="flex h-[46px] items-center justify-center rounded-full border border-[#DCE6EF] bg-white text-[14px] font-bold text-blue-accent"
-            >
-              아카이브 더보기
-            </Link>
-          </div>
-        </section>
+        {/* 신혼생활 매거진 — 최신 인스타 자동 연결 (1줄 가로) */}
+        <MagazineRow />
 
         <div className="mx-5 mt-8 text-center text-[10.5px] font-semibold text-mute">
           sinhon.life · 부평·송도 신혼 결정 데이터
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── 신혼생활 매거진: 최신 인스타 자동 연결 1줄 가로 ── */
+
+function captionTitle(caption: string | null): string {
+  if (!caption) return "신혼생활 영상";
+  const firstLine = caption.split("\n").find((l) => l.trim().length > 0) ?? caption;
+  const clean = firstLine.replace(/#[^\s#]+/g, "").trim();
+  const base = clean.length > 0 ? clean : firstLine.trim();
+  return base.length > 24 ? base.slice(0, 24) + "…" : base;
+}
+
+function MagazineRow() {
+  const { data, loading } = useArchiveList({ limit: 12 });
+  const live = data?.items ?? [];
+  const useLive = live.length > 0;
+
+  return (
+    <section className="mt-[34px]">
+      <div className="mb-3.5 flex items-center justify-between px-5">
+        <h2 className="text-[20px] font-extrabold tracking-tight">신혼생활 매거진</h2>
+        <Link
+          href="/archive"
+          className="flex items-center gap-1 whitespace-nowrap text-[13.5px] font-bold text-blue-accent"
+        >
+          전체보기 ›
+        </Link>
+      </div>
+      <div className="flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {useLive
+          ? live.map((it) => {
+              const isVideo = it.media_type === "VIDEO" || it.media_type === "REELS";
+              const thumb = it.thumbnail_url ?? it.media_url;
+              return (
+                <Link key={it.id} href={`/archive/${it.id}`} className="w-[150px] shrink-0">
+                  <div
+                    className="relative w-full overflow-hidden rounded-[14px] bg-[#E3EDF7] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
+                    style={{ aspectRatio: "9 / 16" }}
+                  >
+                    {thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-[#E3EDF7] to-[#C9DDF0]" />
+                    )}
+                    {isVideo && (
+                      <span className="absolute right-2 top-2 z-[2] grid h-[28px] w-[28px] place-items-center rounded-full bg-black/50 backdrop-blur-[2px]">
+                        <Play size={11} fill="#fff" stroke="none" />
+                      </span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/60 to-transparent p-2 pt-6">
+                      <div className="line-clamp-2 text-[11.5px] font-bold leading-snug text-white">
+                        {captionTitle(it.caption)}
+                      </div>
+                      {it.tags?.[0] && (
+                        <div className="mt-0.5 text-[10.5px] font-semibold text-white/85">
+                          #{it.tags[0]}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          : ARCHIVE_FEED.map((a) => (
+              <Link key={a.title} href="/archive" className="w-[150px] shrink-0">
+                <div
+                  className="relative w-full overflow-hidden rounded-[14px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
+                  style={{ aspectRatio: "9 / 16" }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: a.bg }} aria-hidden>
+                    <span className="text-[48px]">{a.emoji}</span>
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-black/55 to-transparent p-2 pt-6">
+                    <div className="text-[11.5px] font-bold leading-snug text-white">{a.title}</div>
+                    <div className="mt-0.5 text-[10.5px] font-semibold text-white/85">{a.tag}</div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+        {loading && !useLive &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={`sk-${i}`}
+              className="w-[150px] shrink-0 animate-pulse rounded-[14px] bg-[#EEF2F6]"
+              style={{ aspectRatio: "9 / 16" }}
+            />
+          ))}
+      </div>
+    </section>
   );
 }
