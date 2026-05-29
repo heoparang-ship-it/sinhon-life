@@ -6,22 +6,108 @@ export const runtime = "nodejs";
 
 type Turn = { role: "user" | "assistant"; content: string };
 
-const SYSTEM_PROMPT = `당신은 한국 신혼생활 서비스 'sinhon.life'의 AI 도우미입니다.
-신혼부부의 결혼 준비(스튜디오·드레스·메이크업·웨딩홀·신혼집·정책혜택·예산 등)와 신혼생활 의사결정을 돕습니다.
+const SYSTEM_PROMPT = `당신은 한국 신혼생활 서비스 'sinhon.life'의 의사결정 도우미입니다.
+신혼부부의 결혼 준비를 5대 결정점에서 도와요: ①스드메(sdm) ②예식장(venue) ③신혼집 인테리어(interior) ④혼수 가전·가구(goods) ⑤신혼여행(honeymoon).
 
-원칙:
-- 따뜻하고 친근한 톤. 반말 아님. "~해요" 체.
+지역 기본: 현재는 **인천(부평·송도) 중심**. 인천 외 지역을 물으면 "지금은 인천 부평·송도 중심이라 다른 지역은 아직 정확하지 않아요"라고 솔직히 안내해요.
+
+톤·원칙:
+- 따뜻하고 친근한 "~해요" 체. 반말 아님.
 - 답변은 짧고 명확하게(3~6문장). 필요하면 번호/줄바꿈 사용.
-- 모르는 정보는 추측하지 말고 "그건 확실하지 않아요" 라고 솔직히 말함.
-- 정책·금액 수치는 항상 "검색·확인 권장"임을 덧붙임.
-- 단순 정보 나열보다, 사용자 상황을 한두 가지 짧게 되묻고 맞춤 도움 주려 함.`;
+- 모르는 건 추측하지 말고 "그건 확실하지 않아요". 특정 업체명·정확한 가격을 단정하지 않아요.
+- 사용자 상황을 1~2개 짧게 되묻고 맞춤 도움 주려 함.
+
+★의사결정 가드 모드(Choice Share 원칙):
+- 5대 결정점 중 하나가 의도라고 판단되면, 대화에서 다음 슬롯을 자연스럽게 한두 개씩 채워요:
+  category(5개 중 하나), region(incheon-bupyeong | incheon-songdo | incheon-etc | etc), budgetManwon(만원 단위 정수), weddingDate(YYYY-MM-DD), styleTags(배열), priorityTag(가격|품질|위치|기타)
+- 비슷한 신혼들 비교는 "비슷한 신혼들은 평균 ○○만 원 정도예요" 같이 일반 범위로만, 정확한 시세는 "함께 확인해 봐요"로 덧붙여요.
+- category 포함 4개 이상의 슬롯이 채워졌고 사용자가 추천을 원한다고 판단되면, 답변 마지막에 정확히 다음 두 줄을 추가해요(사용자 화면에서는 자동 제거됨):
+[LEAD_CTA:<category>]
+[SLOTS:<유효한 JSON 한 줄>]
+- 슬롯이 부족하면 절대 LEAD_CTA를 출력하지 말고 다음 슬롯을 자연스럽게 물어요.`;
 
 const isValidUuid = (s: unknown): s is string =>
   typeof s === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
+const LEAD_CATEGORIES = ["sdm", "venue", "interior", "goods", "honeymoon"] as const;
+type LeadCategory = (typeof LEAD_CATEGORIES)[number];
+
+type SlotsHint = {
+  category?: LeadCategory;
+  region?: string | null;
+  budgetManwon?: number | null;
+  weddingDate?: string | null;
+  styleTags?: string[];
+  priorityTag?: string | null;
+};
+
+type ChatCta = { type: "decision_lead"; category: LeadCategory; slotsHint: SlotsHint };
+
+/** 모델 응답에서 [LEAD_CTA:<cat>] + [SLOTS:{...}] 토큰을 떼어내고 정제된 텍스트·cta 반환 */
+function extractCta(raw: string): { text: string; cta: ChatCta | null } {
+  const ctaRe = /\[LEAD_CTA:(sdm|venue|interior|goods|honeymoon)\]/i;
+  const slotsRe = /\[SLOTS:(\{[\s\S]*?\})\]/i;
+
+  const ctaMatch = raw.match(ctaRe);
+  if (!ctaMatch) return { text: raw, cta: null };
+
+  const category = ctaMatch[1].toLowerCase() as LeadCategory;
+
+  let slotsHint: SlotsHint = { category };
+  const slotsMatch = raw.match(slotsRe);
+  if (slotsMatch) {
+    try {
+      const parsed = JSON.parse(slotsMatch[1]) as Partial<SlotsHint>;
+      slotsHint = {
+        category,
+        region: typeof parsed.region === "string" ? parsed.region : null,
+        budgetManwon:
+          typeof parsed.budgetManwon === "number" && Number.isFinite(parsed.budgetManwon)
+            ? Math.round(parsed.budgetManwon)
+            : null,
+        weddingDate:
+          typeof parsed.weddingDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parsed.weddingDate)
+            ? parsed.weddingDate
+            : null,
+        styleTags: Array.isArray(parsed.styleTags)
+          ? parsed.styleTags.filter((t): t is string => typeof t === "string").slice(0, 8)
+          : [],
+        priorityTag: typeof parsed.priorityTag === "string" ? parsed.priorityTag : null,
+      };
+    } catch {
+      /* JSON 파싱 실패 — category 만 사용 */
+    }
+  }
+
+  const text = raw.replace(ctaRe, "").replace(slotsRe, "").trim();
+  return { text, cta: { type: "decision_lead", category, slotsHint } };
+}
+
+type ProfileHint = {
+  weddingDate?: string | null;
+  region?: string | null;
+};
+
+const REGION_KOR: Record<string, string> = {
+  "incheon-bupyeong": "인천 부평",
+  "incheon-songdo": "인천 송도",
+  "incheon-etc": "인천(기타)",
+  etc: "기타 지역",
+};
+
+function profileContext(p: ProfileHint | undefined): string | null {
+  if (!p) return null;
+  const parts: string[] = [];
+  if (p.region && REGION_KOR[p.region]) parts.push(`거주(예정) 지역: ${REGION_KOR[p.region]}`);
+  if (p.weddingDate && /^\d{4}-\d{2}-\d{2}$/.test(p.weddingDate))
+    parts.push(`예식 예정일: ${p.weddingDate}`);
+  if (parts.length === 0) return null;
+  return `사용자 컨텍스트: ${parts.join(" · ")}. 이 정보를 답변·슬롯 추출에 반영해요.`;
+}
+
 export async function POST(request: Request) {
-  let body: { message?: string; history?: Turn[]; sessionId?: string };
+  let body: { message?: string; history?: Turn[]; sessionId?: string; profile?: ProfileHint };
   try {
     body = await request.json();
   } catch {
@@ -47,8 +133,10 @@ export async function POST(request: Request) {
   }
 
   const history = Array.isArray(body.history) ? body.history.slice(-10) : [];
+  const ctx = profileContext(body.profile);
   const messages = [
     { role: "system" as const, content: SYSTEM_PROMPT },
+    ...(ctx ? [{ role: "system" as const, content: ctx }] : []),
     ...history
       .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string")
       .map((t) => ({ role: t.role, content: t.content })),
@@ -56,7 +144,7 @@ export async function POST(request: Request) {
   ];
 
   const startedAt = Date.now();
-  let reply: string;
+  let rawReply: string;
   let degraded = false;
   try {
     const client = new OpenAI({ apiKey });
@@ -66,15 +154,17 @@ export async function POST(request: Request) {
       temperature: 0.6,
       max_tokens: 600,
     });
-    reply =
+    rawReply =
       completion.choices?.[0]?.message?.content?.trim() ??
       "죄송해요, 답변을 만들지 못했어요. 다시 한 번 보내주실래요?";
   } catch (e) {
     console.error("/api/chat openai error:", e);
-    reply = "지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.";
+    rawReply = "지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.";
     degraded = true;
   }
   const latencyMs = Date.now() - startedAt;
+
+  const { text: reply, cta } = degraded ? { text: rawReply, cta: null } : extractCta(rawReply);
 
   // ─── 대화 로그 저장 (Supabase) ────────────────────────────────────
   // 실패해도 응답은 정상 반환 (fire-and-forget이지만 await로 짧게)
@@ -118,5 +208,6 @@ export async function POST(request: Request) {
     sessionId,
     messageId: assistantMessageId,
     degraded,
+    cta,
   });
 }

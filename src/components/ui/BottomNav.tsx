@@ -14,7 +14,7 @@ const iconColor = (active: boolean) => (active ? "#1A2433" : "rgba(26,36,51,0.36
 const TABS: Tab[] = [
   {
     href: "/",
-    label: "아카이브",
+    label: "홈",
     icon: (a) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path
