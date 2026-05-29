@@ -279,6 +279,58 @@ export function MyScreen() {
         </div>
       </div>
 
+      {/* 가계부 진입 (탭 자리에서 빠진 만큼 강조) */}
+      <div style={{ padding: "20px 20px 0" }}>
+        <Link
+          href="/budget"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            padding: "16px 18px",
+            borderRadius: 16,
+            background: "linear-gradient(135deg,#EDF5FC 0%,#D6E9FA 100%)",
+            textDecoration: "none",
+            color: T.ink,
+          }}
+        >
+          <span
+            style={{
+              flex: "0 0 auto",
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: "#fff",
+              display: "grid",
+              placeItems: "center",
+              boxShadow: "0 6px 12px rgba(31,94,158,0.18)",
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="5" width="16" height="15" rx="2.5" stroke={T.accentDeep} strokeWidth="1.8" />
+              <path d="M8 10h8M8 14h5" stroke={T.accentDeep} strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.3px" }}>
+              결혼 가계부
+            </div>
+            <div style={{ marginTop: 2, fontSize: 12, color: T.mute, fontWeight: 600 }}>
+              둘이서 같이 쓰는 신혼 가계부
+            </div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 5l7 7-7 7"
+              stroke={T.accentDeep}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      </div>
+
       {/* Menu */}
       <div style={{ padding: "28px 28px 0" }}>
         <MicroLabel>Account</MicroLabel>
