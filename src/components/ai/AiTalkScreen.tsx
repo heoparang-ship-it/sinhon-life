@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { useUserProfile } from "@/lib/profile/useUserProfile";
+import { track } from "@/lib/analytics/track";
 import {
   Camera,
   Church,
@@ -72,12 +75,25 @@ function ensureSessionId(): string {
   return id;
 }
 
+const SEED_PROMPTS: Record<LeadCategory, string> = {
+  sdm: "부평·송도 중심으로 스드메 추천 받고 싶어요.",
+  venue: "송도/부평 예식장 비교해 주세요.",
+  interior: "신혼집 인테리어 상담 도와주세요.",
+  goods: "혼수 가전·가구 추천해 주세요.",
+  honeymoon: "신혼여행 어디로 가면 좋을지 추천해 주세요.",
+};
+
+type FlowStep = 1 | 2 | 3 | 4;
+
 export function AiTalkScreen() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Turn[]>([]);
   const [pending, setPending] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const seedHandledRef = useRef(false);
+  const searchParams = useSearchParams();
+  const { profile } = useUserProfile();
 
   useEffect(() => {
     setSessionId(ensureSessionId());
@@ -96,11 +112,20 @@ export function AiTalkScreen() {
     setMessages(nextHistory);
     setDraft("");
     setPending(true);
+    track("chat_send", { length: trimmed.length });
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, history, sessionId }),
+        body: JSON.stringify({
+          message: trimmed,
+          history,
+          sessionId,
+          profile: {
+            weddingDate: profile.weddingDate,
+            region: profile.region,
+          },
+        }),
       });
       const data = (await res.json()) as {
         reply?: string;
@@ -109,6 +134,9 @@ export function AiTalkScreen() {
         cta?: ChatCta | null;
       };
       const reply = data.reply || data.error || "답변을 받지 못했어요.";
+      if (data.cta?.type === "decision_lead") {
+        track("lead_card_shown", { category: data.cta.category });
+      }
       setMessages([
         ...nextHistory,
         {
@@ -133,16 +161,38 @@ export function AiTalkScreen() {
     }
   };
 
+  // ?seed=<category> 로 진입 시 첫 메시지 자동 전송 (1회)
+  useEffect(() => {
+    if (seedHandledRef.current) return;
+    if (!sessionId) return;
+    const seed = searchParams?.get("seed") as LeadCategory | null;
+    if (!seed || !SEED_PROMPTS[seed]) return;
+    seedHandledRef.current = true;
+    track("chat_intent", { category: seed, source: "seed" });
+    void send(SEED_PROMPTS[seed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, searchParams]);
+
   const markLeadSubmitted = (index: number) => {
     setMessages((prev) =>
       prev.map((m, i) => (i === index ? { ...m, leadSubmitted: true } : m)),
     );
   };
 
+  // 4스텝 스테퍼 단계 계산
+  const flowStep: FlowStep = useMemo(() => {
+    if (messages.some((m) => m.leadSubmitted)) return 4;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (lastAssistant?.cta?.type === "decision_lead") return 3;
+    if (messages.some((m) => m.role === "user")) return 2;
+    return 1;
+  }, [messages]);
+
   const submitFeedback = async (index: number, value: 1 | -1) => {
     const target = messages[index];
     if (!target || target.role !== "assistant") return;
     const next: 1 | 0 | -1 = target.feedback === value ? 0 : value;
+    track("feedback_click", { value: next });
     // 낙관적 업데이트
     setMessages((prev) =>
       prev.map((m, i) => (i === index ? { ...m, feedback: next } : m)),
@@ -178,6 +228,9 @@ export function AiTalkScreen() {
           </div>
         </div>
       </header>
+
+      {/* 4스텝 스테퍼 */}
+      <FlowStepper step={flowStep} />
 
       {/* 채팅 영역 */}
       <div
@@ -293,6 +346,7 @@ export function AiTalkScreen() {
                     prefilled={m.cta.slotsHint}
                     onSubmitted={() => {
                       markLeadSubmitted(i);
+                      track("lead_submitted", { category: m.cta?.category ?? null });
                       setMessages((prev) => [
                         ...prev,
                         {
@@ -384,6 +438,52 @@ function TypingDots() {
       <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-[#9EB6CC] [animation-delay:-0.15s]" />
       <span className="block h-1.5 w-1.5 animate-bounce rounded-full bg-[#9EB6CC]" />
     </span>
+  );
+}
+
+function FlowStepper({ step }: { step: FlowStep }) {
+  const STEPS: { n: FlowStep; label: string }[] = [
+    { n: 1, label: "질문" },
+    { n: 2, label: "상황 이해" },
+    { n: 3, label: "맞춤 추천" },
+    { n: 4, label: "상담 연결" },
+  ];
+  return (
+    <div className="flex shrink-0 items-center gap-1 border-b border-[#EAF0F7] bg-white px-3 py-2">
+      {STEPS.map((s, i) => {
+        const active = step === s.n;
+        const done = step > s.n;
+        return (
+          <div key={s.n} className="flex flex-1 items-center gap-1">
+            <span
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                done
+                  ? "bg-blue-accent text-white"
+                  : active
+                    ? "bg-[#EAF3FB] text-blue-deepest ring-2 ring-blue-accent"
+                    : "bg-[#F1F5FA] text-mute"
+              }`}
+            >
+              {done ? "✓" : s.n}
+            </span>
+            <span
+              className={`text-[10.5px] font-bold tracking-tight ${
+                active ? "text-ink" : done ? "text-blue-deepest" : "text-mute"
+              }`}
+            >
+              {s.label}
+            </span>
+            {i < STEPS.length - 1 && (
+              <span
+                className={`mx-0.5 h-[1.5px] flex-1 rounded-full ${
+                  done ? "bg-blue-accent" : "bg-[#EAF0F7]"
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

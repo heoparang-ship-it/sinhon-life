@@ -1,5 +1,5 @@
-import { ArchiveHomeScreen } from "@/components/archive/ArchiveHomeScreen";
+import { DecisionHubScreen } from "@/components/home/DecisionHubScreen";
 
 export default function HomePage() {
-  return <ArchiveHomeScreen />;
+  return <DecisionHubScreen />;
 }

@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { LandingLeft } from "@/components/legacy/LandingLeft";
 import { AppFooter } from "@/components/AppFooter";
+import { OnboardingMount } from "@/components/onboarding/OnboardingMount";
 import "./globals.css";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
   title: {
@@ -70,6 +74,17 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-white text-ink lg:h-[100dvh] lg:overflow-hidden lg:bg-[#F2F4F6]">
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '${GA_ID}', {anonymize_ip: true});window.gtag = gtag;`}
+            </Script>
+          </>
+        )}
         <div className="w-full flex justify-center desktop-shell">
           <LandingLeft />
           <div className="flex-1 max-w-[480px] w-full relative desktop-phone">
@@ -80,6 +95,7 @@ export default function RootLayout({
             <BottomNav />
           </div>
         </div>
+        <OnboardingMount />
       </body>
     </html>
   );

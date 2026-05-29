@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AiTalkScreen } from "@/components/ai/AiTalkScreen";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function AiPage() {
-  return <AiTalkScreen />;
+  return (
+    <Suspense fallback={null}>
+      <AiTalkScreen />
+    </Suspense>
+  );
 }

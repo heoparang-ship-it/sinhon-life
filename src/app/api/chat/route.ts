@@ -84,8 +84,30 @@ function extractCta(raw: string): { text: string; cta: ChatCta | null } {
   return { text, cta: { type: "decision_lead", category, slotsHint } };
 }
 
+type ProfileHint = {
+  weddingDate?: string | null;
+  region?: string | null;
+};
+
+const REGION_KOR: Record<string, string> = {
+  "incheon-bupyeong": "인천 부평",
+  "incheon-songdo": "인천 송도",
+  "incheon-etc": "인천(기타)",
+  etc: "기타 지역",
+};
+
+function profileContext(p: ProfileHint | undefined): string | null {
+  if (!p) return null;
+  const parts: string[] = [];
+  if (p.region && REGION_KOR[p.region]) parts.push(`거주(예정) 지역: ${REGION_KOR[p.region]}`);
+  if (p.weddingDate && /^\d{4}-\d{2}-\d{2}$/.test(p.weddingDate))
+    parts.push(`예식 예정일: ${p.weddingDate}`);
+  if (parts.length === 0) return null;
+  return `사용자 컨텍스트: ${parts.join(" · ")}. 이 정보를 답변·슬롯 추출에 반영해요.`;
+}
+
 export async function POST(request: Request) {
-  let body: { message?: string; history?: Turn[]; sessionId?: string };
+  let body: { message?: string; history?: Turn[]; sessionId?: string; profile?: ProfileHint };
   try {
     body = await request.json();
   } catch {
@@ -111,8 +133,10 @@ export async function POST(request: Request) {
   }
 
   const history = Array.isArray(body.history) ? body.history.slice(-10) : [];
+  const ctx = profileContext(body.profile);
   const messages = [
     { role: "system" as const, content: SYSTEM_PROMPT },
+    ...(ctx ? [{ role: "system" as const, content: ctx }] : []),
     ...history
       .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string")
       .map((t) => ({ role: t.role, content: t.content })),
