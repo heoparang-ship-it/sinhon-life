@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
@@ -54,52 +55,13 @@ type QuickItem = {
   href: string;
   badge?: string;
   category?: DecisionCategory | "ai";
-  icon: React.ReactNode;
+  icon: string; // /icons/*.png
 };
 
 const QUICK_ITEMS: QuickItem[] = [
-  {
-    label: "혼수·가전·가구",
-    href: "/ai?seed=goods",
-    category: "goods",
-    icon: (
-      <svg viewBox="0 0 40 40" fill="none">
-        <rect x="9" y="15" width="22" height="10" rx="5" fill="#BBDCF6" />
-        <rect x="6" y="20" width="28" height="10" rx="4.5" fill="#3B8BCF" />
-        <rect x="6" y="18.5" width="6" height="11.5" rx="3" fill="#2563A8" />
-        <rect x="28" y="18.5" width="6" height="11.5" rx="3" fill="#2563A8" />
-        <rect x="9.5" y="29.5" width="3" height="4.5" rx="1.3" fill="#2563A8" />
-        <rect x="27.5" y="29.5" width="3" height="4.5" rx="1.3" fill="#2563A8" />
-      </svg>
-    ),
-  },
-  {
-    label: "신혼여행",
-    href: "/ai?seed=honeymoon",
-    category: "honeymoon",
-    icon: (
-      <svg viewBox="0 0 40 40" fill="none">
-        <path d="M35 6 L5 17.5 L17.5 21.5 Z" fill="#8FC2EC" />
-        <path d="M35 6 L17.5 21.5 L21 33 Z" fill="#3B8BCF" />
-        <path d="M35 6 L17.5 21.5 L24.5 18.5 Z" fill="#2563A8" />
-      </svg>
-    ),
-  },
-  {
-    label: "AI톡",
-    href: "/ai",
-    badge: "AI",
-    category: "ai",
-    icon: (
-      <svg viewBox="0 0 40 40" fill="none">
-        <path
-          d="M9 7h22a5 5 0 0 1 5 5v11a5 5 0 0 1-5 5H18l-7 5.5V28h-2a5 5 0 0 1-5-5V12a5 5 0 0 1 5-5Z"
-          fill="#2F77BE"
-        />
-        <path d="M19.5 12.5 21 17l4.5 1.5L21 20l-1.5 4.5L18 20l-4.5-1.5L18 17Z" fill="#fff" />
-      </svg>
-    ),
-  },
+  { label: "혼수·가전·가구", href: "/ai?seed=goods", category: "goods", icon: "/icons/goods.png" },
+  { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/honeymoon.png" },
+  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/ai.png" },
 ];
 
 type InfoCard = {
@@ -107,7 +69,7 @@ type InfoCard = {
   sub: string;
   href: string;
   bg: string;
-  emoji: string;
+  icon: string; // /icons/*.png
 };
 
 const INFO_CARDS: InfoCard[] = [
@@ -115,22 +77,22 @@ const INFO_CARDS: InfoCard[] = [
     title: "예산별\n신혼집 추천",
     sub: "3천~5천만원대",
     href: "/ai?seed=interior",
-    bg: "linear-gradient(135deg,#FCE9DA 0%,#F8D6BC 100%)",
-    emoji: "🏠",
+    bg: "linear-gradient(135deg,#EAF2FB 0%,#CFE2F6 100%)",
+    icon: "/icons/house.png",
+  },
+  {
+    title: "스드메·예물\n추천",
+    sub: "187쌍이 고른 옵션",
+    href: "/ai?seed=sdm",
+    bg: "linear-gradient(135deg,#EEF1FB 0%,#D7DEF4 100%)",
+    icon: "/icons/ring.png",
   },
   {
     title: "신혼여행 인기\nTOP 5",
     sub: "요즘 가장 많이 가는",
     href: "/ai?seed=honeymoon",
     bg: "linear-gradient(135deg,#D9EBFC 0%,#B5D6F4 100%)",
-    emoji: "✈️",
-  },
-  {
-    title: "혼수 가전\n체크리스트",
-    sub: "빠짐없이 한 번에",
-    href: "/checklist",
-    bg: "linear-gradient(135deg,#E5EEFD 0%,#C2D6F4 100%)",
-    emoji: "📋",
+    icon: "/icons/honeymoon.png",
   },
 ];
 
@@ -321,7 +283,13 @@ export function MagazineHomeScreen() {
                     {q.badge}
                   </span>
                 )}
-                <span className="block h-[52px] w-[52px]">{q.icon}</span>
+                <Image
+                  src={q.icon}
+                  alt={q.label}
+                  width={52}
+                  height={52}
+                  className="block h-[52px] w-[52px] object-contain"
+                />
               </span>
               <span className="text-[13.5px] font-bold tracking-tight text-ink">{q.label}</span>
             </Link>
@@ -363,7 +331,13 @@ export function MagazineHomeScreen() {
                   style={{ background: c.bg }}
                   aria-hidden
                 >
-                  <span className="text-[44px]">{c.emoji}</span>
+                  <Image
+                    src={c.icon}
+                    alt=""
+                    width={78}
+                    height={78}
+                    className="h-[78px] w-[78px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
+                  />
                 </div>
               </Link>
             ))}
