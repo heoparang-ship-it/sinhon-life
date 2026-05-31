@@ -3,7 +3,6 @@ import Script from "next/script";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { LandingLeft } from "@/components/legacy/LandingLeft";
 import { AppFooter } from "@/components/AppFooter";
-import { OnboardingMount } from "@/components/onboarding/OnboardingMount";
 import "./globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -113,7 +112,6 @@ export default function RootLayout({
             <BottomNav />
           </div>
         </div>
-        <OnboardingMount />
       </body>
     </html>
   );
