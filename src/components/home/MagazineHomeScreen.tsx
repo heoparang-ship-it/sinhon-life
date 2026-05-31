@@ -7,6 +7,7 @@ import { Play } from "lucide-react";
 import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
 import { useArchiveList } from "@/lib/instagram/client";
+import { CompactLegalRow } from "@/components/CompactLegalRow";
 
 /* ───────────────────────────── 데이터 ───────────────────────────── */
 
@@ -474,8 +475,12 @@ export function MagazineHomeScreen() {
         <MagazineRow />
 
         <div className="mx-5 mt-8 text-center text-[10.5px] font-semibold text-mute">
-          sinhon.life · 부평·송도 신혼 결정 데이터
+          sinhon.life · 인천 신혼 결정 데이터
         </div>
+
+        {/* 법적 푸터 — 내부 스크롤 마지막에 인라인. AppFooter 를 풀스크린 페이지 밖에
+            두면 body 스크롤이 따라오는 현상이 있어 내부로 옮김 */}
+        <CompactLegalRow />
       </div>
     </div>
   );
