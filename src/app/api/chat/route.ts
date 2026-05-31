@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { POLICIES } from "@/lib/policy/data";
+import { aggregatePolicies, aggregateContext } from "@/lib/policy/aggregate";
+
+/** 정책/지원금 의도 감지 — 보조금24 보조 컨텍스트 주입 트리거 */
+const POLICY_INTENT_RE =
+  /(지원금|혜택|보조금|지원\s*제도|정책|대출|버팀목|디딤돌|특례|전세|월세|보증금|이자\s*지원|출산|육아\s*수당|첫\s*만남|국민\s*행복|매입\s*임대|임대\s*주택|공공\s*임대|청년)/;
+
+function looksLikePolicyQuery(text: string): boolean {
+  return POLICY_INTENT_RE.test(text);
+}
 
 export const runtime = "nodejs";
 
@@ -150,9 +159,22 @@ export async function POST(request: Request) {
 
   const history = Array.isArray(body.history) ? body.history.slice(-10) : [];
   const ctx = profileContext(body.profile);
+
+  // 정책 의도 감지 시 모든 등록 소스(보조금24·온통청년) 병렬 조회 → 큐레이트
+  // 중복 제외 후 상위 10건을 시스템 컨텍스트로 주입
+  let policyCtx: string | null = null;
+  if (looksLikePolicyQuery(message)) {
+    const aggregated = await aggregatePolicies({
+      keyword: "신혼부부",
+      excludeNames: POLICIES.map((p) => p.name),
+    });
+    policyCtx = aggregateContext(aggregated, 10);
+  }
+
   const messages = [
     { role: "system" as const, content: SYSTEM_PROMPT },
     ...(ctx ? [{ role: "system" as const, content: ctx }] : []),
+    ...(policyCtx ? [{ role: "system" as const, content: policyCtx }] : []),
     ...history
       .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string")
       .map((t) => ({ role: t.role, content: t.content })),
