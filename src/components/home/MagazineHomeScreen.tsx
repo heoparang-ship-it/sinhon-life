@@ -65,16 +65,24 @@ type InfoCard = {
   sub: string;
   href: string;
   bg: string;
-  icon: string; // /icons/*.png
+  icon?: string; // /icons/*.png
+  /** 강조 — 카드 우상단 배지 */
+  badge?: string;
+  /** 강조 — 큰 이모지(아이콘 이미지 대체) */
+  emoji?: string;
+  /** 분석용 라벨 */
+  trackId?: string;
 };
 
 const INFO_CARDS: InfoCard[] = [
   {
-    title: "예산별\n신혼집 추천",
-    sub: "3천~5천만원대",
-    href: "/ai?seed=interior",
-    bg: "linear-gradient(135deg,#EAF2FB 0%,#CFE2F6 100%)",
-    icon: "/icons/09_budget_recommendation.png",
+    title: "내 지원금\n확인",
+    sub: "1분 · 무료",
+    href: "/support",
+    bg: "linear-gradient(135deg,#E0EDFB 0%,#B7D3F1 100%)",
+    emoji: "💰",
+    badge: "NEW",
+    trackId: "support",
   },
   {
     title: "스드메·예물\n추천",
@@ -363,8 +371,21 @@ export function MagazineHomeScreen() {
               <Link
                 key={c.title}
                 href={c.href}
-                className="flex flex-col items-start rounded-[16px] border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
+                onClick={() =>
+                  c.trackId === "support"
+                    ? track("support_entry_click", { from: "home_info_grid" })
+                    : track("decision_card_click", { from: "home_info_grid", to: c.trackId ?? c.title })
+                }
+                className="relative flex flex-col items-start rounded-[16px] border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
               >
+                {c.badge && (
+                  <span
+                    className="absolute right-2 top-2 rounded-full px-1.5 py-[2px] text-[9px] font-extrabold text-white"
+                    style={{ background: "linear-gradient(135deg,#3B8BCF,#4F9CDB)" }}
+                  >
+                    {c.badge}
+                  </span>
+                )}
                 <h3
                   className="m-0 text-[14px] font-extrabold leading-[1.3] tracking-tight text-ink"
                   style={{ whiteSpace: "pre-line" }}
@@ -373,13 +394,19 @@ export function MagazineHomeScreen() {
                 </h3>
                 <span className="mt-1 block text-[11px] font-semibold text-mute">{c.sub}</span>
                 <div className="mt-3 flex w-full justify-center">
-                  <Image
-                    src={c.icon}
-                    alt=""
-                    width={64}
-                    height={64}
-                    className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
-                  />
+                  {c.emoji ? (
+                    <span className="grid h-[64px] w-[64px] place-items-center text-[44px] drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]">
+                      {c.emoji}
+                    </span>
+                  ) : c.icon ? (
+                    <Image
+                      src={c.icon}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
+                    />
+                  ) : null}
                 </div>
               </Link>
             ))}

@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     "/",
     "/ai",
+    "/support",
     "/policy",
     "/budget",
     "/checklist",
@@ -23,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE}${p}`,
     lastModified: now,
     changeFrequency: "weekly",
-    priority: p === "/" ? 1.0 : p === "/policy" ? 0.95 : 0.7,
+    priority: p === "/" ? 1.0 : p === "/support" || p === "/policy" ? 0.95 : 0.7,
   }));
 
   const regionRoutes: MetadataRoute.Sitemap = listRegionKeys().map((k) => ({

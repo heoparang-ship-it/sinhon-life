@@ -18,8 +18,11 @@ export function AppFooter() {
     pathname.startsWith("/checklist") ||
     pathname.startsWith("/partners") ||
     pathname.startsWith("/policy") ||
+    pathname.startsWith("/support") ||
     pathname.startsWith("/lp/") ||
     pathname.startsWith("/index/");
+  // /support 결과·게이트 화면은 sticky CTA 가 깔리므로 푸터를 컴팩트하게 위로 안 끼움
+  if (pathname.startsWith("/support")) return <CompactLegalRow noBottomPad />;
   if (compact) return <CompactLegalRow noBottomPad={pathname.startsWith("/lp/")} />;
   return <Footer />;
 }

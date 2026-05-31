@@ -21,7 +21,16 @@ type EventName =
   | "lead_submitted"
   | "feedback_click"
   | "partners_cta_click"
-  | "partner_loi_submitted";
+  | "partner_loi_submitted"
+  | "support_entry_click"
+  | "support_step"
+  | "support_answer"
+  | "support_gate_shown"
+  | "support_gate_kakao"
+  | "support_gate_later"
+  | "support_result_shown"
+  | "support_share_click"
+  | "support_policy_click";
 
 type EventProps = Record<string, string | number | boolean | null | undefined>;
 
@@ -43,6 +52,9 @@ const META_EVENT_MAP: Partial<Record<EventName, string>> = {
   decision_card_click: "ViewContent",
   partner_loi_submitted: "Lead",
   onboarding_complete: "CompleteRegistration",
+  support_entry_click: "ViewContent",
+  support_result_shown: "Lead",
+  support_gate_kakao: "CompleteRegistration",
 };
 
 let posthogReady = false;
