@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 import { type DecisionCategory } from "@/lib/profile/useUserProfile";
 import { track } from "@/lib/analytics/track";
@@ -10,42 +9,6 @@ import { useArchiveList } from "@/lib/instagram/client";
 import { CompactLegalRow } from "@/components/CompactLegalRow";
 
 /* ───────────────────────────── 데이터 ───────────────────────────── */
-
-type HeroSlide = {
-  kicker: string;
-  title1: string;
-  title2: string;
-  desc: string;
-  bg: string;
-  emoji: string;
-};
-
-const HERO_SLIDES: HeroSlide[] = [
-  {
-    kicker: "신혼의 시작,",
-    title1: "더 가볍게",
-    title2: "준비해요",
-    desc: "예산·취향 맞춤 추천까지\n신혼생활의 모든 것",
-    bg: "linear-gradient(135deg,#EDF5FC 0%,#D6E9FA 100%)",
-    emoji: "💍",
-  },
-  {
-    kicker: "데이터로 결정,",
-    title1: "깜깜이 가격",
-    title2: "이젠 끝",
-    desc: "부평·송도 신혼 시세를\n한눈에 비교해요",
-    bg: "linear-gradient(135deg,#EAF2FB 0%,#CFE2F6 100%)",
-    emoji: "📊",
-  },
-  {
-    kicker: "비슷한 신혼들이,",
-    title1: "무엇을",
-    title2: "얼마에?",
-    desc: "187쌍의 선택을\nAI가 알려드려요",
-    bg: "linear-gradient(135deg,#E9F1FA 0%,#D9E7F6 100%)",
-    emoji: "✨",
-  },
-];
 
 type QuickItem = {
   label: string;
@@ -164,49 +127,6 @@ const ARCHIVE_FEED: ArchiveItem[] = [
 /* ───────────────────────────── 컴포넌트 ───────────────────────────── */
 
 export function MagazineHomeScreen() {
-  const heroTrackRef = useRef<HTMLDivElement>(null);
-  const [heroIndex, setHeroIndex] = useState(0);
-
-  useEffect(() => {
-    const el = heroTrackRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const i = Math.round(el.scrollLeft / (el.clientWidth - 28));
-      setHeroIndex(Math.min(i, HERO_SLIDES.length - 1));
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // 자동 슬라이드 (4초). 사용자가 직접 스와이프하면 잠시 멈췄다 재개.
-  useEffect(() => {
-    const el = heroTrackRef.current;
-    if (!el) return;
-    let paused = false;
-    let resumeTimer: ReturnType<typeof setTimeout> | undefined;
-    const pause = () => {
-      paused = true;
-      if (resumeTimer) clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => (paused = false), 6000);
-    };
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("pointerdown", pause, { passive: true });
-    const id = setInterval(() => {
-      if (paused) return;
-      const step = el.clientWidth - 28;
-      if (step <= 0) return;
-      const cur = Math.round(el.scrollLeft / step);
-      const next = cur + 1 >= HERO_SLIDES.length ? 0 : cur + 1;
-      el.scrollTo({ left: next * step, behavior: "smooth" });
-    }, 4000);
-    return () => {
-      clearInterval(id);
-      if (resumeTimer) clearTimeout(resumeTimer);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("pointerdown", pause);
-    };
-  }, []);
-
   return (
     <div className="flex h-[100dvh] flex-col bg-white text-ink lg:h-full">
       {/* App bar */}
@@ -245,66 +165,8 @@ export function MagazineHomeScreen() {
 
       {/* Scroll */}
       <div className="flex-1 overflow-y-auto pb-[120px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {/* Hero carousel */}
-        <div className="mt-1">
-          <div
-            ref={heroTrackRef}
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 [scrollbar-width:none] [scroll-padding:0_20px] [&::-webkit-scrollbar]:hidden"
-          >
-            {HERO_SLIDES.map((slide, i) => (
-              <article
-                key={i}
-                className="relative h-[212px] shrink-0 snap-center overflow-hidden rounded-[20px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
-                style={{ flexBasis: "calc(100% - 40px)", background: slide.bg }}
-              >
-                <div className="absolute left-[22px] right-[46%] top-6 z-[2]">
-                  <span className="text-[13px] font-extrabold tracking-tight text-blue-accent">
-                    {slide.kicker}
-                  </span>
-                  <h2 className="mt-1.5 mb-3 text-[30px] font-extrabold leading-[1.12] tracking-[-1px] text-ink">
-                    {slide.title1}
-                    <br />
-                    <b className="font-extrabold text-blue-accent">{slide.title2}</b>
-                  </h2>
-                  <p
-                    className="m-0 text-[12.5px] font-semibold leading-[1.45] text-[#56657A]"
-                    style={{ whiteSpace: "pre-line" }}
-                  >
-                    {slide.desc}
-                  </p>
-                </div>
-                <div
-                  className="absolute right-0 top-0 bottom-0 flex w-[56%] items-center justify-center"
-                  aria-hidden
-                >
-                  <span className="text-[88px] drop-shadow-[0_8px_20px_rgba(31,94,158,0.25)]">
-                    {slide.emoji}
-                  </span>
-                </div>
-                {/* 페이지 카운터 1 / 3 */}
-                <div className="absolute right-[14px] top-[14px] z-[3] rounded-full bg-white/70 px-2.5 py-[3px] text-[11.5px] font-bold tabular-nums text-ink backdrop-blur-[2px]">
-                  <span className="text-blue-accent">{heroIndex + 1}</span>
-                  <span className="text-mute"> / {HERO_SLIDES.length}</span>
-                </div>
-                <div className="absolute bottom-[18px] left-6 z-[3] flex gap-1.5">
-                  {HERO_SLIDES.map((_, di) => (
-                    <i
-                      key={di}
-                      className={`block h-[7px] rounded-full transition-[width,background] ${
-                        di === heroIndex
-                          ? "w-[18px] rounded-[4px] bg-blue-accent"
-                          : "w-[7px] bg-blue-accent/30"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-
         {/* Quick row */}
-        <div className="mx-5 mt-[22px] grid grid-cols-3 rounded-[18px] border border-[#EEF2F6] bg-white py-5 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
+        <div className="mx-5 mt-3 grid grid-cols-3 rounded-[18px] border border-[#EEF2F6] bg-white py-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
           {QUICK_ITEMS.map((q, i) => (
             <Link
               key={q.label}
@@ -330,7 +192,7 @@ export function MagazineHomeScreen() {
                 {q.emoji ? (
                   <span
                     aria-hidden
-                    className="grid h-[44px] w-[44px] place-items-center rounded-2xl text-[26px]"
+                    className="grid h-9 w-9 place-items-center rounded-xl text-[22px]"
                     style={{ background: "linear-gradient(135deg,#E0EDFB 0%,#B7D3F1 100%)" }}
                   >
                     {q.emoji}
@@ -339,9 +201,9 @@ export function MagazineHomeScreen() {
                   <Image
                     src={q.icon}
                     alt={q.label}
-                    width={40}
-                    height={40}
-                    className="block h-[40px] w-[40px] object-contain"
+                    width={36}
+                    height={36}
+                    className="block h-9 w-9 object-contain"
                   />
                 ) : null}
               </span>
@@ -354,7 +216,7 @@ export function MagazineHomeScreen() {
         <Link
           href="/policy"
           onClick={() => track("decision_card_click", { from: "home_policy_banner" })}
-          className="mx-5 mt-[18px] flex items-center gap-3 rounded-[20px] p-[18px] text-white shadow-[0_12px_28px_-12px_rgba(43,123,207,0.6)] transition active:scale-[0.99]"
+          className="mx-5 mt-3.5 flex items-center gap-3 rounded-[20px] p-[18px] text-white shadow-[0_12px_28px_-12px_rgba(43,123,207,0.6)] transition active:scale-[0.99]"
           style={{ background: "linear-gradient(120deg,#2566A8 0%,#3B8BCF 55%,#4F9CDB 100%)" }}
         >
           <span className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-2xl bg-white/18 text-[24px] backdrop-blur">
@@ -372,8 +234,8 @@ export function MagazineHomeScreen() {
         </Link>
 
         {/* 지금 많이 찾는 정보 */}
-        <section className="mt-[30px]">
-          <div className="mb-3.5 flex items-center justify-between px-5">
+        <section className="mt-6">
+          <div className="mb-2.5 flex items-center justify-between px-5">
             <h2 className="text-[20px] font-extrabold tracking-tight">지금 많이 찾는 정보</h2>
             <Link
               href="/index/bupyeong"
@@ -409,18 +271,18 @@ export function MagazineHomeScreen() {
                   {c.title}
                 </h3>
                 <span className="mt-1 block text-[11px] font-semibold text-mute">{c.sub}</span>
-                <div className="mt-3 flex w-full justify-center">
+                <div className="mt-2 flex w-full justify-center">
                   {c.emoji ? (
-                    <span className="grid h-[64px] w-[64px] place-items-center text-[44px] drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]">
+                    <span className="grid h-10 w-10 place-items-center text-[24px] drop-shadow-[0_4px_8px_rgba(31,94,158,0.18)]">
                       {c.emoji}
                     </span>
                   ) : c.icon ? (
                     <Image
                       src={c.icon}
                       alt=""
-                      width={64}
-                      height={64}
-                      className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(31,94,158,0.18)]"
                     />
                   ) : null}
                 </div>
@@ -430,8 +292,8 @@ export function MagazineHomeScreen() {
         </section>
 
         {/* 지금 찾는 꿀팁 (기존 매거진 더미) */}
-        <section className="mt-[30px]">
-          <div className="mb-3.5 flex items-center justify-between px-5">
+        <section className="mt-6">
+          <div className="mb-2.5 flex items-center justify-between px-5">
             <h2 className="text-[20px] font-extrabold tracking-tight">지금 찾는 꿀팁</h2>
             <Link
               href="/archive"
@@ -445,9 +307,9 @@ export function MagazineHomeScreen() {
               <Link
                 key={m.title}
                 href="/archive"
-                className="w-[300px] shrink-0 snap-start"
+                className="w-[240px] shrink-0 snap-start"
               >
-                <div className="relative h-[172px] w-full overflow-hidden rounded-[16px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]">
+                <div className="relative h-[136px] w-full overflow-hidden rounded-[16px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]">
                   <span className="absolute left-[11px] top-[11px] z-[2] rounded-full bg-black/60 px-[9px] py-[4px] text-[12px] font-bold text-white backdrop-blur-[2px]">
                     {m.time}
                   </span>
@@ -459,10 +321,10 @@ export function MagazineHomeScreen() {
                     style={{ background: m.bg }}
                     aria-hidden
                   >
-                    <span className="text-[64px]">{m.emoji}</span>
+                    <span className="text-[44px]">{m.emoji}</span>
                   </div>
                 </div>
-                <div className="mt-3 text-[15.5px] font-bold tracking-tight text-ink">{m.title}</div>
+                <div className="mt-3 text-[14px] font-bold tracking-tight text-ink">{m.title}</div>
                 <div className="mt-1.5 text-[12.5px] font-semibold tracking-tight text-blue-soft">
                   {m.tags}
                 </div>
@@ -502,8 +364,8 @@ function MagazineRow() {
   const useLive = live.length > 0;
 
   return (
-    <section className="mt-[34px]">
-      <div className="mb-3.5 flex items-center justify-between px-5">
+    <section className="mt-6">
+      <div className="mb-2.5 flex items-center justify-between px-5">
         <h2 className="text-[20px] font-extrabold tracking-tight">신혼생활 매거진</h2>
         <Link
           href="/archive"
@@ -525,7 +387,7 @@ function MagazineRow() {
                   href={it.permalink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-[150px] shrink-0"
+                  className="w-[132px] shrink-0"
                 >
                   <div
                     className="relative w-full overflow-hidden rounded-[14px] bg-[#E3EDF7] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
@@ -557,7 +419,7 @@ function MagazineRow() {
               );
             })
           : ARCHIVE_FEED.map((a) => (
-              <Link key={a.title} href="/archive" className="w-[150px] shrink-0">
+              <Link key={a.title} href="/archive" className="w-[132px] shrink-0">
                 <div
                   className="relative w-full overflow-hidden rounded-[14px] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
                   style={{ aspectRatio: "9 / 16" }}
@@ -576,7 +438,7 @@ function MagazineRow() {
           Array.from({ length: 3 }).map((_, i) => (
             <div
               key={`sk-${i}`}
-              className="w-[150px] shrink-0 animate-pulse rounded-[14px] bg-[#EEF2F6]"
+              className="w-[132px] shrink-0 animate-pulse rounded-[14px] bg-[#EEF2F6]"
               style={{ aspectRatio: "9 / 16" }}
             />
           ))}

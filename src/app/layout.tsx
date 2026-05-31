@@ -104,7 +104,7 @@ export default function RootLayout({
         )}
         <div className="w-full flex justify-center desktop-shell">
           <LandingLeft />
-          <div className="flex-1 max-w-[480px] w-full relative desktop-phone">
+          <div className="flex-1 max-w-[420px] w-full relative desktop-phone">
             <div className="lg:absolute lg:inset-0 lg:overflow-y-auto scrollbar-hide">
               {children}
               <AppFooter />

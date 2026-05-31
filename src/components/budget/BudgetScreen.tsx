@@ -127,7 +127,7 @@ export function BudgetScreen() {
         onEntryClick={(entry) => setEntrySheet({ initial: entry })}
       />
       {entrySheet && (
-        <div className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
+        <div className="fixed inset-0 z-[60] max-w-[420px] mx-auto">
           <LedgerEntrySheet
             onClose={() => setEntrySheet(null)}
             onSave={upsertEntry}
@@ -137,7 +137,7 @@ export function BudgetScreen() {
         </div>
       )}
       {!entrySheet && budgetSheet && (
-        <div className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
+        <div className="fixed inset-0 z-[60] max-w-[420px] mx-auto">
           <BudgetEditSheet
             onClose={() => setBudgetSheet(null)}
             onSave={saveBudgetsCombined}

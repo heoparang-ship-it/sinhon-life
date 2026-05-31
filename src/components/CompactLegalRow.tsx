@@ -10,7 +10,7 @@ export function CompactLegalRow({ noBottomPad }: { noBottomPad?: boolean }) {
   return (
     <div
       aria-label="법적 안내"
-      className={`mx-auto mb-2 mt-6 flex max-w-[480px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 text-[11px] text-faint ${
+      className={`mx-auto mb-2 mt-6 flex max-w-[420px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 text-[11px] text-faint ${
         noBottomPad ? "pb-6" : "pb-[110px]"
       }`}
     >

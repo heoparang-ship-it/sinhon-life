@@ -87,7 +87,7 @@ export function PartnersScreen() {
 
   if (done) {
     return (
-      <main className="mx-auto min-h-[100dvh] max-w-[480px] bg-white px-5 pb-20 pt-20 text-center">
+      <main className="mx-auto min-h-[100dvh] max-w-[420px] bg-white px-5 pb-20 pt-20 text-center">
         <div className="text-[40px]">🤝</div>
         <h1 className="mt-3 text-[22px] font-extrabold leading-tight text-ink">
           입점 의향 접수했어요
@@ -102,7 +102,7 @@ export function PartnersScreen() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] max-w-[480px] bg-white pb-[140px]">
+    <main className="mx-auto min-h-[100dvh] max-w-[420px] bg-white pb-[140px]">
       {/* Hero */}
       <section
         className="px-5 pb-8 pt-10"
