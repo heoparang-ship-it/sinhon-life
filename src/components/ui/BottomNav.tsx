@@ -5,15 +5,15 @@ import { usePathname } from "next/navigation";
 
 export function BottomNav() {
   const pathname = usePathname() || "/";
-  // 광고 랜딩(/lp/*)에서는 탭바 숨김 — 단일 전환 경로 보호
-  if (pathname.startsWith("/lp/")) return null;
+  // 광고 랜딩(/lp/*)·지원금 진단(/support)에서는 탭바 숨김 — 단일 전환 경로 보호
+  if (pathname.startsWith("/lp/") || pathname.startsWith("/support")) return null;
   const homeActive = pathname === "/";
   const myActive =
     pathname === "/my" || pathname.startsWith("/my/") || pathname === "/budget" || pathname.startsWith("/budget/");
 
   return (
     <nav
-      className="fixed left-0 right-0 bottom-0 z-30 mx-auto flex h-[82px] max-w-[480px] items-start justify-around border-t border-[#EEF2F6] bg-white/95 pt-[11px] backdrop-blur-md lg:absolute"
+      className="fixed left-0 right-0 bottom-0 z-30 mx-auto flex h-[82px] max-w-[420px] items-start justify-around border-t border-[#EEF2F6] bg-white/95 pt-[11px] backdrop-blur-md lg:absolute"
       style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
     >
       {/* 홈 */}

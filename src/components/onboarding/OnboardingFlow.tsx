@@ -89,7 +89,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[90] bg-white">
-      <div className="mx-auto flex h-full max-w-[480px] flex-col">
+      <div className="mx-auto flex h-full max-w-[420px] flex-col">
         {/* 상단: 진행바 + 뒤로/건너뛰기 */}
         {step !== 5 && (
           <div className="px-5 pt-[max(14px,env(safe-area-inset-top))]">
