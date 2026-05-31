@@ -10,6 +10,8 @@
 
 type EventName =
   | "onboarding_shown"
+  | "onboarding_step"
+  | "onboarding_skip"
   | "onboarding_complete"
   | "decision_card_click"
   | "decision_toggle"
@@ -19,7 +21,16 @@ type EventName =
   | "lead_submitted"
   | "feedback_click"
   | "partners_cta_click"
-  | "partner_loi_submitted";
+  | "partner_loi_submitted"
+  | "support_entry_click"
+  | "support_step"
+  | "support_answer"
+  | "support_gate_shown"
+  | "support_gate_kakao"
+  | "support_gate_later"
+  | "support_result_shown"
+  | "support_share_click"
+  | "support_policy_click";
 
 type EventProps = Record<string, string | number | boolean | null | undefined>;
 
@@ -29,8 +40,22 @@ declare global {
     gtag?: (...args: any[]) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     posthog?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fbq?: (...args: any[]) => void;
   }
 }
+
+/** 우리 이벤트명 → Meta Pixel 표준 이벤트 매핑 (광고 최적화용) */
+const META_EVENT_MAP: Partial<Record<EventName, string>> = {
+  lead_submitted: "Lead",
+  lead_card_shown: "InitiateCheckout",
+  decision_card_click: "ViewContent",
+  partner_loi_submitted: "Lead",
+  onboarding_complete: "CompleteRegistration",
+  support_entry_click: "ViewContent",
+  support_result_shown: "Lead",
+  support_gate_kakao: "CompleteRegistration",
+};
 
 let posthogReady = false;
 
@@ -65,6 +90,15 @@ export function track(event: EventName, props: EventProps = {}) {
   // GA4
   try {
     window.gtag?.("event", event, props);
+  } catch {
+    /* noop */
+  }
+  // Meta Pixel — 표준 이벤트로 변환 발화 (광고 최적화 알고리즘 학습)
+  try {
+    const metaEvent = META_EVENT_MAP[event];
+    if (metaEvent && window.fbq) window.fbq("track", metaEvent, props);
+    // 매핑 없어도 커스텀 이벤트로도 보냄
+    if (window.fbq) window.fbq("trackCustom", event, props);
   } catch {
     /* noop */
   }

@@ -50,14 +50,17 @@ type QuickItem = {
   label: string;
   href: string;
   badge?: string;
-  category?: DecisionCategory | "ai";
-  icon: string; // /icons/*.png
+  category?: DecisionCategory | "ai" | "support";
+  icon?: string; // /icons/*.png
+  emoji?: string; // 아이콘 없이 큰 이모지로 대체
+  emphasis?: boolean; // 가운데 AI톡처럼 강조
 };
 
 const QUICK_ITEMS: QuickItem[] = [
-  { label: "혼수·가전·가구", href: "/ai?seed=goods", category: "goods", icon: "/icons/01_honsu_appliances_furniture.png" },
+  // ★ 지원금: 가장 좌측·NEW 배지. 라이브 사이트의 '혼수·가전·가구' 자리 대체
+  { label: "내 지원금", href: "/support", category: "support", emoji: "💰", badge: "NEW" },
   { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/02_honeymoon_travel.png" },
-  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png" },
+  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png", emphasis: true },
 ];
 
 type InfoCard = {
@@ -65,7 +68,13 @@ type InfoCard = {
   sub: string;
   href: string;
   bg: string;
-  icon: string; // /icons/*.png
+  icon?: string; // /icons/*.png
+  /** 강조 — 카드 우상단 배지 */
+  badge?: string;
+  /** 강조 — 큰 이모지(아이콘 이미지 대체) */
+  emoji?: string;
+  /** 분석용 라벨 */
+  trackId?: string;
 };
 
 const INFO_CARDS: InfoCard[] = [
@@ -299,7 +308,11 @@ export function MagazineHomeScreen() {
             <Link
               key={q.label}
               href={q.href}
-              onClick={() => track("decision_card_click", { category: q.category ?? null, from: "home_quick" })}
+              onClick={() =>
+                q.category === "support"
+                  ? track("support_entry_click", { from: "home_quick" })
+                  : track("decision_card_click", { category: q.category ?? null, from: "home_quick" })
+              }
               className={`relative flex flex-col items-center gap-2.5 ${
                 i > 0 ? "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#EEF2F6] before:content-['']" : ""
               }`}
@@ -313,18 +326,49 @@ export function MagazineHomeScreen() {
                     {q.badge}
                   </span>
                 )}
-                <Image
-                  src={q.icon}
-                  alt={q.label}
-                  width={40}
-                  height={40}
-                  className="block h-[40px] w-[40px] object-contain"
-                />
+                {q.emoji ? (
+                  <span
+                    aria-hidden
+                    className="grid h-[44px] w-[44px] place-items-center rounded-2xl text-[26px]"
+                    style={{ background: "linear-gradient(135deg,#E0EDFB 0%,#B7D3F1 100%)" }}
+                  >
+                    {q.emoji}
+                  </span>
+                ) : q.icon ? (
+                  <Image
+                    src={q.icon}
+                    alt={q.label}
+                    width={40}
+                    height={40}
+                    className="block h-[40px] w-[40px] object-contain"
+                  />
+                ) : null}
               </span>
               <span className="text-[12.5px] font-bold tracking-tight text-ink">{q.label}</span>
             </Link>
           ))}
         </div>
+
+        {/* ★ 정책 매칭 배너 — 인천 신혼 유입 관문 */}
+        <Link
+          href="/policy"
+          onClick={() => track("decision_card_click", { from: "home_policy_banner" })}
+          className="mx-5 mt-[18px] flex items-center gap-3 rounded-[20px] p-[18px] text-white shadow-[0_12px_28px_-12px_rgba(43,123,207,0.6)] transition active:scale-[0.99]"
+          style={{ background: "linear-gradient(120deg,#2566A8 0%,#3B8BCF 55%,#4F9CDB 100%)" }}
+        >
+          <span className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-2xl bg-white/18 text-[24px] backdrop-blur">
+            🏠
+          </span>
+          <span className="flex-1">
+            <span className="block text-[15.5px] font-extrabold leading-tight">
+              인천 신혼이 받을 수 있는 정책 찾기
+            </span>
+            <span className="mt-0.5 block text-[12.5px] font-medium text-on-blue-mute">
+              천원주택·신생아 대출·전세보증료 — 1분 자가진단
+            </span>
+          </span>
+          <span className="text-[20px] font-bold">→</span>
+        </Link>
 
         {/* 지금 많이 찾는 정보 */}
         <section className="mt-[30px]">
@@ -342,8 +386,21 @@ export function MagazineHomeScreen() {
               <Link
                 key={c.title}
                 href={c.href}
-                className="flex flex-col items-start rounded-[16px] border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
+                onClick={() =>
+                  c.trackId === "support"
+                    ? track("support_entry_click", { from: "home_info_grid" })
+                    : track("decision_card_click", { from: "home_info_grid", to: c.trackId ?? c.title })
+                }
+                className="relative flex flex-col items-start rounded-[16px] border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
               >
+                {c.badge && (
+                  <span
+                    className="absolute right-2 top-2 rounded-full px-1.5 py-[2px] text-[9px] font-extrabold text-white"
+                    style={{ background: "linear-gradient(135deg,#3B8BCF,#4F9CDB)" }}
+                  >
+                    {c.badge}
+                  </span>
+                )}
                 <h3
                   className="m-0 text-[14px] font-extrabold leading-[1.3] tracking-tight text-ink"
                   style={{ whiteSpace: "pre-line" }}
@@ -352,13 +409,19 @@ export function MagazineHomeScreen() {
                 </h3>
                 <span className="mt-1 block text-[11px] font-semibold text-mute">{c.sub}</span>
                 <div className="mt-3 flex w-full justify-center">
-                  <Image
-                    src={c.icon}
-                    alt=""
-                    width={64}
-                    height={64}
-                    className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
-                  />
+                  {c.emoji ? (
+                    <span className="grid h-[64px] w-[64px] place-items-center text-[44px] drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]">
+                      {c.emoji}
+                    </span>
+                  ) : c.icon ? (
+                    <Image
+                      src={c.icon}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="h-[64px] w-[64px] object-contain drop-shadow-[0_6px_10px_rgba(31,94,158,0.18)]"
+                    />
+                  ) : null}
                 </div>
               </Link>
             ))}
@@ -449,8 +512,16 @@ function MagazineRow() {
           ? live.map((it) => {
               const isVideo = it.media_type === "VIDEO" || it.media_type === "REELS";
               const thumb = it.thumbnail_url ?? it.media_url;
+              // 라이브 인스타 게시물은 인스타 permalink로 새창 직행.
+              // (사내 /archive/[id] 상세 페이지로 가지 않음 — 사장님 피드백)
               return (
-                <Link key={it.id} href={`/archive/${it.id}`} className="w-[150px] shrink-0">
+                <a
+                  key={it.id}
+                  href={it.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-[150px] shrink-0"
+                >
                   <div
                     className="relative w-full overflow-hidden rounded-[14px] bg-[#E3EDF7] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
                     style={{ aspectRatio: "9 / 16" }}
@@ -477,7 +548,7 @@ function MagazineRow() {
                       )}
                     </div>
                   </div>
-                </Link>
+                </a>
               );
             })
           : ARCHIVE_FEED.map((a) => (

@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 
 export function BottomNav() {
   const pathname = usePathname() || "/";
+  // 광고 랜딩(/lp/*)에서는 탭바 숨김 — 단일 전환 경로 보호
+  if (pathname.startsWith("/lp/")) return null;
   const homeActive = pathname === "/";
   const myActive =
     pathname === "/my" || pathname.startsWith("/my/") || pathname === "/budget" || pathname.startsWith("/budget/");
