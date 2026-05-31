@@ -6,6 +6,8 @@ export type Region = "incheon-bupyeong" | "incheon-songdo" | "incheon-etc" | "et
 export type DecisionCategory = "sdm" | "venue" | "interior" | "goods" | "honeymoon";
 
 export type UserProfile = {
+  userNickname: string | null;
+  partnerNickname: string | null;
   weddingDate: string | null;        // YYYY-MM-DD
   region: Region | null;
   completedDecisions: DecisionCategory[]; // 5대 결정점 중 완료 표시한 것
@@ -15,6 +17,8 @@ export type UserProfile = {
 const STORAGE_KEY = "sinhon.user.profile.v1";
 
 const EMPTY: UserProfile = {
+  userNickname: null,
+  partnerNickname: null,
   weddingDate: null,
   region: null,
   completedDecisions: [],
@@ -28,6 +32,8 @@ function read(): UserProfile {
     if (!raw) return EMPTY;
     const parsed = JSON.parse(raw) as Partial<UserProfile>;
     return {
+      userNickname: typeof parsed.userNickname === "string" ? parsed.userNickname : null,
+      partnerNickname: typeof parsed.partnerNickname === "string" ? parsed.partnerNickname : null,
       weddingDate: typeof parsed.weddingDate === "string" ? parsed.weddingDate : null,
       region: (parsed.region as Region) ?? null,
       completedDecisions: Array.isArray(parsed.completedDecisions)

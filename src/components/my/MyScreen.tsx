@@ -32,7 +32,7 @@ export function MyScreen() {
   const session = useSession();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
-  const { profile } = useUserProfile();
+  const { profile, toggleDecision } = useUserProfile();
   const dday = useMemo(() => daysUntil(profile.weddingDate), [profile.weddingDate]);
   const completed = profile.completedDecisions.length;
   const ratio = Math.round((completed / 5) * 100);
@@ -49,10 +49,11 @@ export function MyScreen() {
   };
 
   const displayName =
+    profile.userNickname ||
     session.user?.user_metadata?.name ||
     session.user?.user_metadata?.full_name ||
     session.user?.email?.split("@")[0] ||
-    "닉네임 자리";
+    "닉네임 설정하기";
   const avatar = session.user?.user_metadata?.avatar_url as string | undefined;
   const isAuthed = session.status === "authenticated";
 
@@ -145,7 +146,9 @@ export function MyScreen() {
                     color: T.onBlueMute,
                   }}
                 >
-                  {isAuthed
+                  {profile.partnerNickname
+                    ? `${profile.partnerNickname}과 함께`
+                    : isAuthed
                     ? `kakao · ${session.user?.email ?? ""}`
                     : "로그인 전 · 둘이서 시작해요"}
                 </div>
@@ -253,28 +256,33 @@ export function MyScreen() {
               (c) => {
                 const done = profile.completedDecisions.includes(c);
                 return (
-                  <span
+                  <button
                     key={c}
+                    type="button"
+                    onClick={() => toggleDecision(c)}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 4,
-                      padding: "5px 10px",
+                      padding: "6px 11px",
                       borderRadius: 999,
                       fontSize: 11.5,
                       fontWeight: 700,
                       background: done ? "#3B8BCF" : "#F1F5FA",
                       color: done ? "#FFF" : T.mute,
+                      border: "none",
+                      cursor: "pointer",
+                      fontFamily: T.font,
                     }}
                   >
                     {done ? "✓" : "○"} {DECISION_LABEL[c]}
-                  </span>
+                  </button>
                 );
               },
             )}
           </div>
           <div style={{ marginTop: 10, fontSize: 11.5, color: T.mute }}>
-            홈에서 카테고리별로 ‘결정 완료’ 표시할 수 있어요.
+            결정한 카테고리를 눌러 표시하세요.
           </div>
         </div>
       </div>
@@ -336,7 +344,7 @@ export function MyScreen() {
         <MicroLabel>Account</MicroLabel>
         <div style={{ marginTop: 14 }}>
           <MenuRow
-            href="/my"
+            href="/my/profile"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.6" />
@@ -349,7 +357,7 @@ export function MyScreen() {
               </svg>
             }
             title="내 정보"
-            sub="닉네임, 결혼 시기, 알림 설정"
+            sub="닉네임, 파트너, 예식일, 지역"
           />
           <MenuRow
             href="/"
