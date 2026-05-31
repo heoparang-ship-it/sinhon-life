@@ -50,14 +50,17 @@ type QuickItem = {
   label: string;
   href: string;
   badge?: string;
-  category?: DecisionCategory | "ai";
-  icon: string; // /icons/*.png
+  category?: DecisionCategory | "ai" | "support";
+  icon?: string; // /icons/*.png
+  emoji?: string; // 아이콘 없이 큰 이모지로 대체
+  emphasis?: boolean; // 가운데 AI톡처럼 강조
 };
 
 const QUICK_ITEMS: QuickItem[] = [
-  { label: "혼수·가전·가구", href: "/ai?seed=goods", category: "goods", icon: "/icons/01_honsu_appliances_furniture.png" },
+  // ★ 지원금: 가장 좌측·NEW 배지. 라이브 사이트의 '혼수·가전·가구' 자리 대체
+  { label: "내 지원금", href: "/support", category: "support", emoji: "💰", badge: "NEW" },
   { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/02_honeymoon_travel.png" },
-  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png" },
+  { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png", emphasis: true },
 ];
 
 type InfoCard = {
@@ -76,13 +79,11 @@ type InfoCard = {
 
 const INFO_CARDS: InfoCard[] = [
   {
-    title: "내 지원금\n확인",
-    sub: "1분 · 무료",
-    href: "/support",
-    bg: "linear-gradient(135deg,#E0EDFB 0%,#B7D3F1 100%)",
-    emoji: "💰",
-    badge: "NEW",
-    trackId: "support",
+    title: "예산별\n신혼집 추천",
+    sub: "3천~5천만원대",
+    href: "/ai?seed=interior",
+    bg: "linear-gradient(135deg,#EAF2FB 0%,#CFE2F6 100%)",
+    icon: "/icons/09_budget_recommendation.png",
   },
   {
     title: "스드메·예물\n추천",
@@ -307,7 +308,11 @@ export function MagazineHomeScreen() {
             <Link
               key={q.label}
               href={q.href}
-              onClick={() => track("decision_card_click", { category: q.category ?? null, from: "home_quick" })}
+              onClick={() =>
+                q.category === "support"
+                  ? track("support_entry_click", { from: "home_quick" })
+                  : track("decision_card_click", { category: q.category ?? null, from: "home_quick" })
+              }
               className={`relative flex flex-col items-center gap-2.5 ${
                 i > 0 ? "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#EEF2F6] before:content-['']" : ""
               }`}
@@ -321,13 +326,23 @@ export function MagazineHomeScreen() {
                     {q.badge}
                   </span>
                 )}
-                <Image
-                  src={q.icon}
-                  alt={q.label}
-                  width={40}
-                  height={40}
-                  className="block h-[40px] w-[40px] object-contain"
-                />
+                {q.emoji ? (
+                  <span
+                    aria-hidden
+                    className="grid h-[44px] w-[44px] place-items-center rounded-2xl text-[26px]"
+                    style={{ background: "linear-gradient(135deg,#E0EDFB 0%,#B7D3F1 100%)" }}
+                  >
+                    {q.emoji}
+                  </span>
+                ) : q.icon ? (
+                  <Image
+                    src={q.icon}
+                    alt={q.label}
+                    width={40}
+                    height={40}
+                    className="block h-[40px] w-[40px] object-contain"
+                  />
+                ) : null}
               </span>
               <span className="text-[12.5px] font-bold tracking-tight text-ink">{q.label}</span>
             </Link>
@@ -497,8 +512,16 @@ function MagazineRow() {
           ? live.map((it) => {
               const isVideo = it.media_type === "VIDEO" || it.media_type === "REELS";
               const thumb = it.thumbnail_url ?? it.media_url;
+              // 라이브 인스타 게시물은 인스타 permalink로 새창 직행.
+              // (사내 /archive/[id] 상세 페이지로 가지 않음 — 사장님 피드백)
               return (
-                <Link key={it.id} href={`/archive/${it.id}`} className="w-[150px] shrink-0">
+                <a
+                  key={it.id}
+                  href={it.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-[150px] shrink-0"
+                >
                   <div
                     className="relative w-full overflow-hidden rounded-[14px] bg-[#E3EDF7] shadow-[0_1px_2px_rgba(26,36,51,0.05)]"
                     style={{ aspectRatio: "9 / 16" }}
@@ -525,7 +548,7 @@ function MagazineRow() {
                       )}
                     </div>
                   </div>
-                </Link>
+                </a>
               );
             })
           : ARCHIVE_FEED.map((a) => (
