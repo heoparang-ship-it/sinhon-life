@@ -531,6 +531,8 @@ function DecisionLeadCard({
   const [phone, setPhone] = useState("");
   const [kakao, setKakao] = useState("");
   const [consent, setConsent] = useState(false);
+  const [thirdPartyConsent, setThirdPartyConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -544,7 +546,12 @@ function DecisionLeadCard({
     summaryParts.push(prefilled.styleTags.slice(0, 3).join("·"));
   if (prefilled.priorityTag) summaryParts.push(`우선: ${prefilled.priorityTag}`);
 
-  const canSubmit = name.trim().length > 0 && /^[0-9+\-\s()]{9,20}$/.test(phone.trim()) && consent && !submitting;
+  const canSubmit =
+    name.trim().length > 0 &&
+    /^[0-9+\-\s()]{9,20}$/.test(phone.trim()) &&
+    consent &&
+    thirdPartyConsent &&
+    !submitting;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -567,6 +574,8 @@ function DecisionLeadCard({
           },
           contact: { name: name.trim(), phone: phone.trim(), kakao: kakao.trim() || undefined },
           consent: true,
+          thirdPartyConsent: true,
+          marketingConsent,
         }),
       });
       if (!res.ok) {
@@ -622,18 +631,46 @@ function DecisionLeadCard({
           className="rounded-[10px] border border-[#D8E5F0] bg-white px-2.5 py-1.5 text-[13px] font-medium text-ink placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-[#9CC7EA]"
         />
       </div>
-      <label className="mt-2 flex items-start gap-1.5 text-[10.5px] font-medium leading-snug text-mute">
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          className="mt-0.5 h-3 w-3 shrink-0 accent-blue-accent"
-        />
-        <span>
-          개인정보 수집·이용 동의 (필수). 목적: 파트너 업체 견적·상담 연결 / 항목: 이름·연락처·카카오ID·상담 슬롯
-          / 보유기간: 상담 완료 후 6개월 / 제3자 제공: 매칭된 파트너 업체에 한해 제공.
-        </span>
-      </label>
+      <div className="mt-2 space-y-1.5">
+        <label className="flex items-start gap-1.5 text-[10.5px] font-medium leading-snug text-mute">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5 h-3 w-3 shrink-0 accent-blue-accent"
+          />
+          <span>
+            <b className="text-ink-soft">[필수]</b> 개인정보 수집·이용 동의. 항목: 이름·연락처·카카오ID·상담 슬롯
+            / 목적: 상담 매칭 / 보유: 상담 완료 또는 1년.{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline">
+              자세히
+            </a>
+          </span>
+        </label>
+        <label className="flex items-start gap-1.5 text-[10.5px] font-medium leading-snug text-mute">
+          <input
+            type="checkbox"
+            checked={thirdPartyConsent}
+            onChange={(e) => setThirdPartyConsent(e.target.checked)}
+            className="mt-0.5 h-3 w-3 shrink-0 accent-blue-accent"
+          />
+          <span>
+            <b className="text-ink-soft">[필수]</b> 매칭된 파트너 업체에 위 항목을 제공하는 데 동의해요. 동의하지
+            않으면 상담 매칭이 어려워요.
+          </span>
+        </label>
+        <label className="flex items-start gap-1.5 text-[10.5px] font-medium leading-snug text-mute">
+          <input
+            type="checkbox"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            className="mt-0.5 h-3 w-3 shrink-0 accent-blue-accent"
+          />
+          <span>
+            <span className="text-ink-soft">[선택]</span> 알림톡·이메일로 비슷한 신혼 정보·이벤트 받기.
+          </span>
+        </label>
+      </div>
       {error && (
         <p className="mt-1.5 text-[11px] font-semibold text-[#D24A4A]">{error}</p>
       )}

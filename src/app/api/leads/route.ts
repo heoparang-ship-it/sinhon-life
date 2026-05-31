@@ -14,6 +14,16 @@ const isUuid = (s: unknown): s is string =>
 const isPhone = (s: unknown): s is string =>
   typeof s === "string" && /^[0-9+\-\s()]{9,20}$/.test(s.trim());
 
+function buildNote(note: string | undefined, marketingConsent: boolean): string {
+  const tags: string[] = [];
+  tags.push(`thirdPartyConsent=true`);
+  tags.push(`marketingConsent=${marketingConsent}`);
+  tags.push(`consentAt=${new Date().toISOString()}`);
+  const base = `[CONSENT ${tags.join(";")}]`;
+  const userNote = typeof note === "string" ? note.slice(0, 400) : "";
+  return userNote ? `${base} ${userNote}` : base;
+}
+
 type Body = {
   sessionId?: string;
   category?: Category;
@@ -30,7 +40,12 @@ type Body = {
     phone?: string;
     kakao?: string;
   };
+  /** 개인정보 수집·이용 동의 (필수) */
   consent?: boolean;
+  /** 제3자(매칭 파트너) 제공 동의 (필수 — 송객 매칭에 사용) */
+  thirdPartyConsent?: boolean;
+  /** 마케팅 정보 수신 동의 (선택) */
+  marketingConsent?: boolean;
   sourceMessageId?: string | null;
 };
 
@@ -51,6 +66,13 @@ export async function POST(request: Request) {
   if (body.consent !== true) {
     return NextResponse.json({ error: "개인정보 수집·이용 동의가 필요해요." }, { status: 400 });
   }
+  if (body.thirdPartyConsent !== true) {
+    return NextResponse.json(
+      { error: "매칭 파트너에 대한 제3자 제공 동의가 필요해요." },
+      { status: 400 },
+    );
+  }
+  const marketingConsent = body.marketingConsent === true;
 
   const name = body.contact?.name?.trim();
   const phone = body.contact?.phone?.trim();
@@ -95,7 +117,7 @@ export async function POST(request: Request) {
         contact_kakao:
           typeof body.contact?.kakao === "string" ? body.contact.kakao.trim().slice(0, 50) : null,
         consent_at: new Date().toISOString(),
-        note: typeof slots.note === "string" ? slots.note.slice(0, 500) : null,
+        note: buildNote(slots.note, marketingConsent),
         source_message_id: isUuid(body.sourceMessageId) ? body.sourceMessageId : null,
       })
       .select("id")

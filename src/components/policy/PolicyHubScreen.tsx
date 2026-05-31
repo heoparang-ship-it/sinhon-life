@@ -58,6 +58,9 @@ export function PolicyHubScreen() {
           <br />
           예식·집·출산까지 묶어서 알려드려요.
         </p>
+        <p className="mt-2 text-[11px] font-medium leading-snug text-faint">
+          본 정보는 참고용이며 신청 가능 여부·지원 금액은 각 기관 공식 공고에서 최종 확인해 주세요.
+        </p>
       </header>
 
       {phase === "intro" && <Intro onStart={() => setPhase("diagnose")} />}
