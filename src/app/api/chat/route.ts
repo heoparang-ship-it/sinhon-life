@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { POLICIES } from "@/lib/policy/data";
-import { searchGov24Services, dedupeAgainst, type Gov24Service } from "@/lib/policy/gov24";
+import { aggregatePolicies, aggregateContext } from "@/lib/policy/aggregate";
 
 /** 정책/지원금 의도 감지 — 보조금24 보조 컨텍스트 주입 트리거 */
 const POLICY_INTENT_RE =
@@ -10,23 +10,6 @@ const POLICY_INTENT_RE =
 
 function looksLikePolicyQuery(text: string): boolean {
   return POLICY_INTENT_RE.test(text);
-}
-
-/** 보조금24 결과 → 시스템 컨텍스트 문자열 (top N) */
-function gov24Context(items: Gov24Service[], limit = 8): string | null {
-  if (items.length === 0) return null;
-  const lines = items.slice(0, limit).map((it) => {
-    const levelTag =
-      it.level === "district" ? "군구" : it.level === "city" ? "지자체" : it.level === "central" ? "중앙" : "기관";
-    const summary = it.summary ? ` — ${it.summary.slice(0, 80)}` : "";
-    const org = it.org ? ` (${it.org})` : "";
-    return `- ${it.name} [${levelTag}]${org}${summary}`;
-  });
-  return [
-    "★보조금24에서 방금 조회한 추가 후보(인천·신혼부부 키워드 매칭, 큐레이트 11종 외):",
-    ...lines,
-    "안내 원칙: 위 후보는 정부 등록 메타데이터라 자격 세부조건은 별도 확인이 필요해요. 답변 시 \"방금 보조금24에서 찾아본 후보예요. 자세한 자격은 보조금24/소관기관에서 확인해요\" 톤으로 안내.",
-  ].join("\n");
 }
 
 export const runtime = "nodejs";
@@ -177,18 +160,21 @@ export async function POST(request: Request) {
   const history = Array.isArray(body.history) ? body.history.slice(-10) : [];
   const ctx = profileContext(body.profile);
 
-  // 정책 의도 감지 시 보조금24 호출 — 큐레이트 11종 중복 제외 후 상위 8건 컨텍스트로 주입
-  let gov24Ctx: string | null = null;
+  // 정책 의도 감지 시 모든 등록 소스(보조금24·온통청년) 병렬 조회 → 큐레이트
+  // 중복 제외 후 상위 10건을 시스템 컨텍스트로 주입
+  let policyCtx: string | null = null;
   if (looksLikePolicyQuery(message)) {
-    const fresh = await searchGov24Services({ keyword: "신혼부부", region: "인천광역시", perPage: 30 });
-    const filtered = dedupeAgainst(fresh, POLICIES.map((p) => p.name));
-    gov24Ctx = gov24Context(filtered, 8);
+    const aggregated = await aggregatePolicies({
+      keyword: "신혼부부",
+      excludeNames: POLICIES.map((p) => p.name),
+    });
+    policyCtx = aggregateContext(aggregated, 10);
   }
 
   const messages = [
     { role: "system" as const, content: SYSTEM_PROMPT },
     ...(ctx ? [{ role: "system" as const, content: ctx }] : []),
-    ...(gov24Ctx ? [{ role: "system" as const, content: gov24Ctx }] : []),
+    ...(policyCtx ? [{ role: "system" as const, content: policyCtx }] : []),
     ...history
       .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string")
       .map((t) => ({ role: t.role, content: t.content })),
