@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/privacy",
     "/terms",
     "/business",
+    "/lp/incheon-policy",
   ].map((p) => ({
     url: `${BASE}${p}`,
     lastModified: now,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendKakaoNotify } from "@/lib/notifications/kakao";
+import { notifyOperator } from "@/lib/notifications/operator";
 
 export const runtime = "nodejs";
 
@@ -133,6 +134,21 @@ export async function POST(request: Request) {
       to: phone,
       template: "lead.created",
       vars: { category: body.category, region: slots.region ?? null, name },
+    });
+
+    // 운영자 즉시 알림 (Slack/Resend) — 광고 ON 시 리드를 30초 안에 인지하기 위함
+    void notifyOperator({
+      source: body.category === "venue" || body.category === "sdm" || body.category === "interior" || body.category === "goods" || body.category === "honeymoon"
+        ? "ai_chat"
+        : "ai_chat",
+      category: body.category,
+      region: slots.region ?? null,
+      budgetManwon: typeof slots.budgetManwon === "number" ? slots.budgetManwon : null,
+      weddingDate,
+      contactName: name,
+      contactPhone: phone,
+      contactKakao: typeof body.contact?.kakao === "string" ? body.contact.kakao : null,
+      note: typeof slots.note === "string" ? slots.note : null,
     });
 
     return NextResponse.json({ ok: true, id: data?.id });

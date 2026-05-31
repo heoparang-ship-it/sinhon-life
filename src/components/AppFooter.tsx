@@ -18,16 +18,19 @@ export function AppFooter() {
     pathname.startsWith("/checklist") ||
     pathname.startsWith("/partners") ||
     pathname.startsWith("/policy") ||
+    pathname.startsWith("/lp/") ||
     pathname.startsWith("/index/");
-  if (compact) return <CompactLegalRow />;
+  if (compact) return <CompactLegalRow noBottomPad={pathname.startsWith("/lp/")} />;
   return <Footer />;
 }
 
-function CompactLegalRow() {
+function CompactLegalRow({ noBottomPad }: { noBottomPad?: boolean }) {
   return (
     <div
       aria-label="법적 안내"
-      className="mx-auto mb-2 mt-6 flex max-w-[480px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 pb-[110px] text-[11px] text-faint"
+      className={`mx-auto mb-2 mt-6 flex max-w-[480px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 text-[11px] text-faint ${
+        noBottomPad ? "pb-6" : "pb-[110px]"
+      }`}
     >
       <Link href="/terms" className="font-bold text-mute underline-offset-2 hover:underline">
         이용약관
