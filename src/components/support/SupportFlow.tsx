@@ -472,7 +472,7 @@ function QuizScreen({
       </div>
 
       {/* 하단 CTA — sticky */}
-      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-white via-white/95 to-white/0">
+      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-white via-white/95 to-white/0 lg:absolute">
         <button
           type="button"
           onClick={onNext}
@@ -676,7 +676,7 @@ function ResultScreen({
       </div>
 
       {/* 공유 FAB */}
-      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-white via-white/95 to-white/0">
+      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-white via-white/95 to-white/0 lg:absolute">
         <button
           type="button"
           onClick={onShare}
