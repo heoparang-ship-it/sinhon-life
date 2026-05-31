@@ -14,9 +14,7 @@ import { useUserProfile, type Region, type DecisionCategory } from "@/lib/profil
 import { track } from "@/lib/analytics/track";
 
 const REGIONS: { value: Region; label: string; sub: string }[] = [
-  { value: "incheon-bupyeong", label: "인천 부평", sub: "지금 데이터가 가장 많아요" },
-  { value: "incheon-songdo", label: "인천 송도", sub: "지금 데이터가 가장 많아요" },
-  { value: "incheon-etc", label: "인천 그 외", sub: "남동·연수·서구 등" },
+  { value: "incheon-etc", label: "인천", sub: "현재 서비스 지역" },
 ];
 
 const DECISIONS: { value: DecisionCategory; label: string; emoji: string }[] = [
@@ -166,7 +164,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
 
           {step === 2 && (
             <>
-              <Q title={"인천 어디서\n결혼을 준비하세요?"} sub="지금은 인천 중심으로 시세·후기를 깊게 모으고 있어요." />
+              <Q title={"어디서 결혼을\n준비하세요?"} sub="지금은 인천부터 시세·후기를 깊게 모으고 있어요." />
               <div className="mt-6 space-y-2.5">
                 {REGIONS.map((r) => {
                   const active = region === r.value;
@@ -187,6 +185,18 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
                     </button>
                   );
                 })}
+                <div
+                  aria-disabled
+                  className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#E2EBF3] bg-[#F7FAFC] px-4 py-4 text-left opacity-70"
+                >
+                  <div>
+                    <div className="text-[16px] font-extrabold text-mute">그 외 지역</div>
+                    <div className="mt-0.5 text-[12px] font-medium text-mute">서비스 오픈 준비 중</div>
+                  </div>
+                  <span className="rounded-full bg-[#E2EBF3] px-2.5 py-1 text-[10.5px] font-bold text-mute">
+                    준비중
+                  </span>
+                </div>
               </div>
             </>
           )}

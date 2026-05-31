@@ -8,9 +8,7 @@ import { T } from "@/lib/design/tokens";
 import { useUserProfile, type Region } from "@/lib/profile/useUserProfile";
 
 const REGIONS: { value: Region; label: string }[] = [
-  { value: "incheon-bupyeong", label: "인천 부평" },
-  { value: "incheon-songdo", label: "인천 송도" },
-  { value: "incheon-etc", label: "인천 그 외" },
+  { value: "incheon-etc", label: "인천" },
 ];
 
 export function ProfileEditScreen() {
@@ -134,6 +132,19 @@ export function ProfileEditScreen() {
                 </button>
               );
             })}
+            <span
+              style={{
+                padding: "10px 14px",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 700,
+                border: `1px dashed ${T.hairline}`,
+                background: "#F7FAFC",
+                color: T.mute,
+              }}
+            >
+              그 외 지역 · 준비중
+            </span>
           </div>
         </Field>
 
