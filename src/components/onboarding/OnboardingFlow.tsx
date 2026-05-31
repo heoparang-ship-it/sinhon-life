@@ -16,8 +16,7 @@ import { track } from "@/lib/analytics/track";
 const REGIONS: { value: Region; label: string; sub: string }[] = [
   { value: "incheon-bupyeong", label: "인천 부평", sub: "지금 데이터가 가장 많아요" },
   { value: "incheon-songdo", label: "인천 송도", sub: "지금 데이터가 가장 많아요" },
-  { value: "incheon-etc", label: "인천 그 외", sub: "데이터 쌓는 중" },
-  { value: "etc", label: "다른 지역", sub: "확장 알림 받기" },
+  { value: "incheon-etc", label: "인천 그 외", sub: "남동·연수·서구 등" },
 ];
 
 const DECISIONS: { value: DecisionCategory; label: string; emoji: string }[] = [
@@ -60,7 +59,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
 
   const skip = () => {
     track("onboarding_skip", { at_step: step });
-    completeOnboarding(weddingDate || null, region ?? "etc");
+    completeOnboarding(weddingDate || null, region ?? "incheon-etc");
     onClose();
   };
 
@@ -75,7 +74,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
   const finish = () => {
     update({
       weddingDate: dateUnknown ? null : weddingDate || null,
-      region: region ?? "etc",
+      region: region ?? "incheon-etc",
       completedDecisions: decisions,
       userNickname: userNickname.trim() || null,
       partnerNickname: partnerNickname.trim() || null,
@@ -83,7 +82,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
     });
     track("onboarding_complete", {
       has_wedding_date: !dateUnknown && !!weddingDate,
-      region: region ?? "etc",
+      region: region ?? "incheon-etc",
       decisions: decisions.length,
       has_nickname: !!userNickname.trim(),
     });
@@ -167,7 +166,7 @@ export function OnboardingFlow({ onClose }: { onClose: () => void }) {
 
           {step === 2 && (
             <>
-              <Q title={"어디서 결혼을\n준비하세요?"} sub="지역별 시세와 후기를 맞춤으로 모아드려요." />
+              <Q title={"인천 어디서\n결혼을 준비하세요?"} sub="지금은 인천 중심으로 시세·후기를 깊게 모으고 있어요." />
               <div className="mt-6 space-y-2.5">
                 {REGIONS.map((r) => {
                   const active = region === r.value;
@@ -300,7 +299,7 @@ function Done({
   decisionsCount: number;
   userNickname: string;
 }) {
-  const regionLabel = REGIONS.find((r) => r.value === region)?.label ?? "전국";
+  const regionLabel = REGIONS.find((r) => r.value === region)?.label ?? "인천";
   return (
     <div className="flex h-full flex-col items-center justify-center pb-10 text-center">
       <div

@@ -10,8 +10,7 @@ import { useUserProfile, type Region } from "@/lib/profile/useUserProfile";
 const REGIONS: { value: Region; label: string }[] = [
   { value: "incheon-bupyeong", label: "인천 부평" },
   { value: "incheon-songdo", label: "인천 송도" },
-  { value: "incheon-etc", label: "인천 기타" },
-  { value: "etc", label: "그 외 지역" },
+  { value: "incheon-etc", label: "인천 그 외" },
 ];
 
 export function ProfileEditScreen() {
