@@ -480,10 +480,12 @@ function QuizScreen({
           className="w-full rounded-2xl py-4 text-[15px] font-extrabold text-white shadow-[0_12px_26px_-10px_rgba(43,123,207,0.65)] transition active:scale-[0.99] disabled:opacity-40"
           style={{ background: "linear-gradient(90deg,#2566A8 0%,#3B8BCF 60%,#4F9CDB 100%)" }}
         >
-          {isLast ? "내 맞춤 체크리스트 받기 🔓" : "다음"}
-          <span className="mt-0.5 block text-[11px] font-semibold text-on-blue-mute">
-            {chosen.length === 0 ? "위에서 골라주세요" : isLast ? "카카오로 0.5초 잠금 해제" : ""}
-          </span>
+          {isLast ? "카카오로 내 정책 받기" : "다음"}
+          {chosen.length === 0 && (
+            <span className="mt-0.5 block text-[11px] font-semibold text-on-blue-mute">
+              위에서 골라주세요
+            </span>
+          )}
         </button>
       </div>
     </section>
@@ -631,17 +633,17 @@ function ResultScreen({
       </div>
 
       {!unlocked && (
-        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[#FCE8C8] bg-[#FFF7EC] px-3.5 py-3">
-          <span className="text-[16px]">⚠️</span>
-          <span className="flex-1 text-[11.5px] font-semibold text-[#7A5417]">
-            게스트는 일부 정책이 잠겨 있어요.
+        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-hairline bg-paper px-3.5 py-3">
+          <span className="text-[16px]">💛</span>
+          <span className="flex-1 text-[11.5px] font-semibold text-ink-soft">
+            카카오로 가입하면 정책을 모두 볼 수 있어요
           </span>
           <button
             type="button"
             onClick={onKakao}
             className="rounded-full bg-kakao px-3 py-1.5 text-[11px] font-extrabold text-kakao-text"
           >
-            카카오로 전체 보기
+            카카오로 받기
           </button>
         </div>
       )}
@@ -658,10 +660,10 @@ function ResultScreen({
         {hidden.length > 0 && (
           <div className="rounded-2xl border border-hairline bg-paper p-4 text-center">
             <p className="text-[13px] font-bold text-ink">
-              🔒 {hidden.length}개 정책이 더 있어요
+              💛 {hidden.length}개 정책을 더 보여드려요
             </p>
             <p className="mt-1 text-[11.5px] font-medium text-mute">
-              카카오로 잠금 해제하면 마감일·신청처까지 한 번에 받아볼 수 있어요.
+              카카오로 가입하면 마감일·신청처까지 한 번에 챙길 수 있어요
             </p>
             <button
               type="button"
@@ -669,7 +671,7 @@ function ResultScreen({
               className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-kakao px-4 py-2 text-[12px] font-extrabold text-kakao-text"
             >
               <KakaoIcon />
-              카카오로 잠금 해제
+              카카오로 받기
             </button>
           </div>
         )}
