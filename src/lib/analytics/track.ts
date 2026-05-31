@@ -10,6 +10,8 @@
 
 type EventName =
   | "onboarding_shown"
+  | "onboarding_step"
+  | "onboarding_skip"
   | "onboarding_complete"
   | "decision_card_click"
   | "decision_toggle"
