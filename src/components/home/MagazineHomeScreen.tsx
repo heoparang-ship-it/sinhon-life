@@ -326,6 +326,27 @@ export function MagazineHomeScreen() {
           ))}
         </div>
 
+        {/* ★ 정책 매칭 배너 — 인천 신혼 유입 관문 */}
+        <Link
+          href="/policy"
+          onClick={() => track("decision_card_click", { from: "home_policy_banner" })}
+          className="mx-5 mt-[18px] flex items-center gap-3 rounded-[20px] p-[18px] text-white shadow-[0_12px_28px_-12px_rgba(43,123,207,0.6)] transition active:scale-[0.99]"
+          style={{ background: "linear-gradient(120deg,#2566A8 0%,#3B8BCF 55%,#4F9CDB 100%)" }}
+        >
+          <span className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-2xl bg-white/18 text-[24px] backdrop-blur">
+            🏠
+          </span>
+          <span className="flex-1">
+            <span className="block text-[15.5px] font-extrabold leading-tight">
+              인천 신혼이 받을 수 있는 정책 찾기
+            </span>
+            <span className="mt-0.5 block text-[12.5px] font-medium text-on-blue-mute">
+              천원주택·신생아 대출·전세보증료 — 1분 자가진단
+            </span>
+          </span>
+          <span className="text-[20px] font-bold">→</span>
+        </Link>
+
         {/* 지금 많이 찾는 정보 */}
         <section className="mt-[30px]">
           <div className="mb-3.5 flex items-center justify-between px-5">

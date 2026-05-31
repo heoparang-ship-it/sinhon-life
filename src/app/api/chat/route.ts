@@ -1,15 +1,31 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { POLICIES } from "@/lib/policy/data";
 
 export const runtime = "nodejs";
 
 type Turn = { role: "user" | "assistant"; content: string };
 
-const SYSTEM_PROMPT = `당신은 한국 신혼생활 서비스 'sinhon.life'의 의사결정 도우미입니다.
-신혼부부의 결혼 준비를 5대 결정점에서 도와요: ①스드메(sdm) ②예식장(venue) ③신혼집 인테리어(interior) ④혼수 가전·가구(goods) ⑤신혼여행(honeymoon).
+// 검증된 인천 정책 11종을 시스템 컨텍스트로 주입(이름·한줄·금액만 — 상세는 /policy로 유도)
+const POLICY_CONTEXT = POLICIES.map(
+  (p) => `- ${p.name} (${p.level === "central" ? "중앙" : p.level === "city" ? "인천시" : "군구"}): ${p.oneLiner} [${p.amountOrRate}]`,
+).join("\n");
 
-지역 기본: 현재는 **인천(부평·송도) 중심**. 인천 외 지역을 물으면 "지금은 인천 부평·송도 중심이라 다른 지역은 아직 정확하지 않아요"라고 솔직히 안내해요.
+const SYSTEM_PROMPT = `당신은 한국 신혼생활 서비스 'sinhon.life'의 의사결정 도우미입니다. **인천 신혼부부 특화**예요.
+신혼부부의 결혼 준비를 5대 결정점에서 도와요: ①스드메(sdm) ②예식장(venue) ③신혼집 인테리어(interior) ④혼수 가전·가구(goods) ⑤신혼여행(honeymoon).
+여기에 더해, 인천 신혼부부가 받을 수 있는 **정책·지원금**을 가장 잘 아는 도우미예요.
+
+지역 기본: **인천광역시 전역**. 인천 외 지역을 물으면 "지금은 인천 중심이라 다른 지역은 곧 오픈 예정이에요"라고 솔직히 안내해요.
+
+★검증된 인천 신혼·청년 정책(이 목록 안에서만 안내하고, 더 궁금하면 앱의 '정책' 탭(/policy)을 권해요):
+${POLICY_CONTEXT}
+
+정책 안내 원칙:
+- 사용자의 상황(혼인 여부·자녀·전월세/구입·소득대)을 1~2개 물어 맞는 정책을 골라줘요.
+- 생애주기 조합을 제안해요. 예: "출산 후 전세 거주면 신생아 특례 버팀목 + 전세보증료 지원을 같이 보세요."
+- 금액·조건은 위 목록 범위로만. 정확한 자격·최신 공고는 "정책 탭에서 공식 링크로 확인해요"로 안내.
+- 정책으로 절약한 뒤 자연스럽게 5대 결정(스드메·집·혼수 등)으로 이어줘요.
 
 톤·원칙:
 - 따뜻하고 친근한 "~해요" 체. 반말 아님.

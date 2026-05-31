@@ -385,6 +385,23 @@ export function MyScreen() {
             sub="예산, 카테고리, 함께 쓰는 파트너"
           />
           <MenuRow
+            href="/policy"
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 10l8-5 8 5M6 9.5V19h12V9.5M10 19v-4h4v4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            }
+            title="인천 신혼 정책"
+            sub="천원주택·신생아 대출·전세보증료"
+            badge="NEW"
+          />
+          <MenuRow
             href="/checklist"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
