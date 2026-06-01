@@ -30,7 +30,10 @@ type EventName =
   | "support_gate_later"
   | "support_result_shown"
   | "support_share_click"
-  | "support_policy_click";
+  | "support_policy_click"
+  | "cheongmo_entry_click"
+  | "cheongmo_place_click"
+  | "cheongmo_partner_cta_click";
 
 type EventProps = Record<string, string | number | boolean | null | undefined>;
 

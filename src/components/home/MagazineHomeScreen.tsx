@@ -50,7 +50,7 @@ type QuickItem = {
   label: string;
   href: string;
   badge?: string;
-  category?: DecisionCategory | "ai" | "support";
+  category?: DecisionCategory | "ai" | "support" | "cheongmo";
   icon?: string; // /icons/*.png
   emoji?: string; // 아이콘 없이 큰 이모지로 대체
   emphasis?: boolean; // 가운데 AI톡처럼 강조
@@ -59,6 +59,8 @@ type QuickItem = {
 const QUICK_ITEMS: QuickItem[] = [
   // ★ 지원금: 가장 좌측·NEW 배지. 라이브 사이트의 '혼수·가전·가구' 자리 대체
   { label: "내 지원금", href: "/support", category: "support", emoji: "💰", badge: "NEW" },
+  // ★ 전국청모지도: 지원금 바로 우측. 청첩장 모임 장소 큐레이션 (사장님 시그니처 기능)
+  { label: "전국청모지도", href: "/cheongmo", category: "cheongmo", emoji: "💌", badge: "NEW" },
   { label: "신혼여행", href: "/ai?seed=honeymoon", category: "honeymoon", icon: "/icons/02_honeymoon_travel.png" },
   { label: "AI톡", href: "/ai", badge: "AI", category: "ai", icon: "/icons/03_ai_talk.png", emphasis: true },
 ];
@@ -303,16 +305,16 @@ export function MagazineHomeScreen() {
         </div>
 
         {/* Quick row */}
-        <div className="mx-5 mt-[22px] grid grid-cols-3 rounded-[18px] border border-[#EEF2F6] bg-white py-5 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
+        <div className="mx-5 mt-[22px] grid grid-cols-4 rounded-[18px] border border-[#EEF2F6] bg-white py-5 shadow-[0_1px_2px_rgba(26,36,51,0.04),0_10px_24px_rgba(26,36,51,0.045)]">
           {QUICK_ITEMS.map((q, i) => (
             <Link
               key={q.label}
               href={q.href}
-              onClick={() =>
-                q.category === "support"
-                  ? track("support_entry_click", { from: "home_quick" })
-                  : track("decision_card_click", { category: q.category ?? null, from: "home_quick" })
-              }
+              onClick={() => {
+                if (q.category === "support") track("support_entry_click", { from: "home_quick" });
+                else if (q.category === "cheongmo") track("cheongmo_entry_click", { from: "home_quick" });
+                else track("decision_card_click", { category: q.category ?? null, from: "home_quick" });
+              }}
               className={`relative flex flex-col items-center gap-2.5 ${
                 i > 0 ? "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-px before:bg-[#EEF2F6] before:content-['']" : ""
               }`}
@@ -344,7 +346,7 @@ export function MagazineHomeScreen() {
                   />
                 ) : null}
               </span>
-              <span className="text-[12.5px] font-bold tracking-tight text-ink">{q.label}</span>
+              <span className="whitespace-nowrap text-[11.5px] font-bold tracking-tight text-ink">{q.label}</span>
             </Link>
           ))}
         </div>
