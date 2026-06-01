@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-node_modules/
-=======
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
@@ -50,4 +47,13 @@ worker/node_modules/
 worker/.wrangler/
 worker/*.bak
 src/lib/instagram/*.bak
->>>>>>> 34353a1 (feat(archive): Instagram → sinhon.life 미러링 (Cloudflare Worker + D1))
+
+# Claude Code: ignore local config, but share committed skills
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/awesome-design/
+!.claude/skills/bmad-*/
+
+# BMAD-METHOD: 도구 자체와 docs는 추적, 생성 산출물은 제외
+_bmad-output/

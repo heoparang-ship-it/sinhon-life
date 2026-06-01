@@ -1,25 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Play, Image as ImageIcon, AlertCircle, Inbox } from "lucide-react";
 import { useArchiveList, useArchiveTags } from "@/lib/instagram/client";
 import type { ArchiveItem } from "@/lib/instagram/types";
 
-/**
- * /archive — 인스타 미러 리스트.
- *
- * 디자인 원칙
- *  - 톤은 기존 ShortsCard 와 동일한 sky-card 배경 + ink navy 텍스트
- *  - 4탭 BottomNav 와 겹치지 않게 pb-[100px]
- *  - 해시태그 pill 클릭 시 같은 화면에서 필터 적용 (라우트 이동 X)
- */
+type RegionKey = "all" | "bupyeong" | "songdo" | "incheon";
+
+const REGION_LABEL: Record<RegionKey, string> = {
+  all: "전체",
+  bupyeong: "부평",
+  songdo: "송도",
+  incheon: "인천",
+};
+
+const REGION_PATTERNS: Record<RegionKey, RegExp | null> = {
+  all: null,
+  bupyeong: /부평/,
+  songdo: /송도/,
+  incheon: /인천/,
+};
+
+function matchesRegion(item: ArchiveItem, region: RegionKey): boolean {
+  const re = REGION_PATTERNS[region];
+  if (!re) return true;
+  if (item.caption && re.test(item.caption)) return true;
+  if (item.tags?.some((t) => re.test(t))) return true;
+  return false;
+}
+
 export default function ArchiveClient() {
+  const [activeRegion, setActiveRegion] = useState<RegionKey>("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const { data: list, loading, error } = useArchiveList({ tag: activeTag });
   const { data: tagsRes } = useArchiveTags(20);
 
-  const items = list?.items ?? [];
+  const rawItems = list?.items ?? [];
+  const items = useMemo(
+    () => (activeRegion === "all" ? rawItems : rawItems.filter((it) => matchesRegion(it, activeRegion))),
+    [rawItems, activeRegion],
+  );
 
   return (
     <main className="min-h-screen pb-[100px]" style={{ background: "var(--background, #FFFFFF)" }}>
@@ -35,6 +56,29 @@ export default function ArchiveClient() {
           인스타에 올라온 신혼 콘텐츠를 한 곳에서.
         </p>
       </header>
+
+      {/* 지역 칩 — 부평/송도/인천 우선 */}
+      <div className="px-5 mb-3">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5">
+          {(["all", "bupyeong", "songdo", "incheon"] as RegionKey[]).map((r) => {
+            const active = activeRegion === r;
+            return (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setActiveRegion(r)}
+                className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition active:scale-[0.97] ${
+                  active
+                    ? "bg-blue-accent text-white shadow-[0_4px_10px_-4px_rgba(59,139,207,0.5)]"
+                    : "border border-[#DCE6EF] bg-white text-ink-soft"
+                }`}
+              >
+                {REGION_LABEL[r]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* 태그 pill — 가로 스크롤 */}
       {tagsRes && tagsRes.tags.length > 0 && (

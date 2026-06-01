@@ -401,7 +401,7 @@ function VideoCard({ tags, title, dur, label, onClick, imageUrl, isVideo }) {
 }
 
 // ─── 화면 껍데기 ───────────────────────────────────────────────
-function ScreenShell({ children }) {
+function ScreenShell({ children, overlay }) {
   return (
     <div style={{
       width: '100%', height: '100%', background: T.white,
@@ -410,6 +410,7 @@ function ScreenShell({ children }) {
       <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
         {children}
       </div>
+      {overlay}
       <TabBar />
     </div>
   );
@@ -887,22 +888,35 @@ function LedgerGateScreen() {
 
 // ═══ 04b · 가계부 — 로그인 후 ════════════════════════════════════
 const LEDGER_STORAGE_KEY = 'sinhon.ledger.entries.v1';
+const LEDGER_BUDGETS_KEY = 'sinhon.ledger.budgets.v1';
 const LEDGER_CATEGORIES = [
-  { id: 'venue',  name: '예식장',   short: '예', budget: 4000000,  color: '#F07C9B' },
-  { id: 'studio', name: '스드메',   short: '스', budget: 2500000,  color: '#F07C6C' },
-  { id: 'hanbok', name: '예복',     short: '복', budget: 900000,   color: '#8C8FF2' },
-  { id: 'gift',   name: '예물/예단', short: '물', budget: 3000000,  color: '#6BA7F2' },
-  { id: 'travel', name: '신혼여행', short: '여', budget: 6000000,  color: '#77C7C0' },
-  { id: 'home',   name: '가전/가구', short: '집', budget: 8000000,  color: '#90B874' },
-  { id: 'etc',    name: '기타',     short: '기', budget: 15600000, color: '#A8B0BB' },
+  { id: 'venue',     name: '예식장',   defaultBudget: 5000000,  color: '#F07C9B' },
+  { id: 'studio',    name: '스드메',   defaultBudget: 3000000,  color: '#F07C6C' },
+  { id: 'hanbok',    name: '예복',     defaultBudget: 1000000,  color: '#8C8FF2' },
+  { id: 'gift',      name: '예물예단', defaultBudget: 3000000,  color: '#6BA7F2' },
+  { id: 'appliance', name: '혼수가전', defaultBudget: 6000000,  color: '#F2B66B' },
+  { id: 'newhome',   name: '신혼집',   defaultBudget: 10000000, color: '#9D7CB8' },
+  { id: 'travel',    name: '신혼여행', defaultBudget: 5000000,  color: '#77C7C0' },
+  { id: 'cash',      name: '본식현금', defaultBudget: 1500000,  color: '#C97A86' },
+  { id: 'etc',       name: '기타',     defaultBudget: 5500000,  color: '#A8B0BB' },
 ];
-const LEDGER_INITIAL_ENTRIES = [
-  { id: 'seed-1', type: 'expense', categoryId: 'venue',  memo: '웨딩홀 계약금',       payer: '공동', method: '카드', amount: 4000000, date: '2026-05-19' },
-  { id: 'seed-2', type: 'expense', categoryId: 'studio', memo: '스튜디오 촬영 예약금', payer: '신랑', method: '이체', amount: 1200000, date: '2026-05-19' },
-  { id: 'seed-3', type: 'expense', categoryId: 'studio', memo: '드레스 피팅비',       payer: '신부', method: '카드', amount: 650000,  date: '2026-05-18' },
-  { id: 'seed-4', type: 'expense', categoryId: 'hanbok', memo: '예복 샘플 상담',       payer: '공동', method: '카드', amount: 450000,  date: '2026-05-17' },
-  { id: 'seed-5', type: 'income',  categoryId: 'etc',    memo: '결혼 준비 저축',       payer: '공동', method: '입금', amount: 8200000, date: '2026-05-16' },
-];
+function formatAmountInput(value) {
+  const digits = String(value || '').replace(/[^\d]/g, '');
+  return digits ? Number(digits).toLocaleString('ko-KR') : '';
+}
+function parseAmountInput(value) {
+  return Number(String(value || '').replace(/[^\d]/g, '')) || 0;
+}
+function krwHangul(n) {
+  const v = Math.abs(Math.round(Number(n) || 0));
+  if (v === 0) return '';
+  if (v >= 100000000) return `약 ${(v / 100000000).toFixed(v % 100000000 === 0 ? 0 : 1).replace(/\.0$/, '')}억원`;
+  if (v >= 10000) {
+    const man = Math.floor(v / 10000);
+    return `약 ${man.toLocaleString('ko-KR')}만원`;
+  }
+  return '';
+}
 
 function krw(amount, suffix = true) {
   return Math.round(amount || 0).toLocaleString('ko-KR') + (suffix ? '원' : '');
@@ -910,11 +924,12 @@ function krw(amount, suffix = true) {
 function ledgerCategory(id) {
   return LEDGER_CATEGORIES.find(c => c.id === id) || LEDGER_CATEGORIES[LEDGER_CATEGORIES.length - 1];
 }
-function summarizeLedger(entries) {
-  const totalBudget = LEDGER_CATEGORIES.reduce((sum, c) => sum + c.budget, 0);
+function summarizeLedger(entries, budgets) {
+  const resolved = LEDGER_CATEGORIES.map(c => ({ ...c, budget: Number((budgets && budgets[c.id] != null) ? budgets[c.id] : c.defaultBudget) || 0 }));
+  const totalBudget = resolved.reduce((sum, c) => sum + c.budget, 0);
   const expenseTotal = entries.filter(e => e.type === 'expense').reduce((sum, e) => sum + Number(e.amount || 0), 0);
   const incomeTotal = entries.filter(e => e.type === 'income').reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  const byCategory = LEDGER_CATEGORIES.map(c => {
+  const byCategory = resolved.map(c => {
     const spent = entries
       .filter(e => e.type === 'expense' && e.categoryId === c.id)
       .reduce((sum, e) => sum + Number(e.amount || 0), 0);
@@ -932,11 +947,21 @@ function summarizeLedger(entries) {
 function loadLedgerEntries() {
   try {
     const raw = localStorage.getItem(LEDGER_STORAGE_KEY);
-    if (!raw) return LEDGER_INITIAL_ENTRIES;
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : LEDGER_INITIAL_ENTRIES;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return LEDGER_INITIAL_ENTRIES;
+    return [];
+  }
+}
+function loadLedgerBudgets() {
+  try {
+    const raw = localStorage.getItem(LEDGER_BUDGETS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
   }
 }
 function groupLedgerEntries(entries) {
@@ -1023,33 +1048,36 @@ function CategoryRail({ activeCategory, onSelect }) {
   );
 }
 
-function CategoryBudgetCard({ summary }) {
-  const rows = summary.byCategory.slice().sort((a, b) => b.spent - a.spent).slice(0, 5);
+function CategoryBudgetCard({ summary, activeCategory, onEditAll, onEditOne }) {
+  const rows = summary.byCategory;
   return (
     <section style={{ padding: '26px 26px 0' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 2px', marginBottom: 14 }}>
         <div>
           <MicroLabel>Budget Map</MicroLabel>
           <div style={{ marginTop: 9, fontSize: 20, fontWeight: 650, letterSpacing: '-0.03em', color: T.ink }}>카테고리별 예산</div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: T.mute }}>각 항목을 눌러 예산을 수정하세요</div>
         </div>
-        <span style={{ fontSize: 11, color: T.faint }}>상위 지출</span>
+        <button onClick={onEditAll} style={{ height: 32, padding: '0 13px', border: '1px solid rgba(74,155,224,0.30)', borderRadius: 999, background: 'rgba(74,155,224,0.08)', color: T.accentDeep, font: 'inherit', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>예산 편집</button>
       </div>
       <div style={{ borderRadius: 20, background: '#FFFFFF', boxShadow: '0 18px 40px -28px rgba(20,40,80,0.22)', border: '1px solid rgba(120,140,170,0.10)', overflow: 'hidden' }}>
         {rows.map((c, i) => (
-          <div key={c.id} style={{ padding: '15px 16px', borderTop: i === 0 ? 'none' : '1px solid rgba(120,140,170,0.08)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 11, background: c.color + '22', color: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>{c.short}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>{c.name}</span>
+          <div key={c.id} onClick={() => onEditOne && onEditOne(c.id)} onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && onEditOne) { e.preventDefault(); onEditOne(c.id); } }} role="button" tabIndex={0} aria-label={`${c.name} 예산 수정`} style={{ padding: '15px 16px 15px 12px', borderTop: i === 0 ? 'none' : '1px solid rgba(120,140,170,0.08)', background: activeCategory === c.id ? 'rgba(74,155,224,0.05)' : '#FFFFFF', cursor: 'pointer', position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 0, top: 12, bottom: 12, width: 4, borderRadius: 999, background: c.color }} />
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, paddingLeft: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontSize: 14, fontWeight: 750, color: T.ink, letterSpacing: '-0.015em' }}>{c.name}</span>
                   <span style={{ fontSize: 12, fontWeight: 700, color: T.inkSoft, fontVariantNumeric: 'tabular-nums' }}>{krw(c.spent)}</span>
                 </div>
                 <div style={{ marginTop: 8, height: 6, borderRadius: 999, background: '#EEF3F8', overflow: 'hidden' }}>
                   <div style={{ width: c.rate + '%', height: '100%', borderRadius: 999, background: c.color }} />
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: 10.5, color: T.mute }}>
-                  <span>{c.rate}% 사용</span>
-                  <span>예산 {krw(c.budget)}</span>
+                  <span style={{ color: c.spent > c.budget ? T.expense : c.rate >= 80 ? '#C97A2A' : T.mute, fontWeight: c.rate >= 80 ? 700 : 400 }}>
+                    {c.spent > c.budget ? `예산 ${krw(c.spent - c.budget)} 초과` : c.rate >= 80 ? `${c.rate}% · 거의 다 사용` : `${c.rate}% 사용 · 남은 ${krw(Math.max(0, c.remaining))}`}
+                  </span>
+                  <span>예산 {krw(c.budget)} <span style={{ color: T.faint, marginLeft: 2 }}>›</span></span>
                 </div>
               </div>
             </div>
@@ -1060,17 +1088,17 @@ function CategoryBudgetCard({ summary }) {
   );
 }
 
-function LedgerRow({ entry }) {
+function LedgerRow({ entry, onClick }) {
   const isIncome = entry.type === 'income';
   const cat = ledgerCategory(entry.categoryId);
+  const onKey = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick && onClick(); } };
+  const label = isIncome ? (entry.incomeSource || '수입') : cat.name;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 4px', borderBottom: '1px solid rgba(120,140,170,0.10)' }}>
-      <div style={{ width: 40, height: 40, borderRadius: 13, background: isIncome ? 'linear-gradient(135deg, rgba(74,155,224,0.16), rgba(140,200,242,0.10))' : cat.color + '1F', color: isIncome ? T.accentDeep : cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800 }}>
-        {isIncome ? '+' : cat.short}
-      </div>
+    <div onClick={onClick} onKeyDown={onKey} role="button" tabIndex={0} aria-label={`${entry.memo} 수정`} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 4px', borderBottom: '1px solid rgba(120,140,170,0.10)', cursor: 'pointer' }}>
+      <div style={{ width: 10, height: 10, borderRadius: '50%', background: isIncome ? T.accentDeep : cat.color, flexShrink: 0, boxShadow: isIncome ? '0 0 0 4px rgba(74,155,224,0.12)' : `0 0 0 4px ${cat.color}1A` }} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13.5, fontWeight: 650, color: T.ink, letterSpacing: '-0.015em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.memo}</div>
-        <div style={{ marginTop: 3, fontSize: 11, color: T.mute }}>{cat.name} · {entry.payer} · {entry.method}</div>
+        <div style={{ marginTop: 3, fontSize: 11, color: T.mute }}>{label} · {entry.payer} · {entry.method}</div>
       </div>
       <div style={{ fontSize: 14, fontWeight: 800, color: isIncome ? T.accentDeep : T.expense, letterSpacing: '-0.015em', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
         {isIncome ? '+' : '−'}{krw(entry.amount, false)}
@@ -1079,7 +1107,7 @@ function LedgerRow({ entry }) {
   );
 }
 
-function LedgerList({ entries, activeCategory }) {
+function LedgerList({ entries, activeCategory, onAddClick, onEntryClick }) {
   const filtered = activeCategory === 'all' ? entries : entries.filter(e => e.categoryId === activeCategory);
   const groups = groupLedgerEntries(filtered);
   return (
@@ -1089,8 +1117,11 @@ function LedgerList({ entries, activeCategory }) {
           <MicroLabel>Entries</MicroLabel>
           <div style={{ marginTop: 10, fontSize: 20, fontWeight: 650, letterSpacing: '-0.03em', color: T.ink }}>최근 내역</div>
         </div>
-        <span style={{ fontSize: 11, color: T.faint }}>총 {filtered.length}건</span>
+        <button onClick={onAddClick} style={{ height: 36, padding: '0 14px', border: 0, borderRadius: 999, background: G.pillActiveOnWhite, color: '#fff', font: 'inherit', fontSize: 12, fontWeight: 800, boxShadow: '0 10px 24px -16px rgba(74,155,224,0.55)', cursor: 'pointer' }}>
+          + 내역 추가
+        </button>
       </div>
+      <div style={{ margin: '-8px 4px 18px', fontSize: 11, color: T.faint }}>총 {filtered.length}건 · 항목을 눌러 수정</div>
       {groups.length === 0 && (
         <div style={{ padding: '44px 0', textAlign: 'center', fontSize: 13, color: T.mute }}>
           아직 이 카테고리의 내역이 없어요.
@@ -1106,7 +1137,7 @@ function LedgerList({ entries, activeCategory }) {
                 {dayTotal >= 0 ? '+' : '−'}{krw(Math.abs(dayTotal), false)}
               </span>
             </div>
-            {group.entries.map(entry => <LedgerRow key={entry.id} entry={entry} />)}
+            {group.entries.map(entry => <LedgerRow key={entry.id} entry={entry} onClick={() => onEntryClick && onEntryClick(entry)} />)}
           </div>
         );
       })}
@@ -1114,19 +1145,22 @@ function LedgerList({ entries, activeCategory }) {
   );
 }
 
-function LedgerEntrySheet({ onClose, onAdd }) {
-  const [type, setType] = React.useState('expense');
-  const [categoryId, setCategoryId] = React.useState('venue');
-  const [amount, setAmount] = React.useState('4000000');
-  const [memo, setMemo] = React.useState('웨딩홀 계약금');
-  const [payer, setPayer] = React.useState('공동');
-  const [method, setMethod] = React.useState('카드');
-  const [date, setDate] = React.useState('2026-05-20');
+function LedgerEntrySheet({ onClose, onSave, onDelete, initial }) {
+  const editing = !!initial;
+  const [type, setType] = React.useState(initial?.type || 'expense');
+  const [categoryId, setCategoryId] = React.useState(initial?.categoryId || 'venue');
+  const [incomeSource, setIncomeSource] = React.useState(initial?.incomeSource || '축의금');
+  const [amount, setAmount] = React.useState(initial ? formatAmountInput(initial.amount) : '');
+  const [memo, setMemo] = React.useState(initial?.memo || '');
+  const [payer, setPayer] = React.useState(initial?.payer || '공동');
+  const [method, setMethod] = React.useState(initial?.method || '카드');
+  const [date, setDate] = React.useState(initial?.date || (() => new Date().toISOString().slice(0, 10))());
+  const cleanAmount = parseAmountInput(amount);
+  const canSubmit = cleanAmount > 0 && memo.trim().length > 0;
   const submit = () => {
-    const cleanAmount = Number(String(amount).replace(/[^\d]/g, ''));
-    if (!cleanAmount || !memo.trim()) return;
-    onAdd({
-      id: 'local-' + Date.now(),
+    if (!canSubmit) return;
+    onSave({
+      id: initial?.id || 'local-' + Date.now(),
       type,
       categoryId,
       memo: memo.trim(),
@@ -1134,18 +1168,25 @@ function LedgerEntrySheet({ onClose, onAdd }) {
       method,
       amount: cleanAmount,
       date,
+      ...(type === 'income' ? { incomeSource } : {}),
     });
+    onClose();
+  };
+  const remove = () => {
+    if (!initial) return;
+    if (typeof window !== 'undefined' && !window.confirm(`'${initial.memo}' 내역을 삭제할까요?`)) return;
+    onDelete(initial.id);
     onClose();
   };
   const inputStyle = { width: '100%', height: 48, border: '1px solid rgba(120,140,170,0.18)', borderRadius: 14, padding: '0 14px', font: 'inherit', fontSize: 14, fontWeight: 600, color: T.ink, outline: 'none', background: '#F8FBFE' };
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 60 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(26,36,51,0.26)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'absolute', left: 14, right: 14, bottom: 18, borderRadius: 26, background: T.white, boxShadow: '0 -20px 60px -24px rgba(20,40,80,0.35)', padding: '18px 18px 22px' }}>
+      <div style={{ position: 'absolute', left: 14, right: 14, bottom: 18, borderRadius: 26, background: T.white, boxShadow: '0 -20px 60px -24px rgba(20,40,80,0.35)', padding: '18px 18px 22px', maxHeight: 'calc(100% - 36px)', overflowY: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <MicroLabel>New Entry</MicroLabel>
-            <div style={{ marginTop: 6, fontSize: 20, fontWeight: 750, letterSpacing: '-0.03em', color: T.ink }}>내역 추가</div>
+            <MicroLabel>{editing ? 'Edit Entry' : 'New Entry'}</MicroLabel>
+            <div style={{ marginTop: 6, fontSize: 20, fontWeight: 750, letterSpacing: '-0.03em', color: T.ink }}>{editing ? '내역 수정' : '내역 추가'}</div>
           </div>
           <button onClick={onClose} style={{ width: 36, height: 36, border: 0, borderRadius: '50%', background: '#F1F5F9', color: T.mute, fontSize: 20, cursor: 'pointer' }}>×</button>
         </div>
@@ -1154,12 +1195,25 @@ function LedgerEntrySheet({ onClose, onAdd }) {
             <button key={v} onClick={() => setType(v)} style={{ height: 42, border: 0, borderRadius: 14, background: type === v ? G.pillActiveOnWhite : '#EEF3F8', color: type === v ? '#fff' : T.accentDeep, font: 'inherit', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>{v === 'expense' ? '지출' : '수입'}</button>
           ))}
         </div>
+        {type === 'income' && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+            {['축의금','양가 지원금','본인 저축','기타'].map(s => (
+              <Pill key={s} onWhite active={incomeSource === s} size={32} onClick={() => setIncomeSource(s)} style={{ fontSize: 12, padding: '0 13px' }}>{s}</Pill>
+            ))}
+          </div>
+        )}
         <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <input value={amount} onChange={e => setAmount(e.target.value)} inputMode="numeric" placeholder="금액" style={inputStyle} />
+          <div>
+            <div style={{ position: 'relative' }}>
+              <input value={amount} onChange={e => setAmount(formatAmountInput(e.target.value))} inputMode="numeric" placeholder="금액" style={{ ...inputStyle, paddingRight: 30, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }} />
+              <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: T.mute, pointerEvents: 'none' }}>원</span>
+            </div>
+            {cleanAmount > 0 && <div style={{ marginTop: 4, fontSize: 10.5, color: T.faint, textAlign: 'right' }}>{krwHangul(cleanAmount)}</div>}
+          </div>
           <input value={date} onChange={e => setDate(e.target.value)} type="date" style={inputStyle} />
         </div>
         <div style={{ marginTop: 10 }}>
-          <input value={memo} onChange={e => setMemo(e.target.value)} placeholder="메모" style={inputStyle} />
+          <input value={memo} onChange={e => setMemo(e.target.value)} placeholder="예: 웨딩홀 계약금" style={inputStyle} />
         </div>
         <div style={{ marginTop: 12, display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
           {LEDGER_CATEGORIES.map(c => (
@@ -1168,13 +1222,81 @@ function LedgerEntrySheet({ onClose, onAdd }) {
         </div>
         <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <select value={payer} onChange={e => setPayer(e.target.value)} style={inputStyle}>
-            <option>공동</option><option>신랑</option><option>신부</option>
+            <option>공동</option><option>신랑</option><option>신부</option><option>양가</option>
           </select>
           <select value={method} onChange={e => setMethod(e.target.value)} style={inputStyle}>
             <option>카드</option><option>이체</option><option>현금</option><option>입금</option>
           </select>
         </div>
-        <button onClick={submit} style={{ marginTop: 16, width: '100%', height: 52, border: 0, borderRadius: 16, background: G.pillActiveOnWhite, color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 800, boxShadow: '0 18px 36px -16px rgba(74,155,224,0.55)', cursor: 'pointer' }}>추가하기</button>
+        <button onClick={submit} style={{ marginTop: 16, width: '100%', height: 52, border: 0, borderRadius: 16, background: canSubmit ? G.pillActiveOnWhite : '#DDE7F1', color: canSubmit ? '#fff' : T.faint, font: 'inherit', fontSize: 15, fontWeight: 800, boxShadow: canSubmit ? '0 18px 36px -16px rgba(74,155,224,0.55)' : 'none', cursor: canSubmit ? 'pointer' : 'default' }}>{editing ? '저장하기' : '추가하기'}</button>
+        {editing && (
+          <button onClick={remove} style={{ marginTop: 10, width: '100%', height: 44, border: '1px solid rgba(224,82,99,0.30)', borderRadius: 14, background: 'rgba(224,82,99,0.06)', color: T.expense, font: 'inherit', fontSize: 13, fontWeight: 750, cursor: 'pointer' }}>이 내역 삭제</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BudgetEditSheet({ onClose, onSave, initialBudgets, isFirstSetup, focusCategoryId }) {
+  const inputRefs = React.useRef({});
+  React.useEffect(() => {
+    if (focusCategoryId && inputRefs.current[focusCategoryId]) {
+      inputRefs.current[focusCategoryId].focus();
+      inputRefs.current[focusCategoryId].select();
+    }
+  }, [focusCategoryId]);
+  const seed = LEDGER_CATEGORIES.reduce((acc, c) => {
+    const v = initialBudgets && initialBudgets[c.id] != null ? initialBudgets[c.id] : c.defaultBudget;
+    acc[c.id] = formatAmountInput(v);
+    return acc;
+  }, {});
+  const [values, setValues] = React.useState(seed);
+  const total = LEDGER_CATEGORIES.reduce((sum, c) => sum + parseAmountInput(values[c.id]), 0);
+  const update = (id, v) => setValues(prev => ({ ...prev, [id]: formatAmountInput(v) }));
+  const submit = () => {
+    const out = {};
+    LEDGER_CATEGORIES.forEach(c => { out[c.id] = parseAmountInput(values[c.id]); });
+    onSave(out);
+    onClose();
+  };
+  const inputStyle = { width: '100%', height: 44, border: '1px solid rgba(120,140,170,0.18)', borderRadius: 12, padding: '0 12px', font: 'inherit', fontSize: 14, fontWeight: 650, color: T.ink, outline: 'none', background: '#F8FBFE', textAlign: 'right', fontVariantNumeric: 'tabular-nums' };
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 60 }}>
+      <div onClick={isFirstSetup ? undefined : onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(26,36,51,0.26)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }} />
+      <div style={{ position: 'absolute', left: 14, right: 14, top: 40, bottom: 18, borderRadius: 26, background: T.white, boxShadow: '0 -20px 60px -24px rgba(20,40,80,0.35)', padding: '18px 18px 22px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <MicroLabel>{isFirstSetup ? 'Setup Budget' : 'Edit Budget'}</MicroLabel>
+            <div style={{ marginTop: 6, fontSize: 20, fontWeight: 750, letterSpacing: '-0.03em', color: T.ink }}>{isFirstSetup ? '예산 설정' : '예산 편집'}</div>
+            <div style={{ marginTop: 4, fontSize: 11.5, color: T.mute }}>{isFirstSetup ? '카테고리별 예산을 입력해 시작하세요' : '카테고리별 예산을 수정하세요'}</div>
+          </div>
+          {!isFirstSetup && <button onClick={onClose} style={{ width: 36, height: 36, border: 0, borderRadius: '50%', background: '#F1F5F9', color: T.mute, fontSize: 20, cursor: 'pointer' }}>×</button>}
+        </div>
+        <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 12, background: 'rgba(74,155,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: T.accentDeep, letterSpacing: '0.04em', textTransform: 'uppercase' }}>총 예산</span>
+          <span style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: T.ink, fontVariantNumeric: 'tabular-nums' }}>{krw(total)}</span>
+            {total > 0 && <div style={{ fontSize: 10.5, color: T.mute, marginTop: 1 }}>{krwHangul(total)}</div>}
+          </span>
+        </div>
+        <div style={{ marginTop: 14, flex: 1, overflowY: 'auto', paddingRight: 2 }}>
+          {LEDGER_CATEGORIES.map((c, i) => {
+            const highlighted = focusCategoryId === c.id;
+            return (
+              <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 12, alignItems: 'center', padding: '10px 6px', borderTop: i === 0 ? 'none' : '1px solid rgba(120,140,170,0.10)', background: highlighted ? 'rgba(74,155,224,0.06)' : 'transparent', borderRadius: highlighted ? 10 : 0, margin: highlighted ? '0 -6px' : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 4, height: 28, borderRadius: 999, background: c.color }} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: T.ink }}>{c.name}</span>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input ref={el => { if (el) inputRefs.current[c.id] = el; }} value={values[c.id]} onChange={e => update(c.id, e.target.value)} inputMode="numeric" placeholder="0" style={{ ...inputStyle, paddingRight: 28, borderColor: highlighted ? 'rgba(74,155,224,0.45)' : inputStyle.border }} />
+                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: T.mute, pointerEvents: 'none' }}>원</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={submit} style={{ marginTop: 14, width: '100%', height: 52, border: 0, borderRadius: 16, background: G.pillActiveOnWhite, color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 800, boxShadow: '0 18px 36px -16px rgba(74,155,224,0.55)', cursor: 'pointer' }}>{isFirstSetup ? '시작하기' : '저장하기'}</button>
       </div>
     </div>
   );
@@ -1182,25 +1304,48 @@ function LedgerEntrySheet({ onClose, onAdd }) {
 
 function LedgerScreen() {
   const [entries, setEntries] = React.useState(() => loadLedgerEntries());
+  const [budgets, setBudgets] = React.useState(() => loadLedgerBudgets());
   const [activeCategory, setActiveCategory] = React.useState('all');
-  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [entrySheet, setEntrySheet] = React.useState(null); // null | { initial: entry | null }
+  const [budgetSheet, setBudgetSheet] = React.useState(() => loadLedgerBudgets() == null ? { firstSetup: true } : null);
   React.useEffect(() => {
     try { localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(entries)); } catch {}
   }, [entries]);
-  const summary = summarizeLedger(entries);
-  const addEntry = (entry) => setEntries(prev => [entry, ...prev]);
+  React.useEffect(() => {
+    if (budgets) {
+      try { localStorage.setItem(LEDGER_BUDGETS_KEY, JSON.stringify(budgets)); } catch {}
+    }
+  }, [budgets]);
+  const summary = summarizeLedger(entries, budgets);
+  const upsertEntry = (entry) => setEntries(prev => {
+    const idx = prev.findIndex(e => e.id === entry.id);
+    if (idx >= 0) { const next = prev.slice(); next[idx] = entry; return next; }
+    return [entry, ...prev];
+  });
+  const deleteEntry = (id) => setEntries(prev => prev.filter(e => e.id !== id));
+  const overlay = entrySheet
+    ? <LedgerEntrySheet onClose={() => setEntrySheet(null)} onSave={upsertEntry} onDelete={deleteEntry} initial={entrySheet.initial} />
+    : budgetSheet
+      ? <BudgetEditSheet onClose={() => setBudgetSheet(null)} onSave={setBudgets} initialBudgets={budgets} isFirstSetup={budgetSheet.firstSetup} focusCategoryId={budgetSheet.focusCategoryId} />
+      : null;
   return (
-    <ScreenShell>
+    <ScreenShell overlay={overlay}>
       <div style={{ paddingTop: 54, background: T.blueSoft }}>
         <LedgerHero summary={summary} />
       </div>
       <CategoryRail activeCategory={activeCategory} onSelect={setActiveCategory} />
-      <CategoryBudgetCard summary={summary} />
-      <LedgerList entries={entries} activeCategory={activeCategory} />
-      <div onClick={() => setSheetOpen(true)} style={{ position: 'absolute', right: 26, bottom: 110, width: 60, height: 60, borderRadius: '50%', background: G.pillActiveOnWhite, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 16px 32px -10px rgba(74,155,224,0.55)', zIndex: 20, cursor: 'pointer' }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/></svg>
-      </div>
-      {sheetOpen && <LedgerEntrySheet onClose={() => setSheetOpen(false)} onAdd={addEntry} />}
+      <CategoryBudgetCard
+        summary={summary}
+        activeCategory={activeCategory}
+        onEditAll={() => setBudgetSheet({ firstSetup: false })}
+        onEditOne={(id) => setBudgetSheet({ firstSetup: false, focusCategoryId: id })}
+      />
+      <LedgerList
+        entries={entries}
+        activeCategory={activeCategory}
+        onAddClick={() => setEntrySheet({ initial: null })}
+        onEntryClick={(entry) => setEntrySheet({ initial: entry })}
+      />
     </ScreenShell>
   );
 }

@@ -18,7 +18,7 @@ preview_urls = false
 #   첫 번째: 10분마다 인스타 폴링 (스펙 요구사항)
 #   두 번째: 매주 일요일 03:00 UTC (KST 정오) Long-Lived Token 자동 갱신
 [triggers]
-crons = ["*/10 * * * *", "0 3 * * 0"]
+crons = ["*/10 * * * *", "0 3 * * 7"]
 
 # D1 데이터베이스 — wrangler d1 create sinhon-life-media 실행 후
 # 출력된 database_id 를 아래에 채워 넣을 것.
@@ -29,7 +29,7 @@ database_id = "df3992ea-550c-4fc4-95db-2c80ceb65530"
 
 # 공개 변수 (비밀 아님)
 [vars]
-ALLOWED_ORIGIN = "https://sinhon.life"
+ALLOWED_ORIGIN = "*"
 INSTAGRAM_GRAPH_VERSION = "v21.0"
 POLL_LIMIT = "25"
 
