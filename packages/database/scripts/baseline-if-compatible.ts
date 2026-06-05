@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { Client } from "pg";
+import { withProductionDatabaseSchema } from "../src/database-url";
 
 type MigrationBaseline = {
   checks: Array<{ column?: string; table: string }>;
@@ -121,7 +122,7 @@ function resolveAppliedMigration(migrationName: string) {
 }
 
 const client = new Client({
-  connectionString: databaseUrl
+  connectionString: withProductionDatabaseSchema(databaseUrl)
 });
 
 try {
