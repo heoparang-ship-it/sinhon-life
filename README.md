@@ -68,7 +68,7 @@ NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.example/api/v1
 NEXT_PUBLIC_WEB_BASE_URL=https://your-web-domain.example
 ```
 
-Vercel production build는 `pnpm db:generate` 후 `VERCEL_ENV=production`일 때만 `scripts/vercel-production-db-prepare.mjs`로 `DIRECT_URL`을 사용해 호환 스키마 기준점 처리, 필요 시 Supabase `auth` schema를 인식한 비파괴 `db push` bootstrap, `migrate deploy`, seed를 실행합니다.
+Vercel production build는 `pnpm db:generate` 후 `VERCEL_ENV=production`일 때만 `scripts/vercel-production-db-prepare.mjs`로 `DIRECT_URL`을 사용해 호환 스키마 기준점 처리, 필요 시 체크인된 migration SQL bootstrap, `migrate deploy`, seed를 실행합니다. 이 과정은 기존 public schema의 다른 테이블을 삭제하거나 강제 동기화하지 않습니다.
 
 ## 기준 문서
 
