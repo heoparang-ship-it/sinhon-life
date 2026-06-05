@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { Client } from "pg";
-import { withProductionDatabaseSchema } from "../src/database-url";
+import { getProductionDatabaseSchema, withProductionDatabaseSchema } from "../src/database-url";
 
 type MigrationBaseline = {
   checks: Array<{ column?: string; table: string }>;
@@ -33,6 +33,8 @@ const migrations: MigrationBaseline[] = [
 ];
 
 const databaseUrl = process.env.DATABASE_URL;
+const schemaName =
+  process.env.VERCEL_ENV === "production" ? getProductionDatabaseSchema() : "public";
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to baseline production migrations.");
@@ -41,7 +43,7 @@ if (!databaseUrl) {
 async function tableExists(client: Client, tableName: string) {
   const result = await client.query<{ exists: boolean }>(
     "select to_regclass($1) is not null as exists",
-    [`public.${tableName}`]
+    [`${schemaName}.${tableName}`]
   );
 
   return result.rows[0]?.exists ?? false;
@@ -53,12 +55,12 @@ async function columnExists(client: Client, tableName: string, columnName: strin
       select exists (
         select 1
         from information_schema.columns
-        where table_schema = 'public'
-          and table_name = $1
-          and column_name = $2
+        where table_schema = $1
+          and table_name = $2
+          and column_name = $3
       ) as exists
     `,
-    [tableName, columnName]
+    [schemaName, tableName, columnName]
   );
 
   return result.rows[0]?.exists ?? false;
