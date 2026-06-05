@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["public", "auth"]
 }
 
 model User {
@@ -48,6 +49,7 @@ model User {
   @@index([emailHash], name: "idx_users_email_hash")
   @@index([phoneHash], name: "idx_users_phone_hash")
   @@map("users")
+  @@schema("public")
 }
 
 model Couple {
@@ -92,6 +94,7 @@ model Couple {
   @@index([weddingRegion], name: "idx_couples_wedding_region")
   @@index([preferredResidenceRegion], name: "idx_couples_preferred_residence_region")
   @@map("couples")
+  @@schema("public")
 }
 
 model CoupleMember {
@@ -132,6 +135,7 @@ model CoupleMember {
   @@index([role], name: "idx_couple_members_role")
   @@index([onboardingStatus], name: "idx_couple_members_onboarding_status")
   @@map("couple_members")
+  @@schema("public")
 }
 
 model CoupleInvitation {
@@ -159,6 +163,7 @@ model CoupleInvitation {
   @@index([status], name: "idx_couple_invitations_status")
   @@index([expiresAt], name: "idx_couple_invitations_expires_at")
   @@map("couple_invitations")
+  @@schema("public")
 }
 
 model Scenario {
@@ -188,6 +193,7 @@ model Scenario {
   @@index([createdAt], name: "idx_scenarios_created_at")
   @@index([calculationVersion], name: "idx_scenarios_calculation_version")
   @@map("scenarios")
+  @@schema("public")
 }
 
 model ScenarioItem {
@@ -211,6 +217,7 @@ model ScenarioItem {
   @@index([category], name: "idx_scenario_items_category")
   @@index([sortOrder], name: "idx_scenario_items_sort_order")
   @@map("scenario_items")
+  @@schema("public")
 }
 
 model PolicyProgram {
@@ -242,6 +249,7 @@ model PolicyProgram {
   @@index([applicationEndAt], name: "idx_policy_programs_application_end_at")
   @@index([verifiedAt], name: "idx_policy_programs_verified_at")
   @@map("policy_programs")
+  @@schema("public")
 }
 
 model PolicyRuleVersion {
@@ -272,6 +280,7 @@ model PolicyRuleVersion {
   @@index([effectiveFrom, effectiveTo], name: "idx_policy_rule_versions_effective_range")
   @@index([verifiedAt], name: "idx_policy_rule_versions_verified_at")
   @@map("policy_rule_versions")
+  @@schema("public")
 }
 
 model EligibilityResult {
@@ -298,6 +307,7 @@ model EligibilityResult {
   @@index([resultStatus], name: "idx_eligibility_results_result_status")
   @@index([checkedAt], name: "idx_eligibility_results_checked_at")
   @@map("eligibility_results")
+  @@schema("public")
 }
 
 model Vendor {
@@ -328,6 +338,7 @@ model Vendor {
   @@index([verificationStatus], name: "idx_vendors_verification_status")
   @@index([businessIdentifierHash], name: "idx_vendors_business_identifier_hash")
   @@map("vendors")
+  @@schema("public")
 }
 
 model VendorBranch {
@@ -350,6 +361,7 @@ model VendorBranch {
   @@index([region], name: "idx_vendor_branches_region")
   @@index([status], name: "idx_vendor_branches_status")
   @@map("vendor_branches")
+  @@schema("public")
 }
 
 model Offer {
@@ -380,6 +392,7 @@ model Offer {
   @@index([status], name: "idx_offers_status")
   @@index([displayOrder], name: "idx_offers_display_order")
   @@map("offers")
+  @@schema("public")
 }
 
 model OfferPriceVersion {
@@ -413,6 +426,7 @@ model OfferPriceVersion {
   @@index([validUntil], name: "idx_offer_price_versions_valid_until")
   @@index([verifiedAt], name: "idx_offer_price_versions_verified_at")
   @@map("offer_price_versions")
+  @@schema("public")
 }
 
 model CompareRoom {
@@ -440,6 +454,7 @@ model CompareRoom {
   @@index([status], name: "idx_compare_rooms_status")
   @@index([createdAt], name: "idx_compare_rooms_created_at")
   @@map("compare_rooms")
+  @@schema("public")
 }
 
 model CompareCard {
@@ -470,6 +485,7 @@ model CompareCard {
   @@index([offerPriceVersionId], name: "idx_compare_cards_offer_price_version_id")
   @@index([position], name: "idx_compare_cards_position")
   @@map("compare_cards")
+  @@schema("public")
 }
 
 model Approval {
@@ -494,6 +510,7 @@ model Approval {
   @@index([coupleMemberId], name: "idx_approvals_couple_member_id")
   @@index([status], name: "idx_approvals_status")
   @@map("approvals")
+  @@schema("public")
 }
 
 model CompareComment {
@@ -516,6 +533,7 @@ model CompareComment {
   @@index([compareCardId], name: "idx_compare_comments_compare_card_id")
   @@index([createdAt], name: "idx_compare_comments_created_at")
   @@map("compare_comments")
+  @@schema("public")
 }
 
 model LeadRequest {
@@ -557,6 +575,7 @@ model LeadRequest {
   @@index([submittedAt], name: "idx_lead_requests_submitted_at")
   @@index([contactPhoneHash], name: "idx_lead_requests_contact_phone_hash")
   @@map("lead_requests")
+  @@schema("public")
 }
 
 model LeadStatusHistory {
@@ -576,6 +595,7 @@ model LeadStatusHistory {
   @@index([toStatus], name: "idx_lead_status_histories_to_status")
   @@index([createdAt], name: "idx_lead_status_histories_created_at")
   @@map("lead_status_histories")
+  @@schema("public")
 }
 
 model DecisionLog {
@@ -602,6 +622,7 @@ model DecisionLog {
   @@index([action], name: "idx_decision_logs_action")
   @@index([createdAt], name: "idx_decision_logs_created_at")
   @@map("decision_logs")
+  @@schema("public")
 }
 
 model Document {
@@ -630,6 +651,7 @@ model Document {
   @@index([dueAt], name: "idx_documents_due_at")
   @@index([sourceType, sourceId], name: "idx_documents_source")
   @@map("documents")
+  @@schema("public")
 }
 
 model Task {
@@ -658,6 +680,7 @@ model Task {
   @@index([dueAt], name: "idx_tasks_due_at")
   @@index([sourceType, sourceId], name: "idx_tasks_source")
   @@map("tasks")
+  @@schema("public")
 }
 
 model Notification {
@@ -687,6 +710,7 @@ model Notification {
   @@index([scheduledAt], name: "idx_notifications_scheduled_at")
   @@index([readAt], name: "idx_notifications_read_at")
   @@map("notifications")
+  @@schema("public")
 }
 
 model Article {
@@ -713,6 +737,7 @@ model Article {
   @@index([category], name: "idx_articles_category")
   @@index([publishedAt], name: "idx_articles_published_at")
   @@map("articles")
+  @@schema("public")
 }
 
 model EventLog {
@@ -737,4 +762,5 @@ model EventLog {
   @@index([occurredAt], name: "idx_event_logs_occurred_at")
   @@index([eventName, occurredAt], name: "idx_event_logs_event_name_occurred_at")
   @@map("event_logs")
+  @@schema("public")
 }

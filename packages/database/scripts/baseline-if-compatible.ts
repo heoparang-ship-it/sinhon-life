@@ -1,6 +1,5 @@
 import { spawnSync } from "node:child_process";
 import { Client } from "pg";
-import { getProductionDatabaseSchema, withProductionDatabaseSchema } from "../src/database-url";
 
 type MigrationBaseline = {
   checks: Array<{ column?: string; table: string }>;
@@ -33,8 +32,7 @@ const migrations: MigrationBaseline[] = [
 ];
 
 const databaseUrl = process.env.DATABASE_URL;
-const schemaName =
-  process.env.VERCEL_ENV === "production" ? getProductionDatabaseSchema() : "public";
+const schemaName = "public";
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to baseline production migrations.");
@@ -124,7 +122,7 @@ function resolveAppliedMigration(migrationName: string) {
 }
 
 const client = new Client({
-  connectionString: withProductionDatabaseSchema(databaseUrl)
+  connectionString: databaseUrl
 });
 
 try {
