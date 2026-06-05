@@ -4,9 +4,11 @@
 
 ## 현재 단계
 
-Phase 5의 `21. E2E 테스트`, 결제 전 단계 `25-A. 결제 설계 문서`, 공개 배포 전 최소 보안 하드닝까지 진행되었습니다. 로컬 MVP 인증, 커플 생성, 초대 링크 생성, 초대 가입/수락, 개인·커플 공통 온보딩, 시나리오 생성·계산·결과 확인, 정책·혜택 가능성 확인, 필요 서류 체크리스트, 파트너 상품 목록·상세, 비교방 생성·카드 추가·댓글·공동 승인, 상담 신청·리드 상태 변경, 문서함·할 일·인앱 알림, 운영자 CRM, 공개 콘텐츠·CMS·계산기 랜딩, 분석 이벤트·관리자 퍼널, Playwright 핵심 E2E 흐름이 연결되어 있습니다. 사용자 웹 프론트엔드는 Vercel production으로 배포되었고, API 운영 배포는 공개 DB/API 호스트 연결이 필요합니다. 결제 샌드박스 구현은 법무·보안·운영 승인 전까지 보류합니다.
+Phase 5의 `21. E2E 테스트`, 결제 전 단계 `25-A. 결제 설계 문서`, 공개 배포 전 최소 보안 하드닝까지 진행되었습니다. 로컬 MVP 인증, 커플 생성, 초대 링크 생성, 초대 가입/수락, 개인·커플 공통 온보딩, 시나리오 생성·계산·결과 확인, 정책·혜택 가능성 확인, 필요 서류 체크리스트, 파트너 상품 목록·상세, 비교방 생성·카드 추가·댓글·공동 승인, 상담 신청·리드 상태 변경, 문서함·할 일·인앱 알림, 운영자 CRM, 공개 콘텐츠·CMS·계산기 랜딩, 분석 이벤트·관리자 퍼널, Playwright 핵심 E2E 흐름이 연결되어 있습니다. 사용자 웹과 API는 Vercel production의 같은 배포에서 제공되며 API는 `/api/v1` 경로로 노출됩니다. 결제 샌드박스 구현은 법무·보안·운영 승인 전까지 보류합니다.
 
 Production URL: `https://sinhon.life`
+
+API base URL: `https://www.sinhon.life/api/v1`
 
 ## 구조
 
@@ -65,6 +67,8 @@ NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.example/api/v1
 NEXT_PUBLIC_WEB_BASE_URL=https://your-web-domain.example
 ```
 
+Vercel production build는 `pnpm db:generate` 후 `VERCEL_ENV=production`일 때만 `scripts/vercel-production-db-prepare.mjs`로 `migrate deploy`와 seed를 실행합니다.
+
 ## 기준 문서
 
 - `AGENTS.md`
@@ -80,6 +84,7 @@ NEXT_PUBLIC_WEB_BASE_URL=https://your-web-domain.example
 - `docs/10-release-checklist.md`
 - `docs/11-production-readiness.md`
 - `docs/12-deployment-report-2026-06-05.md`
+- `신혼OS_코덱스_명령세트_v1.md`
 
 ## 주의
 

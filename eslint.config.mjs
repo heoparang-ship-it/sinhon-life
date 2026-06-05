@@ -6,6 +6,7 @@ export default [
   {
     ignores: [
       "**/.next/**",
+      "**/.vercel/**",
       "**/coverage/**",
       "**/dist/**",
       "**/next-env.d.ts",
@@ -46,6 +47,13 @@ export default [
     files: ["**/*.config.{js,mjs,ts}"],
     languageOptions: {
       globals: globals.node
+    }
+  },
+  {
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: globals.node,
+      sourceType: "module"
     }
   }
 ];

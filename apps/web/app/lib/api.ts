@@ -1,6 +1,21 @@
 export const AUTH_TOKEN_STORAGE_KEY = "sinhon_os_access_token";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
+export function getApiBaseUrl() {
+  const configuredUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  if (typeof window !== "undefined") {
+    return "/api/v1";
+  }
+
+  const webBaseUrl =
+    process.env.NEXT_PUBLIC_WEB_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+
+  return `${webBaseUrl}/api/v1`;
+}
 
 export type ApiErrorPayload = {
   code: string;
@@ -34,7 +49,7 @@ export async function apiRequest<T>(
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     headers,
     method: options.method ?? "GET"

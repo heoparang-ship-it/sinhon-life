@@ -2,6 +2,7 @@ import { AppFrame, Card } from "@sinhon-os/ui/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getApiBaseUrl } from "../../lib/api";
 import type { ArticleDetail, ArticleResponse } from "../article-types";
 
 type ArticlePageProps = {
@@ -14,10 +15,8 @@ type ApiEnvelope<T> = {
   data?: T;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
-
 async function fetchArticle(slug: string): Promise<ArticleDetail | null> {
-  const response = await fetch(`${API_BASE_URL}/articles/${encodeURIComponent(slug)}`, {
+  const response = await fetch(`${getApiBaseUrl()}/articles/${encodeURIComponent(slug)}`, {
     cache: "no-store"
   });
 

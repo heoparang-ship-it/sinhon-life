@@ -18,11 +18,13 @@ type AuthStore = Pick<
 
 type AuthServiceOptions = {
   authTokenSecret: string;
-  authTokenTtlSeconds: number;
+  authTokenTtlSeconds?: number;
   now?: () => Date;
   prisma: SinhonPrismaClient;
   webBaseUrl: string;
 };
+
+const defaultAccessTokenTtlSeconds = 60 * 60 * 24 * 7;
 
 type UserRecord = Awaited<ReturnType<SinhonPrismaClient["user"]["findFirst"]>>;
 type CoupleRecord = Awaited<ReturnType<SinhonPrismaClient["couple"]["findFirst"]>>;
@@ -239,7 +241,7 @@ async function acceptInvitationWithStore(
 
 export function createAuthService({
   authTokenSecret,
-  authTokenTtlSeconds,
+  authTokenTtlSeconds = defaultAccessTokenTtlSeconds,
   now = () => new Date(),
   prisma,
   webBaseUrl

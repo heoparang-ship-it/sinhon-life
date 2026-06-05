@@ -1,18 +1,17 @@
 import { AppFrame, Card, EmptyState, ErrorState } from "@sinhon-os/ui/server";
 import Link from "next/link";
+import { getApiBaseUrl } from "../lib/api";
 import type { ArticleListResponse, ArticleSummary } from "./article-types";
 
 type ApiEnvelope<T> = {
   data?: T;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
-
 export const dynamic = "force-dynamic";
 
 async function fetchArticles() {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles?limit=20`, {
+    const response = await fetch(`${getApiBaseUrl()}/articles?limit=20`, {
       cache: "no-store"
     });
 
