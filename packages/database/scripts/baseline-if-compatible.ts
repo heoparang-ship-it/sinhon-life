@@ -76,7 +76,7 @@ async function getAppliedMigrations(client: Client) {
   const result = await client.query<{ migration_name: string }>(
     `
       select migration_name
-      from "_prisma_migrations"
+      from "${schemaName}"."_prisma_migrations"
       where rolled_back_at is null
     `
   );
