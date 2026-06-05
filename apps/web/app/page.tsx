@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const featureLinks = [
   {
-    description: "거주지, 결혼 시기, 소득 구간을 고르면 맞는 정책 가능성을 카카오톡처럼 안내합니다.",
+    description: "거주지, 결혼 시기, 소득·주거·예식 조건을 고르면 정책별 점수와 부족 조건을 안내합니다.",
     href: "/policies",
     label: "정책 톡 시작",
     title: "정책 톡"
