@@ -65,9 +65,7 @@ if (migrationResult.status !== 0) {
   }
 
   console.log("Bootstrapping non-empty production schema before migration baseline.");
-  runCommand(
-    "pnpm --filter @sinhon-os/database exec prisma db push --skip-generate --config prisma.config.ts"
-  );
+  runCommand("pnpm --filter @sinhon-os/database exec prisma db push --config prisma.config.ts");
   baselineCompatibleSchema();
   runCommand("pnpm db:migrate:deploy");
 }
