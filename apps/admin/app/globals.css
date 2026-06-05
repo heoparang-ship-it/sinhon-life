@@ -1,0 +1,365 @@
+:root {
+  color: #171717;
+  background: #f6f7f9;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.button-link {
+  align-items: center;
+  background: #315c45;
+  border: 1px solid #315c45;
+  border-radius: 8px;
+  color: #ffffff;
+  display: flex;
+  font-size: 15px;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  text-align: center;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.secondary-link {
+  background: #ffffff;
+  border-color: #b9c7b7;
+  color: #315c45;
+}
+
+.notice-box,
+.error-box {
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 12px 14px;
+}
+
+.notice-box {
+  background: #eef6f7;
+  border: 1px solid #c7dde1;
+  color: #275463;
+}
+
+.admin-layout,
+.admin-lead-list {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-small-copy {
+  color: #657168;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 12px 0 0;
+}
+
+.admin-tabs {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+
+.admin-tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #4f5a52;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.admin-tabs button.active {
+  background: #eef6f7;
+  border-color: #c7dde1;
+  color: #275463;
+}
+
+.admin-metric-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.admin-metric {
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-height: 110px;
+  padding: 18px;
+}
+
+.admin-metric span {
+  color: #657168;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-metric strong {
+  color: #171717;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.admin-crm-grid {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form-grid {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form-grid button {
+  width: fit-content;
+}
+
+.admin-form-grid.wide-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-textarea-label {
+  color: #4f5a52;
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 6px;
+  grid-column: 1 / -1;
+  line-height: 1.4;
+}
+
+.admin-textarea-label textarea {
+  background: #ffffff;
+  border: 1px solid #b9c7b7;
+  border-radius: 8px;
+  color: #171717;
+  font: inherit;
+  line-height: 1.55;
+  min-height: 180px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.admin-entity-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-entity-list button {
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  color: #171717;
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  text-align: left;
+}
+
+.admin-entity-list button.active {
+  background: #eef6f7;
+  border-color: #c7dde1;
+}
+
+.admin-entity-list strong {
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.admin-entity-list span {
+  color: #657168;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.admin-token-row {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.admin-lead-row {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
+  padding: 16px;
+}
+
+.admin-lead-row h3 {
+  font-size: 18px;
+  line-height: 1.25;
+  margin: 10px 0 6px;
+}
+
+.admin-lead-row p {
+  color: #5d665e;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-lead-actions {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.admin-status {
+  align-items: center;
+  background: #eef6f7;
+  border: 1px solid #c7dde1;
+  border-radius: 999px;
+  color: #275463;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 28px;
+  padding: 0 10px;
+  width: fit-content;
+}
+
+.admin-status.rejected,
+.admin-status.expired {
+  background: #fff1f0;
+  border-color: #f6c9c4;
+  color: #9f2c20;
+}
+
+.admin-funnel-row {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  padding: 14px 16px;
+}
+
+.admin-funnel-row > span {
+  align-items: center;
+  background: #eef6f7;
+  border: 1px solid #c7dde1;
+  border-radius: 999px;
+  color: #275463;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.admin-funnel-row div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-funnel-row strong {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.admin-funnel-row small {
+  color: #657168;
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.admin-funnel-row b {
+  font-size: 20px;
+}
+
+.summary-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.summary-list div {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.summary-list dt {
+  color: #657168;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.summary-list dd {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0;
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .admin-crm-grid,
+  .admin-form-grid,
+  .admin-lead-actions,
+  .admin-lead-row,
+  .admin-metric-grid,
+  .admin-token-row {
+    grid-template-columns: 1fr;
+  }
+
+  .button-link {
+    width: 100%;
+  }
+
+  .summary-list div {
+    align-items: flex-start;
+    display: grid;
+    gap: 4px;
+  }
+
+  .summary-list dd {
+    text-align: left;
+  }
+}

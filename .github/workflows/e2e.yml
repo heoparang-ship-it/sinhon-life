@@ -1,0 +1,55 @@
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: sinhon_os
+          POSTGRES_PASSWORD: sinhon_os
+          POSTGRES_USER: sinhon_os
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+    env:
+      AUTH_TOKEN_SECRET: dev-only-change-me
+      DATABASE_URL: postgresql://sinhon_os:sinhon_os@localhost:5433/sinhon_os?schema=public
+      E2E_API_BASE_URL: http://127.0.0.1:4000/api/v1
+      E2E_WEB_BASE_URL: http://localhost:3002
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:4000/api/v1
+      NEXT_PUBLIC_WEB_BASE_URL: http://localhost:3002
+      PII_ENCRYPTION_KEY: ci-only-32-byte-minimum-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.1
+      - uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm db:generate
+      - run: pnpm db:push
+      - run: pnpm db:seed
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            playwright-report/
+            test-results/

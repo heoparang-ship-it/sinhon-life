@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
+    "isolatedModules": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "paths": {
+      "@sinhon-os/analytics": ["packages/analytics/src/index.ts"],
+      "@sinhon-os/config": ["packages/config/src/index.ts"],
+      "@sinhon-os/database": ["packages/database/src/index.ts"],
+      "@sinhon-os/schemas": ["packages/schemas/src/index.ts"],
+      "@sinhon-os/ui": ["packages/ui/src/index.ts"],
+      "@sinhon-os/ui/server": ["packages/ui/src/server.ts"]
+    }
+  }
+}

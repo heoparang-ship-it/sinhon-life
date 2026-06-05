@@ -1,0 +1,36 @@
+{
+  "name": "@sinhon-os/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build-storybook": "storybook build",
+    "lint": "eslint . --max-warnings=0",
+    "storybook": "storybook dev -p 6006 --host 127.0.0.1",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "peerDependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.4.2",
+    "@storybook/addon-docs": "10.4.2",
+    "@storybook/react-vite": "10.4.2",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "storybook": "10.4.2"
+  }
+}

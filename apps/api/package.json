@@ -1,0 +1,23 @@
+{
+  "name": "@sinhon-os/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:deps": "pnpm --filter @sinhon-os/analytics build && pnpm --filter @sinhon-os/database build && pnpm --filter @sinhon-os/schemas build",
+    "dev": "pnpm run build:deps && tsx watch src/server.ts",
+    "build": "pnpm run build:deps && tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm run build:deps && tsc -p tsconfig.json --noEmit",
+    "test": "pnpm run build:deps && vitest run"
+  },
+  "dependencies": {
+    "@sinhon-os/analytics": "workspace:*",
+    "@sinhon-os/database": "workspace:*",
+    "@sinhon-os/schemas": "workspace:*",
+    "express": "5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0"
+  }
+}

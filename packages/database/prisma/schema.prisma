@@ -1,0 +1,740 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String    @id @default(uuid()) @db.Uuid
+  displayName        String?   @map("display_name")
+  emailEncrypted     String?   @map("email_encrypted")
+  emailHash          String?   @map("email_hash")
+  phoneEncrypted     String?   @map("phone_encrypted")
+  phoneHash          String?   @map("phone_hash")
+  authProvider       String    @map("auth_provider")
+  authProviderUserId String    @map("auth_provider_user_id")
+  status             String
+  lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  createdCouples             Couple[]            @relation("CoupleCreatedBy")
+  coupleMemberships          CoupleMember[]      @relation("CoupleMemberUser")
+  invitedCoupleMemberships   CoupleMember[]      @relation("CoupleMemberInvitedBy")
+  sentCoupleInvitations      CoupleInvitation[]  @relation("CoupleInvitationInvitedBy")
+  receivedCoupleInvitations  CoupleInvitation[]  @relation("CoupleInvitationInvitedUser")
+  acceptedCoupleInvitations  CoupleInvitation[]  @relation("CoupleInvitationAcceptedBy")
+  createdScenarios           Scenario[]          @relation("ScenarioCreatedBy")
+  createdPolicyPrograms      PolicyProgram[]     @relation("PolicyProgramCreatedBy")
+  createdPolicyRuleVersions  PolicyRuleVersion[] @relation("PolicyRuleVersionCreatedBy")
+  createdOfferPriceVersions  OfferPriceVersion[] @relation("OfferPriceVersionCreatedBy")
+  createdCompareRooms        CompareRoom[]       @relation("CompareRoomCreatedBy")
+  addedCompareCards          CompareCard[]       @relation("CompareCardAddedBy")
+  approvals                  Approval[]          @relation("ApprovalUser")
+  compareComments            CompareComment[]    @relation("CompareCommentUser")
+  submittedLeadRequests      LeadRequest[]       @relation("LeadRequestSubmittedBy")
+  changedLeadStatusHistories LeadStatusHistory[] @relation("LeadStatusHistoryChangedBy")
+  decisionLogs               DecisionLog[]       @relation("DecisionLogActorUser")
+  createdTasks               Task[]              @relation("TaskCreatedBy")
+  notifications              Notification[]      @relation("NotificationUser")
+  authoredArticles           Article[]           @relation("ArticleAuthor")
+  eventLogs                  EventLog[]          @relation("EventLogUser")
+
+  @@unique([authProvider, authProviderUserId], name: "users_auth_provider_user_id_key")
+  @@index([status], name: "idx_users_status")
+  @@index([emailHash], name: "idx_users_email_hash")
+  @@index([phoneHash], name: "idx_users_phone_hash")
+  @@map("users")
+}
+
+model Couple {
+  id                       String    @id @default(uuid()) @db.Uuid
+  displayName              String    @map("display_name")
+  lifecycleStatus          String    @map("lifecycle_status")
+  weddingDate              DateTime? @map("wedding_date") @db.Date
+  weddingRegion            String?   @map("wedding_region")
+  preferredResidenceRegion String?   @map("preferred_residence_region")
+  housingType              String?   @map("housing_type")
+  totalBudgetRange         String?   @map("total_budget_range")
+  totalBudgetAmount        BigInt?   @map("total_budget_amount")
+  cashOnHandRange          String?   @map("cash_on_hand_range")
+  cashOnHandAmount         BigInt?   @map("cash_on_hand_amount")
+  familySupportType        String?   @map("family_support_type")
+  loanConsiderationStatus  String?   @map("loan_consideration_status")
+  childrenPlanStatus       String?   @map("children_plan_status")
+  preferredWeddingStyle    String?   @map("preferred_wedding_style")
+  moveInPlanAt             DateTime? @map("move_in_plan_at") @db.Date
+  onboardingStatus         String    @map("onboarding_status")
+  createdByUserId          String?   @map("created_by_user_id") @db.Uuid
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  createdBy          User?               @relation("CoupleCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  members            CoupleMember[]      @relation("CoupleMemberCouple")
+  invitations        CoupleInvitation[]  @relation("CoupleInvitationCouple")
+  scenarios          Scenario[]          @relation("ScenarioCouple")
+  eligibilityResults EligibilityResult[] @relation("EligibilityResultCouple")
+  compareRooms       CompareRoom[]       @relation("CompareRoomCouple")
+  leadRequests       LeadRequest[]       @relation("LeadRequestCouple")
+  documents          Document[]          @relation("DocumentCouple")
+  tasks              Task[]              @relation("TaskCouple")
+  notifications      Notification[]      @relation("NotificationCouple")
+  decisionLogs       DecisionLog[]       @relation("DecisionLogCouple")
+  eventLogs          EventLog[]          @relation("EventLogCouple")
+
+  @@index([createdByUserId], name: "idx_couples_created_by_user_id")
+  @@index([lifecycleStatus], name: "idx_couples_lifecycle_status")
+  @@index([onboardingStatus], name: "idx_couples_onboarding_status")
+  @@index([weddingRegion], name: "idx_couples_wedding_region")
+  @@index([preferredResidenceRegion], name: "idx_couples_preferred_residence_region")
+  @@map("couples")
+}
+
+model CoupleMember {
+  id                    String    @id @default(uuid()) @db.Uuid
+  coupleId              String    @map("couple_id") @db.Uuid
+  userId                String    @map("user_id") @db.Uuid
+  role                  String
+  status                String
+  displayLabel          String?   @map("display_label")
+  phoneVerified         Boolean   @default(false) @map("phone_verified")
+  workRegion            String?   @map("work_region")
+  incomeRange           String?   @map("income_range")
+  assetRange            String?   @map("asset_range")
+  onboardingStatus      String    @default("not_started") @map("onboarding_status")
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(6)
+  invitedByUserId       String?   @map("invited_by_user_id") @db.Uuid
+  invitedAt             DateTime? @map("invited_at") @db.Timestamptz(6)
+  joinedAt              DateTime? @map("joined_at") @db.Timestamptz(6)
+  leftAt                DateTime? @map("left_at") @db.Timestamptz(6)
+  visibilityPreference  Json?     @map("visibility_preference") @db.JsonB
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  couple        Couple           @relation("CoupleMemberCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  user          User             @relation("CoupleMemberUser", fields: [userId], references: [id], onDelete: Restrict)
+  invitedBy     User?            @relation("CoupleMemberInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  approvals     Approval[]       @relation("ApprovalCoupleMember")
+  comments      CompareComment[] @relation("CompareCommentCoupleMember")
+  decisionLogs  DecisionLog[]    @relation("DecisionLogActorCoupleMember")
+  documents     Document[]       @relation("DocumentOwnerCoupleMember")
+  tasks         Task[]           @relation("TaskAssignedCoupleMember")
+  notifications Notification[]   @relation("NotificationCoupleMember")
+
+  @@unique([coupleId, userId], name: "couple_members_couple_id_user_id_key")
+  @@index([coupleId], name: "idx_couple_members_couple_id")
+  @@index([userId], name: "idx_couple_members_user_id")
+  @@index([status], name: "idx_couple_members_status")
+  @@index([role], name: "idx_couple_members_role")
+  @@index([onboardingStatus], name: "idx_couple_members_onboarding_status")
+  @@map("couple_members")
+}
+
+model CoupleInvitation {
+  id               String    @id @default(uuid()) @db.Uuid
+  coupleId         String    @map("couple_id") @db.Uuid
+  invitedByUserId  String    @map("invited_by_user_id") @db.Uuid
+  invitedUserId    String?   @map("invited_user_id") @db.Uuid
+  tokenHash        String    @map("token_hash")
+  status           String
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt       DateTime? @map("accepted_at") @db.Timestamptz(6)
+  acceptedByUserId String?   @map("accepted_by_user_id") @db.Uuid
+  canceledAt       DateTime? @map("canceled_at") @db.Timestamptz(6)
+  rejectedAt       DateTime? @map("rejected_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  couple         Couple @relation("CoupleInvitationCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  invitedBy      User   @relation("CoupleInvitationInvitedBy", fields: [invitedByUserId], references: [id], onDelete: Restrict)
+  invitedUser    User?  @relation("CoupleInvitationInvitedUser", fields: [invitedUserId], references: [id], onDelete: SetNull)
+  acceptedByUser User?  @relation("CoupleInvitationAcceptedBy", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([tokenHash], name: "couple_invitations_token_hash_key")
+  @@index([coupleId], name: "idx_couple_invitations_couple_id")
+  @@index([status], name: "idx_couple_invitations_status")
+  @@index([expiresAt], name: "idx_couple_invitations_expires_at")
+  @@map("couple_invitations")
+}
+
+model Scenario {
+  id                  String    @id @default(uuid()) @db.Uuid
+  coupleId            String    @map("couple_id") @db.Uuid
+  title               String
+  status              String
+  calculationVersion  String    @map("calculation_version")
+  inputSnapshot       Json      @map("input_snapshot") @db.JsonB
+  totalAmount         BigInt?   @map("total_amount")
+  monthlyAmount       BigInt?   @map("monthly_amount")
+  shortfallAmount     BigInt?   @map("shortfall_amount")
+  riskFlags           Json?     @map("risk_flags") @db.JsonB
+  containsSampleValue Boolean   @default(false) @map("contains_sample_value")
+  createdByUserId     String?   @map("created_by_user_id") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt          DateTime? @map("archived_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  couple    Couple         @relation("ScenarioCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  createdBy User?          @relation("ScenarioCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  items     ScenarioItem[] @relation("ScenarioItemScenario")
+
+  @@index([coupleId], name: "idx_scenarios_couple_id")
+  @@index([status], name: "idx_scenarios_status")
+  @@index([createdAt], name: "idx_scenarios_created_at")
+  @@index([calculationVersion], name: "idx_scenarios_calculation_version")
+  @@map("scenarios")
+}
+
+model ScenarioItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  scenarioId String   @map("scenario_id") @db.Uuid
+  category   String
+  label      String
+  amount     BigInt
+  amountType String   @map("amount_type")
+  isRequired Boolean  @default(false) @map("is_required")
+  sourceType String?  @map("source_type")
+  sourceUrl  String?  @map("source_url")
+  note       String?
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  scenario Scenario @relation("ScenarioItemScenario", fields: [scenarioId], references: [id], onDelete: Restrict)
+
+  @@index([scenarioId], name: "idx_scenario_items_scenario_id")
+  @@index([category], name: "idx_scenario_items_category")
+  @@index([sortOrder], name: "idx_scenario_items_sort_order")
+  @@map("scenario_items")
+}
+
+model PolicyProgram {
+  id                       String    @id @default(uuid()) @db.Uuid
+  name                     String
+  providerName             String    @map("provider_name")
+  category                 String
+  region                   String?
+  summary                  String
+  sourceUrl                String    @map("source_url")
+  sourceUpdatedAt          DateTime? @map("source_updated_at") @db.Timestamptz(6)
+  verifiedAt               DateTime? @map("verified_at") @db.Timestamptz(6)
+  applicationStartAt       DateTime? @map("application_start_at") @db.Timestamptz(6)
+  applicationEndAt         DateTime? @map("application_end_at") @db.Timestamptz(6)
+  status                   String
+  cautionText              String?   @map("caution_text")
+  requiredDocumentsSummary Json?     @map("required_documents_summary") @db.JsonB
+  createdByUserId          String?   @map("created_by_user_id") @db.Uuid
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  createdBy          User?               @relation("PolicyProgramCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  ruleVersions       PolicyRuleVersion[] @relation("PolicyRuleVersionProgram")
+  eligibilityResults EligibilityResult[] @relation("EligibilityResultProgram")
+
+  @@index([status], name: "idx_policy_programs_status")
+  @@index([region], name: "idx_policy_programs_region")
+  @@index([category], name: "idx_policy_programs_category")
+  @@index([applicationEndAt], name: "idx_policy_programs_application_end_at")
+  @@index([verifiedAt], name: "idx_policy_programs_verified_at")
+  @@map("policy_programs")
+}
+
+model PolicyRuleVersion {
+  id                   String    @id @default(uuid()) @db.Uuid
+  policyProgramId      String    @map("policy_program_id") @db.Uuid
+  version              Int
+  status               String
+  ruleSummary          String    @map("rule_summary")
+  eligibilityCriteria  Json      @map("eligibility_criteria") @db.JsonB
+  requiredInputs       Json?     @map("required_inputs") @db.JsonB
+  resultReasonTemplate Json?     @map("result_reason_template") @db.JsonB
+  requiredDocuments    Json?     @map("required_documents") @db.JsonB
+  effectiveFrom        DateTime? @map("effective_from") @db.Timestamptz(6)
+  effectiveTo          DateTime? @map("effective_to") @db.Timestamptz(6)
+  sourceUrl            String    @map("source_url")
+  sourceUpdatedAt      DateTime? @map("source_updated_at") @db.Timestamptz(6)
+  verifiedAt           DateTime? @map("verified_at") @db.Timestamptz(6)
+  createdByUserId      String?   @map("created_by_user_id") @db.Uuid
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  policyProgram      PolicyProgram       @relation("PolicyRuleVersionProgram", fields: [policyProgramId], references: [id], onDelete: Restrict)
+  createdBy          User?               @relation("PolicyRuleVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  eligibilityResults EligibilityResult[] @relation("EligibilityResultRuleVersion")
+
+  @@unique([policyProgramId, version], name: "policy_rule_versions_policy_program_id_version_key")
+  @@index([policyProgramId], name: "idx_policy_rule_versions_policy_program_id")
+  @@index([status], name: "idx_policy_rule_versions_status")
+  @@index([effectiveFrom, effectiveTo], name: "idx_policy_rule_versions_effective_range")
+  @@index([verifiedAt], name: "idx_policy_rule_versions_verified_at")
+  @@map("policy_rule_versions")
+}
+
+model EligibilityResult {
+  id                  String    @id @default(uuid()) @db.Uuid
+  coupleId            String    @map("couple_id") @db.Uuid
+  policyProgramId     String    @map("policy_program_id") @db.Uuid
+  policyRuleVersionId String    @map("policy_rule_version_id") @db.Uuid
+  resultStatus        String    @map("result_status")
+  resultReason        String    @map("result_reason")
+  missingInputs       Json?     @map("missing_inputs") @db.JsonB
+  requiredDocuments   Json?     @map("required_documents") @db.JsonB
+  inputSnapshot       Json      @map("input_snapshot") @db.JsonB
+  checkedAt           DateTime  @map("checked_at") @db.Timestamptz(6)
+  expiresAt           DateTime? @map("expires_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  couple            Couple            @relation("EligibilityResultCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  policyProgram     PolicyProgram     @relation("EligibilityResultProgram", fields: [policyProgramId], references: [id], onDelete: Restrict)
+  policyRuleVersion PolicyRuleVersion @relation("EligibilityResultRuleVersion", fields: [policyRuleVersionId], references: [id], onDelete: Restrict)
+
+  @@index([coupleId], name: "idx_eligibility_results_couple_id")
+  @@index([policyProgramId], name: "idx_eligibility_results_policy_program_id")
+  @@index([policyRuleVersionId], name: "idx_eligibility_results_policy_rule_version_id")
+  @@index([resultStatus], name: "idx_eligibility_results_result_status")
+  @@index([checkedAt], name: "idx_eligibility_results_checked_at")
+  @@map("eligibility_results")
+}
+
+model Vendor {
+  id                                  String    @id @default(uuid()) @db.Uuid
+  name                                String
+  category                            String
+  region                              String?
+  description                         String?
+  businessIdentifierEncrypted         String?   @map("business_identifier_encrypted")
+  businessIdentifierHash              String?   @map("business_identifier_hash")
+  representativeContactNameEncrypted  String?   @map("representative_contact_name_encrypted")
+  representativeContactPhoneEncrypted String?   @map("representative_contact_phone_encrypted")
+  representativeContactPhoneHash      String?   @map("representative_contact_phone_hash")
+  status                              String
+  verificationStatus                  String    @map("verification_status")
+  verifiedAt                          DateTime? @map("verified_at") @db.Timestamptz(6)
+  createdAt                           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                           DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  branches     VendorBranch[] @relation("VendorBranchVendor")
+  offers       Offer[]        @relation("OfferVendor")
+  leadRequests LeadRequest[]  @relation("LeadRequestVendor")
+
+  @@index([category], name: "idx_vendors_category")
+  @@index([region], name: "idx_vendors_region")
+  @@index([status], name: "idx_vendors_status")
+  @@index([verificationStatus], name: "idx_vendors_verification_status")
+  @@index([businessIdentifierHash], name: "idx_vendors_business_identifier_hash")
+  @@map("vendors")
+}
+
+model VendorBranch {
+  id                    String    @id @default(uuid()) @db.Uuid
+  vendorId              String    @map("vendor_id") @db.Uuid
+  name                  String
+  region                String?
+  address               String?
+  contactPhoneEncrypted String?   @map("contact_phone_encrypted")
+  contactPhoneHash      String?   @map("contact_phone_hash")
+  status                String
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  vendor Vendor  @relation("VendorBranchVendor", fields: [vendorId], references: [id], onDelete: Restrict)
+  offers Offer[] @relation("OfferVendorBranch")
+
+  @@index([vendorId], name: "idx_vendor_branches_vendor_id")
+  @@index([region], name: "idx_vendor_branches_region")
+  @@index([status], name: "idx_vendor_branches_status")
+  @@map("vendor_branches")
+}
+
+model Offer {
+  id             String    @id @default(uuid()) @db.Uuid
+  vendorId       String    @map("vendor_id") @db.Uuid
+  vendorBranchId String?   @map("vendor_branch_id") @db.Uuid
+  title          String
+  category       String
+  region         String?
+  summary        String
+  description    String?
+  status         String
+  displayOrder   Int       @default(0) @map("display_order")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  vendor        Vendor              @relation("OfferVendor", fields: [vendorId], references: [id], onDelete: Restrict)
+  vendorBranch  VendorBranch?       @relation("OfferVendorBranch", fields: [vendorBranchId], references: [id], onDelete: SetNull)
+  priceVersions OfferPriceVersion[] @relation("OfferPriceVersionOffer")
+  compareCards  CompareCard[]       @relation("CompareCardOffer")
+  leadRequests  LeadRequest[]       @relation("LeadRequestOffer")
+
+  @@index([vendorId], name: "idx_offers_vendor_id")
+  @@index([vendorBranchId], name: "idx_offers_vendor_branch_id")
+  @@index([category], name: "idx_offers_category")
+  @@index([region], name: "idx_offers_region")
+  @@index([status], name: "idx_offers_status")
+  @@index([displayOrder], name: "idx_offers_display_order")
+  @@map("offers")
+}
+
+model OfferPriceVersion {
+  id                        String    @id @default(uuid()) @db.Uuid
+  offerId                   String    @map("offer_id") @db.Uuid
+  version                   Int
+  basePrice                 BigInt    @map("base_price")
+  estimatedTotalPrice       BigInt    @map("estimated_total_price")
+  includedItems             Json      @map("included_items") @db.JsonB
+  requiredOptions           Json?     @map("required_options") @db.JsonB
+  optionalOptions           Json?     @map("optional_options") @db.JsonB
+  additionalCostNote        String?   @map("additional_cost_note")
+  cancellationPolicySummary String?   @map("cancellation_policy_summary")
+  verificationStatus        String    @map("verification_status")
+  verifiedAt                DateTime? @map("verified_at") @db.Timestamptz(6)
+  validFrom                 DateTime? @map("valid_from") @db.Timestamptz(6)
+  validUntil                DateTime? @map("valid_until") @db.Timestamptz(6)
+  sourceType                String?   @map("source_type")
+  sourceUrl                 String?   @map("source_url")
+  createdByUserId           String?   @map("created_by_user_id") @db.Uuid
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  offer        Offer         @relation("OfferPriceVersionOffer", fields: [offerId], references: [id], onDelete: Restrict)
+  createdBy    User?         @relation("OfferPriceVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  compareCards CompareCard[] @relation("CompareCardOfferPriceVersion")
+  leadRequests LeadRequest[] @relation("LeadRequestOfferPriceVersion")
+
+  @@unique([offerId, version], name: "offer_price_versions_offer_id_version_key")
+  @@index([offerId], name: "idx_offer_price_versions_offer_id")
+  @@index([verificationStatus], name: "idx_offer_price_versions_verification_status")
+  @@index([validUntil], name: "idx_offer_price_versions_valid_until")
+  @@index([verifiedAt], name: "idx_offer_price_versions_verified_at")
+  @@map("offer_price_versions")
+}
+
+model CompareRoom {
+  id              String    @id @default(uuid()) @db.Uuid
+  coupleId        String    @map("couple_id") @db.Uuid
+  title           String
+  status          String
+  createdByUserId String?   @map("created_by_user_id") @db.Uuid
+  sharedAt        DateTime? @map("shared_at") @db.Timestamptz(6)
+  bothApprovedAt  DateTime? @map("both_approved_at") @db.Timestamptz(6)
+  rejectedAt      DateTime? @map("rejected_at") @db.Timestamptz(6)
+  archivedAt      DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  couple       Couple           @relation("CompareRoomCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  createdBy    User?            @relation("CompareRoomCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  cards        CompareCard[]    @relation("CompareCardRoom")
+  approvals    Approval[]       @relation("ApprovalCompareRoom")
+  comments     CompareComment[] @relation("CompareCommentRoom")
+  leadRequests LeadRequest[]    @relation("LeadRequestCompareRoom")
+
+  @@index([coupleId], name: "idx_compare_rooms_couple_id")
+  @@index([status], name: "idx_compare_rooms_status")
+  @@index([createdAt], name: "idx_compare_rooms_created_at")
+  @@map("compare_rooms")
+}
+
+model CompareCard {
+  id                      String    @id @default(uuid()) @db.Uuid
+  compareRoomId           String    @map("compare_room_id") @db.Uuid
+  offerId                 String    @map("offer_id") @db.Uuid
+  offerPriceVersionId     String    @map("offer_price_version_id") @db.Uuid
+  snapshotTitle           String    @map("snapshot_title")
+  snapshotPriceSummary    Json      @map("snapshot_price_summary") @db.JsonB
+  snapshotIncludedItems   Json?     @map("snapshot_included_items") @db.JsonB
+  snapshotRequiredOptions Json?     @map("snapshot_required_options") @db.JsonB
+  snapshotOptionalOptions Json?     @map("snapshot_optional_options") @db.JsonB
+  position                Int
+  addedByUserId           String?   @map("added_by_user_id") @db.Uuid
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  removedAt               DateTime? @map("removed_at") @db.Timestamptz(6)
+
+  compareRoom       CompareRoom       @relation("CompareCardRoom", fields: [compareRoomId], references: [id], onDelete: Restrict)
+  offer             Offer             @relation("CompareCardOffer", fields: [offerId], references: [id], onDelete: Restrict)
+  offerPriceVersion OfferPriceVersion @relation("CompareCardOfferPriceVersion", fields: [offerPriceVersionId], references: [id], onDelete: Restrict)
+  addedBy           User?             @relation("CompareCardAddedBy", fields: [addedByUserId], references: [id], onDelete: SetNull)
+  approvals         Approval[]        @relation("ApprovalCompareCard")
+  comments          CompareComment[]  @relation("CompareCommentCard")
+  leadRequests      LeadRequest[]     @relation("LeadRequestCompareCard")
+
+  @@index([compareRoomId], name: "idx_compare_cards_compare_room_id")
+  @@index([offerId], name: "idx_compare_cards_offer_id")
+  @@index([offerPriceVersionId], name: "idx_compare_cards_offer_price_version_id")
+  @@index([position], name: "idx_compare_cards_position")
+  @@map("compare_cards")
+}
+
+model Approval {
+  id             String    @id @default(uuid()) @db.Uuid
+  compareRoomId  String    @map("compare_room_id") @db.Uuid
+  compareCardId  String?   @map("compare_card_id") @db.Uuid
+  coupleMemberId String    @map("couple_member_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  status         String
+  comment        String?
+  decidedAt      DateTime? @map("decided_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  compareRoom  CompareRoom  @relation("ApprovalCompareRoom", fields: [compareRoomId], references: [id], onDelete: Restrict)
+  compareCard  CompareCard? @relation("ApprovalCompareCard", fields: [compareCardId], references: [id], onDelete: SetNull)
+  coupleMember CoupleMember @relation("ApprovalCoupleMember", fields: [coupleMemberId], references: [id], onDelete: Restrict)
+  user         User         @relation("ApprovalUser", fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([compareRoomId], name: "idx_approvals_compare_room_id")
+  @@index([compareCardId], name: "idx_approvals_compare_card_id")
+  @@index([coupleMemberId], name: "idx_approvals_couple_member_id")
+  @@index([status], name: "idx_approvals_status")
+  @@map("approvals")
+}
+
+model CompareComment {
+  id             String    @id @default(uuid()) @db.Uuid
+  compareRoomId  String    @map("compare_room_id") @db.Uuid
+  compareCardId  String?   @map("compare_card_id") @db.Uuid
+  coupleMemberId String    @map("couple_member_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  body           String
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  compareRoom  CompareRoom  @relation("CompareCommentRoom", fields: [compareRoomId], references: [id], onDelete: Restrict)
+  compareCard  CompareCard? @relation("CompareCommentCard", fields: [compareCardId], references: [id], onDelete: SetNull)
+  coupleMember CoupleMember @relation("CompareCommentCoupleMember", fields: [coupleMemberId], references: [id], onDelete: Restrict)
+  user         User         @relation("CompareCommentUser", fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([compareRoomId], name: "idx_compare_comments_compare_room_id")
+  @@index([compareCardId], name: "idx_compare_comments_compare_card_id")
+  @@index([createdAt], name: "idx_compare_comments_created_at")
+  @@map("compare_comments")
+}
+
+model LeadRequest {
+  id                     String    @id @default(uuid()) @db.Uuid
+  coupleId               String    @map("couple_id") @db.Uuid
+  compareRoomId          String    @map("compare_room_id") @db.Uuid
+  compareCardId          String?   @map("compare_card_id") @db.Uuid
+  offerId                String?   @map("offer_id") @db.Uuid
+  vendorId               String    @map("vendor_id") @db.Uuid
+  offerPriceVersionId    String?   @map("offer_price_version_id") @db.Uuid
+  status                 String
+  preferredContactMethod String    @map("preferred_contact_method")
+  preferredContactDates  Json?     @map("preferred_contact_dates") @db.JsonB
+  contactNameEncrypted   String?   @map("contact_name_encrypted")
+  contactPhoneEncrypted  String?   @map("contact_phone_encrypted")
+  contactPhoneHash       String?   @map("contact_phone_hash")
+  messageEncrypted       String?   @map("message_encrypted")
+  consentGivenAt         DateTime  @map("consent_given_at") @db.Timestamptz(6)
+  submittedByUserId      String    @map("submitted_by_user_id") @db.Uuid
+  submittedAt            DateTime  @map("submitted_at") @db.Timestamptz(6)
+  expiresAt              DateTime? @map("expires_at") @db.Timestamptz(6)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  couple            Couple              @relation("LeadRequestCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  compareRoom       CompareRoom         @relation("LeadRequestCompareRoom", fields: [compareRoomId], references: [id], onDelete: Restrict)
+  compareCard       CompareCard?        @relation("LeadRequestCompareCard", fields: [compareCardId], references: [id], onDelete: SetNull)
+  offer             Offer?              @relation("LeadRequestOffer", fields: [offerId], references: [id], onDelete: SetNull)
+  vendor            Vendor              @relation("LeadRequestVendor", fields: [vendorId], references: [id], onDelete: Restrict)
+  offerPriceVersion OfferPriceVersion?  @relation("LeadRequestOfferPriceVersion", fields: [offerPriceVersionId], references: [id], onDelete: SetNull)
+  submittedBy       User                @relation("LeadRequestSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: Restrict)
+  histories         LeadStatusHistory[] @relation("LeadStatusHistoryLeadRequest")
+
+  @@index([coupleId], name: "idx_lead_requests_couple_id")
+  @@index([compareRoomId], name: "idx_lead_requests_compare_room_id")
+  @@index([vendorId], name: "idx_lead_requests_vendor_id")
+  @@index([status], name: "idx_lead_requests_status")
+  @@index([submittedAt], name: "idx_lead_requests_submitted_at")
+  @@index([contactPhoneHash], name: "idx_lead_requests_contact_phone_hash")
+  @@map("lead_requests")
+}
+
+model LeadStatusHistory {
+  id              String   @id @default(uuid()) @db.Uuid
+  leadRequestId   String   @map("lead_request_id") @db.Uuid
+  fromStatus      String?  @map("from_status")
+  toStatus        String   @map("to_status")
+  changedByUserId String?  @map("changed_by_user_id") @db.Uuid
+  changedByRole   String?  @map("changed_by_role")
+  reason          String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  leadRequest LeadRequest @relation("LeadStatusHistoryLeadRequest", fields: [leadRequestId], references: [id], onDelete: Restrict)
+  changedBy   User?       @relation("LeadStatusHistoryChangedBy", fields: [changedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([leadRequestId], name: "idx_lead_status_histories_lead_request_id")
+  @@index([toStatus], name: "idx_lead_status_histories_to_status")
+  @@index([createdAt], name: "idx_lead_status_histories_created_at")
+  @@map("lead_status_histories")
+}
+
+model DecisionLog {
+  id                  String   @id @default(uuid()) @db.Uuid
+  coupleId            String?  @map("couple_id") @db.Uuid
+  actorUserId         String?  @map("actor_user_id") @db.Uuid
+  actorCoupleMemberId String?  @map("actor_couple_member_id") @db.Uuid
+  targetType          String   @map("target_type")
+  targetId            String   @map("target_id") @db.Uuid
+  action              String
+  beforeStatus        String?  @map("before_status")
+  afterStatus         String?  @map("after_status")
+  reason              String?
+  metadata            Json?    @db.JsonB
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  couple            Couple?       @relation("DecisionLogCouple", fields: [coupleId], references: [id], onDelete: SetNull)
+  actorUser         User?         @relation("DecisionLogActorUser", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorCoupleMember CoupleMember? @relation("DecisionLogActorCoupleMember", fields: [actorCoupleMemberId], references: [id], onDelete: SetNull)
+
+  @@index([coupleId], name: "idx_decision_logs_couple_id")
+  @@index([actorUserId], name: "idx_decision_logs_actor_user_id")
+  @@index([targetType, targetId], name: "idx_decision_logs_target")
+  @@index([action], name: "idx_decision_logs_action")
+  @@index([createdAt], name: "idx_decision_logs_created_at")
+  @@map("decision_logs")
+}
+
+model Document {
+  id                        String    @id @default(uuid()) @db.Uuid
+  coupleId                  String    @map("couple_id") @db.Uuid
+  title                     String
+  documentType              String    @map("document_type")
+  status                    String
+  sourceType                String?   @map("source_type")
+  sourceId                  String?   @map("source_id") @db.Uuid
+  ownerCoupleMemberId       String?   @map("owner_couple_member_id") @db.Uuid
+  dueAt                     DateTime? @map("due_at") @db.Timestamptz(6)
+  attachmentRefEncrypted    String?   @map("attachment_ref_encrypted")
+  attachmentProvider        String?   @map("attachment_provider")
+  originalFileNameEncrypted String?   @map("original_file_name_encrypted")
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                 DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  couple Couple        @relation("DocumentCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  owner  CoupleMember? @relation("DocumentOwnerCoupleMember", fields: [ownerCoupleMemberId], references: [id], onDelete: SetNull)
+
+  @@index([coupleId], name: "idx_documents_couple_id")
+  @@index([ownerCoupleMemberId], name: "idx_documents_owner_couple_member_id")
+  @@index([status], name: "idx_documents_status")
+  @@index([dueAt], name: "idx_documents_due_at")
+  @@index([sourceType, sourceId], name: "idx_documents_source")
+  @@map("documents")
+}
+
+model Task {
+  id                     String    @id @default(uuid()) @db.Uuid
+  coupleId               String    @map("couple_id") @db.Uuid
+  title                  String
+  description            String?
+  status                 String
+  sourceType             String?   @map("source_type")
+  sourceId               String?   @map("source_id") @db.Uuid
+  assignedCoupleMemberId String?   @map("assigned_couple_member_id") @db.Uuid
+  dueAt                  DateTime? @map("due_at") @db.Timestamptz(6)
+  completedAt            DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdByUserId        String?   @map("created_by_user_id") @db.Uuid
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  couple     Couple        @relation("TaskCouple", fields: [coupleId], references: [id], onDelete: Restrict)
+  assignedTo CoupleMember? @relation("TaskAssignedCoupleMember", fields: [assignedCoupleMemberId], references: [id], onDelete: SetNull)
+  createdBy  User?         @relation("TaskCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([coupleId], name: "idx_tasks_couple_id")
+  @@index([assignedCoupleMemberId], name: "idx_tasks_assigned_couple_member_id")
+  @@index([status], name: "idx_tasks_status")
+  @@index([dueAt], name: "idx_tasks_due_at")
+  @@index([sourceType, sourceId], name: "idx_tasks_source")
+  @@map("tasks")
+}
+
+model Notification {
+  id             String    @id @default(uuid()) @db.Uuid
+  coupleId       String?   @map("couple_id") @db.Uuid
+  userId         String?   @map("user_id") @db.Uuid
+  coupleMemberId String?   @map("couple_member_id") @db.Uuid
+  type           String
+  title          String
+  body           String?
+  channel        String
+  status         String
+  scheduledAt    DateTime? @map("scheduled_at") @db.Timestamptz(6)
+  sentAt         DateTime? @map("sent_at") @db.Timestamptz(6)
+  readAt         DateTime? @map("read_at") @db.Timestamptz(6)
+  metadata       Json?     @db.JsonB
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  couple       Couple?       @relation("NotificationCouple", fields: [coupleId], references: [id], onDelete: SetNull)
+  user         User?         @relation("NotificationUser", fields: [userId], references: [id], onDelete: SetNull)
+  coupleMember CoupleMember? @relation("NotificationCoupleMember", fields: [coupleMemberId], references: [id], onDelete: SetNull)
+
+  @@index([userId], name: "idx_notifications_user_id")
+  @@index([coupleId], name: "idx_notifications_couple_id")
+  @@index([coupleMemberId], name: "idx_notifications_couple_member_id")
+  @@index([status], name: "idx_notifications_status")
+  @@index([scheduledAt], name: "idx_notifications_scheduled_at")
+  @@index([readAt], name: "idx_notifications_read_at")
+  @@map("notifications")
+}
+
+model Article {
+  id             String    @id @default(uuid()) @db.Uuid
+  title          String
+  slug           String    @unique(map: "articles_slug_key")
+  summary        String?
+  body           String
+  category       String
+  status         String
+  seoTitle       String?   @map("seo_title")
+  seoDescription String?   @map("seo_description")
+  ogImageUrl     String?   @map("og_image_url")
+  publishedAt    DateTime? @map("published_at") @db.Timestamptz(6)
+  authorUserId   String?   @map("author_user_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  author User? @relation("ArticleAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([slug], name: "idx_articles_slug")
+  @@index([status], name: "idx_articles_status")
+  @@index([category], name: "idx_articles_category")
+  @@index([publishedAt], name: "idx_articles_published_at")
+  @@map("articles")
+}
+
+model EventLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  eventName     String   @map("event_name")
+  userId        String?  @map("user_id") @db.Uuid
+  coupleId      String?  @map("couple_id") @db.Uuid
+  anonymousId   String?  @map("anonymous_id")
+  source        String
+  schemaVersion Int      @default(1) @map("schema_version")
+  payload       Json?    @db.JsonB
+  occurredAt    DateTime @map("occurred_at") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user   User?   @relation("EventLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  couple Couple? @relation("EventLogCouple", fields: [coupleId], references: [id], onDelete: SetNull)
+
+  @@index([eventName], name: "idx_event_logs_event_name")
+  @@index([userId], name: "idx_event_logs_user_id")
+  @@index([coupleId], name: "idx_event_logs_couple_id")
+  @@index([anonymousId], name: "idx_event_logs_anonymous_id")
+  @@index([occurredAt], name: "idx_event_logs_occurred_at")
+  @@index([eventName, occurredAt], name: "idx_event_logs_event_name_occurred_at")
+  @@map("event_logs")
+}

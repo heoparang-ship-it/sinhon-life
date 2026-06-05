@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sinhon-os-postgres
+    environment:
+      POSTGRES_DB: sinhon_os
+      POSTGRES_PASSWORD: sinhon_os
+      POSTGRES_USER: sinhon_os
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sinhon_os -d sinhon_os"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5433:5432"
+    volumes:
+      - sinhon_os_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  sinhon_os_postgres_data:

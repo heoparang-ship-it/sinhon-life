@@ -1,25 +1,90 @@
-# CODING AGENTS: READ THIS FIRST
+# 신혼OS
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+신혼OS는 예비 신혼부부와 혼인 초기 부부가 예산, 주거, 정책 혜택, 파트너 상품 비교, 공동 승인, 상담 신청을 함께 진행하는 커플 중심 실행 서비스입니다.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+## 현재 단계
 
-## What you should do — IMPORTANT
+Phase 5의 `21. E2E 테스트`, 결제 전 단계 `25-A. 결제 설계 문서`, 공개 배포 전 최소 보안 하드닝까지 진행되었습니다. 로컬 MVP 인증, 커플 생성, 초대 링크 생성, 초대 가입/수락, 개인·커플 공통 온보딩, 시나리오 생성·계산·결과 확인, 정책·혜택 가능성 확인, 필요 서류 체크리스트, 파트너 상품 목록·상세, 비교방 생성·카드 추가·댓글·공동 승인, 상담 신청·리드 상태 변경, 문서함·할 일·인앱 알림, 운영자 CRM, 공개 콘텐츠·CMS·계산기 랜딩, 분석 이벤트·관리자 퍼널, Playwright 핵심 E2E 흐름이 연결되어 있습니다. 사용자 웹 프론트엔드는 Vercel production으로 배포되었고, API 운영 배포는 공개 DB/API 호스트 연결이 필요합니다. 결제 샌드박스 구현은 법무·보안·운영 승인 전까지 보류합니다.
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+Production URL: `https://sinhon-os-web.vercel.app`
 
-**Find the primary design file under `project/` and read it top to bottom.** The chat transcripts will tell you which file the user was last iterating on. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+## 구조
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+```text
+apps/
+  web/      사용자용 Next.js 앱
+  admin/    운영자용 Next.js 앱
+  api/      TypeScript Express API
+packages/
+  ui/        공통 UI 최소 골격
+  config/    공통 설정 상수
+  database/  PostgreSQL/ORM 준비용 패키지
+  schemas/   공통 입력 스키마
+  analytics/ 분석 이벤트 상수
+docs/        제품/도메인/API 문서
+tests/       통합 테스트 자리
+```
 
-## About the design files
+## 명령어
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+개발 서버:
 
-## Bundle contents
+```bash
+pnpm dev:web
+pnpm dev:admin
+pnpm dev:api
+```
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `신혼생활 mvp 와이어프레임` project files (HTML prototypes, assets, components)
+로컬 DB와 인증 흐름:
+
+```bash
+docker compose up -d postgres
+DATABASE_URL=postgresql://sinhon_os:sinhon_os@localhost:5433/sinhon_os?schema=public pnpm db:migrate:deploy
+AUTH_TOKEN_SECRET=dev-only-change-me PII_ENCRYPTION_KEY=local-dev-pii-key-change-me DATABASE_URL=postgresql://sinhon_os:sinhon_os@localhost:5433/sinhon_os?schema=public pnpm dev:api
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1 NEXT_PUBLIC_WEB_BASE_URL=http://localhost:3000 pnpm dev:web
+```
+
+운영 배포 필수 환경변수:
+
+```bash
+AUTH_TOKEN_SECRET=...
+AUTH_TOKEN_TTL_SECONDS=604800
+PII_ENCRYPTION_KEY=...
+CORS_ALLOWED_ORIGINS=https://your-web-domain.example
+ADMIN_ALLOWED_ORIGINS=https://your-admin-domain.example
+DATABASE_URL=postgresql://...
+NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.example/api/v1
+NEXT_PUBLIC_WEB_BASE_URL=https://your-web-domain.example
+```
+
+## 기준 문서
+
+- `AGENTS.md`
+- `docs/01-prd.md`
+- `docs/02-user-flows.md`
+- `docs/03-domain-model.md`
+- `docs/04-database-schema-plan.md`
+- `docs/05-api-contract.md`
+- `docs/06-scenario-engine.md`
+- `docs/07-policy-rule-engine.md`
+- `docs/08-offer-price-schema.md`
+- `docs/09-payment-plan.md`
+- `docs/10-release-checklist.md`
+- `docs/11-production-readiness.md`
+- `docs/12-deployment-report-2026-06-05.md`
+
+## 주의
+
+- 주민등록번호는 수집하지 않습니다.
+- 정책 선정, 대출 가능, 금융 심사 결과처럼 보이는 표현은 사용하지 않습니다.
+- 정책 룰은 `PolicyRuleVersion`으로 버전 관리하며 결과는 가능성 안내로만 표시합니다.
+- 파트너 가격은 `OfferPriceVersion`으로 버전 관리하며, 실제 결제나 계약 확정 기능은 만들지 않습니다.
+- 운영 환경에서는 개인정보성 입력을 암호화하기 위해 `PII_ENCRYPTION_KEY`가 반드시 필요합니다.

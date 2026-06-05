@@ -1,59 +1,14 @@
-# dependencies
-node_modules/
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
-
-# vercel
-.vercel
-
-# typescript
+.env
+.env.*
+!.env.example
+.next/
+coverage/
+dist/
+node_modules/
+playwright-report/
+storybook-static/
+test-results/
+*.log
 *.tsbuildinfo
-next-env.d.ts
-
-# Capacitor native build artifacts
-/ios/App/App/public
-/android/app/src/main/assets/public
-*.xcworkspace/xcuserdata
-/ios/App/Pods
-/android/.gradle
-/android/app/build
-/android/build
-/android/local.properties
-
-# Cloudflare Worker (added 2026-05-19)
-worker/node_modules/
-worker/.wrangler/
-worker/*.bak
-src/lib/instagram/*.bak
-
-# Claude Code: ignore local config, but share committed skills
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/awesome-design/
-!.claude/skills/bmad-*/
-
-# BMAD-METHOD: 도구 자체와 docs는 추적, 생성 산출물은 제외
-_bmad-output/
+.vercel

@@ -1,0 +1,593 @@
+# 신혼OS — Codex 명령 세트 v1
+
+> 위에서부터 순서대로 진행. 각 명령은 그대로 복붙해서 Codex에 넣는다.
+> **코드 작업은 전부 plan-only를 먼저 받고, 승인한 뒤에만 implement 한다.** (공통 헤더에 박혀 있음)
+> 작성일: 2026-06-05
+
+---
+
+## 0. 운영 원칙 (먼저 읽기)
+
+- **한 번에 하나의 PR. 한 PR은 하나의 목적.** 절대 전체 개발을 한 번에 시키지 않는다.
+- **4단계 고정:** ① Plan only → ② Implement → ③ Self-review → ④ Human review
+- 정책·결제·개인정보·파트너 정산 PR은 사람이 **반드시** 본다.
+- 비즈니스 규칙은 Codex가 추측 못 하게 문서로 먼저 박는다.
+
+---
+
+## 공통 프롬프트 헤더 (모든 명령 맨 앞에 붙인다)
+
+```
+공통 지시:
+너는 신혼OS 프로젝트의 시니어 엔지니어다.
+
+작업 전 반드시 확인:
+- AGENTS.md
+- docs/01-prd.md
+- docs/03-domain-model.md
+- docs/05-api-contract.md
+- 관련 기능 문서
+
+작업 원칙:
+1. 이번 티켓 범위 밖 파일은 수정하지 마라.
+2. 비즈니스 규칙을 임의로 만들지 마라.
+3. 애매한 부분은 TODO 또는 "확정 필요"로 남겨라.
+4. 개인정보와 금융성 표현은 보수적으로 처리해라.
+5. 모든 주요 기능에는 테스트를 작성해라.
+6. 로딩/에러/빈 상태를 빠뜨리지 마라.
+7. 모바일 화면을 기본으로 생각해라.
+8. 한국어 문구는 쉬운 표현을 사용해라.
+9. 타입 안정성을 유지해라.
+10. 코드 작업이면, 먼저 plan only(수정할 파일·영향 범위·데이터 모델 변경·테스트 계획)만
+    제출하고 멈춰라. 내가 승인하기 전에는 파일을 수정하지 마라.
+11. 승인 후 구현하면, 변경 후 lint/typecheck/test/build 결과를 보고해라.
+
+응답 형식:
+- 구현 요약
+- 변경 파일
+- 실행한 명령어
+- 테스트 결과
+- 남은 리스크
+- 다음 추천 작업
+```
+
+---
+
+# Phase 0 — 작업 규칙과 문서 (코드 거의 없음)
+
+## 01. AGENTS.md 작성
+
+```
+목표:
+신혼부부 대상 서비스 "신혼OS" 개발을 위한 AGENTS.md를 작성한다.
+
+반드시 포함할 것:
+1. 프로젝트 목적
+2. 핵심 사용자 (예비 신혼부부 / 혼인 5년 이내 부부 / 파트너 업체 / 운영자)
+3. 제품 원칙 (개인보다 커플 중심 · 가격은 총액 기준 · 정책/혜택은 출처와 기준일 보유 ·
+   파트너 가격은 검증일/유효기간 보유 · 개인정보 최소 수집 · 민감정보 로그 금지 ·
+   비즈니스 규칙 추측 금지)
+4. 기술 원칙 (TypeScript strict · 테스트 없는 핵심 기능 금지 · 접근성 · 에러/로딩/빈 상태 필수 ·
+   API 응답 타입 명확화 · 관련 없는 리팩터링 금지)
+5. 보안 원칙
+6. 데이터 모델 원칙 (User가 아니라 Couple 중심)
+7. PR 작성 규칙 (목적 / 변경 파일 / 테스트 결과 / 남은 리스크 / 다음 작업 제안)
+8. 테스트 작성 규칙
+9. Codex가 절대 추측하면 안 되는 영역
+10. Codex가 작업 전 반드시 확인해야 하는 문서 목록
+
+주의:
+- 아직 코드는 수정하지 마라. AGENTS.md만 작성해라.
+- 한국어로 작성해라.
+- 이후 모든 작업자가 이 문서를 기준으로 움직이게 구체적으로 써라.
+```
+
+## 02. PRD 작성 — docs/01-prd.md
+
+```
+목표:
+신혼OS의 PRD를 작성한다. 출력: docs/01-prd.md
+
+맥락:
+예식 정보 앱이 아니라, 예산·주거·정책·파트너 비교·공동 승인·실행 연결이 핵심이다.
+
+반드시 포함할 것:
+1. 서비스 정의 (한 줄)
+2. 핵심 사용자
+3. 사용자별 문제
+4. MVP에 반드시 들어갈 기능
+5. MVP에서 제외할 기능
+6. 6주 MVT / 12주 MVP / 24주 Beta 범위
+7. 성공 지표
+8. 실패 지표
+9. 개인정보·금융 관련 주의사항
+10. 파트너 가격 데이터 운영 원칙
+
+주의:
+- 구현은 하지 마라. 문서만. 용어는 쉬운 한국어.
+```
+
+## 03. 사용자 플로우 — docs/02-user-flows.md
+
+```
+목표:
+신혼OS 핵심 사용자 플로우를 작성한다. 출력: docs/02-user-flows.md
+
+반드시 포함:
+- 가입 → 커플 생성 → 배우자 초대 → 수락
+- 공동 온보딩 → 시나리오 생성 → 결과 확인
+- 정책 매칭 결과 확인
+- 파트너 상품 비교 → 비교방 → 둘 다 승인 → 상담 신청
+- 각 플로우의 분기/예외(배우자 미참여, 초대 만료, 이미 다른 커플 소속 등)
+
+주의: 문서만. 화면 와이어프레임 텍스트 수준으로.
+```
+
+## 04. 도메인 모델 — docs/03-domain-model.md
+
+```
+목표:
+신혼OS의 도메인 모델 문서를 작성한다. 출력: docs/03-domain-model.md
+
+반드시 포함할 도메인:
+User, Couple, CoupleMember, Scenario, ScenarioItem, PolicyProgram, PolicyRuleVersion,
+EligibilityResult, Vendor, Offer, OfferPriceVersion, LeadRequest, CompareRoom, CompareCard,
+Approval, DecisionLog, Document, Task, Notification, Article, EventLog
+
+각 도메인마다:
+- 역할 / 주요 필드 / 관계 / 주의사항 / 개인정보 여부 / 버전 관리 필요 여부
+
+주의:
+- ORM 코드는 만들지 마라. 비즈니스 규칙 추측 금지.
+- 애매한 부분은 "확정 필요"로 표시.
+```
+
+## 05. DB 스키마 설계안 — docs/04-database-schema-plan.md
+
+```
+목표:
+docs/03-domain-model.md 기준 PostgreSQL 스키마 설계안을 작성한다.
+출력: docs/04-database-schema-plan.md
+
+포함:
+테이블 목록 / 핵심 컬럼 / 관계 / 인덱스 / unique 제약 / cascade 정책 /
+soft delete 여부 / audit log 필요 여부 / 개인정보 컬럼 / 암호화 필요 컬럼
+
+하지 말 것: 마이그레이션 파일·코드 수정 금지. 설계안 문서만.
+```
+
+## 06. API 계약 — docs/05-api-contract.md
+
+```
+목표:
+신혼OS MVP API 계약 문서를 작성한다. 출력: docs/05-api-contract.md
+
+API 그룹:
+Auth, Couple, Onboarding, Scenario, Policy, Vendor, Offer, LeadRequest,
+CompareRoom, Approval, Document, Task, Notification, Content, Analytics
+
+각 API마다:
+method / path / request body / response body / error code / 권한 /
+개인정보 포함 여부 / 프론트 사용 화면
+
+주의: 구현 금지. 문서만.
+```
+
+---
+
+# Phase 1 — 기술 기반 ("기능 없는 튼튼한 집")
+
+## 07. 모노레포 초기화
+
+```
+목표: 신혼OS 모노레포 기본 구조를 만든다.
+
+기술 기준:
+- TypeScript / Next.js 기반 web · admin
+- NestJS 또는 Express 기반 api
+- PostgreSQL 전제 ORM 준비
+- 공통 ui / schema 패키지
+- ESLint, Prettier, TS strict mode
+- 테스트 환경 기본 세팅 / 환경변수 예시 파일
+
+폴더 구조:
+apps/{web,admin,api}  packages/{ui,config,database,schemas,analytics}  docs/  tests/
+
+작업 범위:
+- 폴더 구조 생성 / package.json scripts / lint·typecheck·test·build 명령어 / README 초안 / docs 폴더
+
+하지 말 것: 실제 기능·인증·결제·추천 로직 금지. 더미 UI 최소.
+
+완료 기준:
+pnpm install / lint / typecheck / test / build 전부 통과
+```
+
+## 08. DB·ORM 스키마 구현 + seed
+
+```
+목표: 승인된 docs/04-database-schema-plan.md 기준 ORM 스키마를 구현한다.
+
+작업:
+- Prisma(또는 선택 ORM) 스키마 / 초기 migration / seed 데이터 / DB 타입 / 기본 repository·service 구조
+
+반드시 포함:
+Couple 중심 모델 / PolicyRuleVersion / OfferPriceVersion / DecisionLog / EventLog /
+개인정보 최소화 / createdAt · updatedAt · sourceUpdatedAt · verifiedAt · validUntil
+
+완료 기준: migration·seed 실행 성공 / typecheck / DB 단위 테스트 통과
+```
+
+## 09. 공통 UI 패키지 + Storybook
+
+```
+목표: packages/ui 공통 컴포넌트 패키지를 만든다.
+
+컴포넌트:
+Button, Input, Select, Checkbox, Radio, Modal, Drawer, Toast, Card, PriceCard,
+TrustBadge, SourceBadge, ApprovalBadge, Progress, Tabs, EmptyState, ErrorState,
+LoadingState, Stepper, DatePicker 기본 구조 + Storybook 설정
+
+디자인 원칙:
+모바일 우선 / 한국어 긴 문구 대응 / 접근성 / 터치 영역 확보 /
+가격·정책 출처 표시 컴포넌트 필수
+
+완료 기준: Storybook 실행 / 컴포넌트별 story / typecheck / 접근성 기본 속성
+```
+
+---
+
+# Phase 2 — 핵심 사용자 흐름 (세로 슬라이스)
+
+## 10. 회원가입 + 커플 초대
+
+```
+목표: 가입·로그인·커플 생성·배우자 초대·초대 수락 기능을 구현한다.
+
+범위: User, Couple, CoupleMember, CoupleInvitation / Auth·Couple API /
+web 온보딩 첫 화면 / 초대 링크 화면 / 기본 권한 처리
+
+반드시 구현:
+1. 가입 시 Couple 생성 2. 초대 링크 생성 3. 초대 수락 후 Couple 참여
+4. CoupleMember role 구분 5. 초대 만료 처리
+6. 이미 다른 Couple 소속 사용자 예외 처리 7. 에러/로딩/빈 상태 UI
+
+하지 말 것: 정책·파트너·결제 금지
+
+테스트: 초대 생성/수락 단위 테스트 · 이미 참여 사용자 예외 · 기본 E2E
+완료 기준: lint/typecheck/test/build 통과 · README 업데이트 · PR에 변경파일·테스트결과
+```
+
+## 11. 공동 온보딩
+
+```
+목표: 공동 온보딩 플로우를 구현한다.
+
+개인별: 이름/닉네임, 휴대폰 인증 여부, 직장 지역, 소득 구간, 자산 구간, 공개 범위
+커플 공통: 결혼 예정일, 예식 지역, 거주 희망 지역, 주거 형태, 예산 총액, 보유 현금,
+가족 지원금 여부, 대출 고려 여부, 자녀 계획, 선호 예식 스타일, 입주 예정 시점
+→ 민감 정보는 정확한 금액 대신 "구간"으로 받는다.
+
+반드시 구현:
+Zod 등 validation / 단계별 저장 / 뒤로가기 / 새로고침 복구 / 모바일 UI /
+에러 상태 / 배우자 미참여 안내 / 진행률 표시
+
+하지 말 것: 정책 매칭 계산 금지 · "대출 가능" 단정 금지
+테스트: 입력 검증 · 단계 저장 · 공개 범위 · E2E 온보딩 완료
+```
+
+## 12-A. 시나리오 계산 규칙 — docs/06-scenario-engine.md
+
+```
+목표: 신혼 시나리오 엔진 계산 규칙 문서를 작성한다. 출력: docs/06-scenario-engine.md
+
+포함:
+시나리오 입력값 / 계산 항목 / 예식 비용 / 주거 초기 비용 / 월 부담액 /
+혼수·가전·가구 / 허니문 / 부족 금액 / 위험 신호 기준 / 아직 확정 안 할 항목
+
+주의: 실제 금리·정책 수치 하드코딩 금지. MVP는 샘플+관리자 입력 기반.
+출처 없는 숫자는 "sample" 표시.
+```
+
+## 12-B. 시나리오 엔진 구현
+
+```
+목표: docs/06-scenario-engine.md 기준 시나리오 생성·계산 기능을 구현한다.
+
+범위: Scenario API / ScenarioItem / Budget / 계산 서비스 / web 결과 화면 /
+항목별 비용 카드 / 월 부담 카드 / 부족 금액 안내 / 위험 신호 표시
+
+반드시: 계산 함수 단위 테스트 / 입력 validation / 결과·계산 버전 저장 /
+화면에 total·monthly·risk·next action / 원화 포맷
+
+하지 말 것: 금융 심사처럼 보이는 문구 금지 · 정책 승인 단정 금지 · 외부 금융 API 금지
+```
+
+---
+
+# Phase 3 — 신혼OS 핵심 가치
+
+## 13-A. 정책 룰 엔진 문서 — docs/07-policy-rule-engine.md
+
+```
+목표: 정책·혜택 매칭 룰 엔진 문서를 작성한다. 출력: docs/07-policy-rule-engine.md
+
+포함:
+PolicyProgram / PolicyRuleVersion / EligibilityInput / EligibilityResult 구조 /
+결과 상태값 / 출처·기준일 관리 / 룰 버전 관리 / 관리자 업데이트 방식 /
+사용자 주의 문구 / 테스트 케이스 예시
+
+결과 상태값:
+likely_eligible / maybe_eligible / not_eligible / need_more_info / expired / unknown
+
+주의: 정책 수치 임의 확정 금지 · 샘플 정책은 sample 표시 · 최종 심사 단정 금지
+```
+
+## 13-B. 정책 룰 엔진 구현
+
+```
+목표: 정책·혜택 매칭 기능을 구현한다.
+
+범위: PolicyProgram / PolicyRuleVersion / EligibilityInput / EligibilityResult /
+Policy API / 관리자 정책 등록 기본 구조 / 사용자 결과 화면 / 필요 서류 체크리스트
+
+반드시: 룰 버전 저장 / sourceUrl / sourceUpdatedAt / verifiedAt / resultReason /
+missingInputs / requiredDocuments / disclaimer / 단위 테스트
+
+하지 말 것: 외부 정책 API 연동 금지 · 확정적 금융 문구 금지 · 주민등록번호 입력 금지
+완료 기준: 샘플 정책 5개 seed · 조건 입력 시 결과·사유·필요서류 표시 · 테스트 통과
+```
+
+## 14-A. 가격 스키마 문서 — docs/08-offer-price-schema.md
+
+```
+목표: 파트너 상품 가격 구조 문서를 작성한다. 출력: docs/08-offer-price-schema.md
+
+포함:
+Vendor / VendorBranch / Offer / OfferPriceVersion / IncludedItem / RequiredOption /
+OptionalOption / CancellationPolicy / VerificationStatus / 가격 카드 표시 방식
+
+가격 카드 필수 표시:
+기본 가격 / 예상 총액 / 포함 항목 / 사실상 필수 옵션 / 선택 옵션 /
+검증일 / 유효기간 / 추가 비용 가능성 / 상담 신청 CTA
+
+주의: "최저가" 남발 금지 · 유효기간 지난 가격 기본 노출 금지 · 미검증 가격은 배지 구분
+```
+
+## 14-B. 파트너 상품 API 구현
+
+```
+목표: 파트너 상품·가격 버전 API를 구현한다.
+
+범위: Vendor / Offer / PriceVersion API / 사용자 상품 목록·상세 화면 /
+가격 카드 컴포넌트 / 지역·예산·카테고리 필터
+
+반드시: 가격 버전 관리 / verifiedAt 표시 / validUntil 만료 처리 /
+included·required·optional 분리 / 예상 총액 계산 / 관리자 seed / 단위 테스트
+
+하지 말 것: 실제 결제 금지 · 상담 신청 외 계약 확정 기능 금지
+```
+
+## 15. 비교방 + 공동 승인
+
+```
+목표: 비교방과 공동 승인 기능을 구현한다.
+
+범위: CompareRoom / CompareCard / Approval / Comment / DecisionLog /
+web 비교방 화면 / 승인·보류·반려 UI / 댓글 UI / 결정 로그 UI
+
+비교방 상태: draft / shared / waiting_partner / both_approved / rejected / archived
+승인 상태: pending / approved / hold / rejected
+
+반드시:
+1. 상품을 비교방에 추가 2. 2~4개 카드 비교 3. 각자 승인/보류/반려
+4. 댓글 5. 둘 다 승인 시 both_approved 6. 모든 상태 변경은 DecisionLog 저장
+7. 누가 언제 무엇을 결정했는지 표시 8. 배우자 초대 전이면 공유 안내
+
+하지 말 것: 결제 확정 금지 · 파트너 리드 전송은 다음 단계 · 알림은 toast까지만
+테스트: 상태 전환 · 둘 다 승인 조건 · 댓글 · 결정 로그 · E2E
+```
+
+## 16. 상담 신청 / 리드 생성
+
+```
+목표: 상담 신청과 리드 생성 기능을 구현한다.
+
+범위: LeadRequest / LeadStatusHistory / Lead API /
+사용자 상담 신청 화면 / 관리자 리드 목록 / 파트너용 리드 상세 기본
+
+리드 상태: submitted / viewed / accepted / contacted / booked / rejected / expired
+
+반드시:
+1. both_approved에서만 상담 신청 가능 2. 상담 희망일·연락 방식 선택
+3. 개인정보 제공 동의 4. 리드 생성 5. 파트너·운영자 조회
+6. 상태 변경 + 히스토리 저장
+
+주의: 전화번호 등 개인정보 마스킹 · 동의 없는 리드 전송 금지 · 전송 전 확인 화면 필수
+테스트: 동의 없는 리드 실패 · 승인 전 리드 실패 · 상태 변경 · 관리자 권한
+```
+
+---
+
+# Phase 4 — 운영 기능
+
+## 17. 문서함 / 할 일 / 알림
+
+```
+목표: 문서함·할 일·알림 기본 기능을 구현한다.
+
+범위: Document / Task / Notification / Reminder /
+web 문서함·할 일 화면 / 정책 결과 → 할 일 생성 / 마감일 알림 기본 구조
+
+반드시:
+1. 문서 준비 상태 체크 2. 파일 첨부 선택 3. 할 일 생성 4. 담당자 지정
+5. 마감일 6. 완료 처리 7. 정책 결과의 필요 서류를 할 일로 추가 8. 알림 테이블 저장
+
+주의: 민감 파일 접근 권한 필수 · 파일명 로그 금지 · 업로드는 로컬/S3 추상화
+※ MVP는 실제 민감 서류 원본 업로드 강제하지 않음. "준비 여부 체크" + "첨부 선택"까지.
+테스트: 문서 권한 · 할 일 생성/완료 · 정책 결과 → 할 일 생성
+```
+
+## 18. 관리자 / 파트너 CRM
+
+```
+목표: 운영자·파트너 관리자 기본 CRM을 구현한다.
+
+범위: admin 앱 / 관리자 로그인 권한 / Vendor·Offer·PriceVersion·Lead·PolicyProgram 관리 /
+기본 대시보드
+
+반드시:
+1. 운영자 권한 체크 2. 파트너 목록·상세 3. 상품 생성/수정 4. 가격 버전 생성
+5. 가격 검증 상태 변경 6. 리드 상태 변경 7. 정책 프로그램 등록 8. audit log 저장
+
+하지 말 것: 복잡한 정산 금지 · 파트너 셀프 가입 금지 · 대량 엑셀 업로드는 다음 단계
+테스트: 관리자 권한 · 가격 버전 변경 · 리드 상태 변경 · audit log
+```
+
+## 19. 콘텐츠 / CMS / SEO
+
+```
+목표: 콘텐츠와 계산기 랜딩 구조를 구현한다.
+
+범위: Article / ContentBlock / FAQ / CMS 기본 관리자 화면 / SEO 메타데이터 /
+콘텐츠 상세 / CTA 컴포넌트 / 계산기 랜딩 페이지
+
+반드시:
+1. 글 목록·상세 2. FAQ 3. 관련 계산기 CTA 4. 관련 정책 CTA 5. 관련 파트너 CTA
+6. SEO title/description 7. OG 이미지 필드 8. published/draft 상태
+
+하지 말 것: 복잡한 에디터 금지 · 댓글 금지 · 유저 생성 콘텐츠 다음 단계
+테스트: published만 노출 · SEO 메타 생성 · CTA 링크 동작
+```
+
+---
+
+# Phase 5 — 품질 강화
+
+## 20. 분석 이벤트
+
+```
+목표: 분석 이벤트 수집 구조를 구현한다.
+
+범위: EventLog / analytics 패키지 / 프론트 트래킹 유틸 / 백엔드 기록 /
+퍼널 대시보드 API / 관리자 퍼널 화면 기본
+
+심을 이벤트:
+account_created, couple_created, partner_invited, partner_joined, onboarding_started,
+onboarding_completed, scenario_created, scenario_evaluated, policy_check_started,
+policy_check_completed, offer_viewed, offer_compared, compare_room_created,
+approval_submitted, both_approved, lead_submitted, content_viewed,
+calculator_started, task_completed
+
+반드시:
+1. 이벤트 이름 상수화 2. payload 타입 정의 3. userId/coupleId/anonymousId 처리
+4. 개인정보 payload 저장 금지 5. 주요 퍼널 연결 6. 관리자 퍼널 수치 조회
+
+주의: 전화번호·이름·계좌·파일명 저장 금지 · analytics 실패가 사용자 기능 막으면 안 됨
+테스트: 이벤트 저장 · 개인정보 필드 차단 · 퍼널 조회
+```
+
+## 21. E2E 테스트
+
+```
+목표: 핵심 사용자 흐름 E2E 테스트를 작성한다.
+
+흐름: 가입 → 커플 생성 → 배우자 초대 → 수락 → 공동 온보딩 → 시나리오 생성 →
+정책 매칭 확인 → 비교방 생성 → 둘 다 승인 → 상담 신청 → 관리자 리드 확인
+
+반드시 확인: 모바일 viewport / 에러 상태 / 권한 없는 접근 / 새로고침 후 상태 유지 / 입력 검증
+완료 기준: Playwright 또는 Cypress 통과 · CI 자동 실행
+```
+
+## 22. 보안 리뷰 (구현한 Codex와 분리된 세션에서)
+
+```
+너는 이 프로젝트의 보안 리뷰어다.
+
+목표: 현재 코드베이스의 신혼OS 보안 리스크를 점검한다.
+
+중점:
+인증/인가 / Couple 접근 권한 / 배우자 초대 링크 보안 / 개인정보 최소 수집 /
+민감정보 로그 노출 / 문서 파일 접근 권한 / 결제 idempotency / 관리자 권한 /
+파트너 리드 개인정보 마스킹 / CSRF·XSS·SQL injection / rate limit 필요 구간 / audit log 누락
+
+출력: docs/security-review-YYYY-MM-DD.md
+코드 수정: 하지 마라. 리스크 목록·심각도·재현 방법·수정 제안만.
+```
+
+## 23. UX 품질 리뷰 (별도 세션)
+
+```
+너는 시니어 UX 엔지니어다.
+
+목표: 현재 web 앱 UX 품질을 점검한다.
+
+중점:
+모바일 사용성 / 버튼 터치 영역 / 한국어 문구 자연스러움 / 로딩·빈·에러 상태 /
+가격 카드 이해 가능성 / 정책 결과 오해 가능성 / 배우자 초대 흐름 명확성 /
+공동 승인 흐름 명확성 / 접근성 / 키보드 탐색 / 스크린리더 라벨 / 색상 대비
+
+출력: docs/ux-review-YYYY-MM-DD.md
+코드 수정: 하지 마라. 문제 목록·개선 제안만.
+```
+
+## 24. 릴리즈 체크리스트 — docs/10-release-checklist.md
+
+```
+목표: 신혼OS MVP 출시 체크리스트를 작성한다. 출력: docs/10-release-checklist.md
+
+반드시 포함 (체크박스 형태, 담당 팀 명시):
+기능 / 디자인 / 모바일 / 접근성 / 보안 / 개인정보 / 법무 / 파트너 데이터 /
+가격 데이터 / 정책 데이터 / 분석 이벤트 / 고객지원 / 장애 대응 / 롤백 계획 /
+출시 후 7일 모니터링 계획
+
+주의: 추상적으로 쓰지 마라. 체크박스 + 담당 팀.
+```
+
+---
+
+# 결제 (검증 끝난 뒤 별도로)
+
+> 상담 신청·리드·가격 투명성·공동 승인까지 검증한 다음에 넣는다. 법무·보안 붙음.
+
+## 25-A. 결제 설계 문서 — docs/09-payment-plan.md
+
+```
+목표: 결제 도입 전 설계 문서를 작성한다. 출력: docs/09-payment-plan.md
+
+포함:
+결제 대상/비대상 상품 / 예약금 구조 / 취소·환불 정책 / 파트너 정산 구조 /
+PG 연동 방식 / 결제 보안 / 개인정보 처리 / 분쟁 처리 / MVP 제외 범위
+
+주의: 결제 코드 금지. 법무 검토 필요 항목 표시.
+```
+
+## 25-B. 결제 샌드박스 구현
+
+```
+목표: 승인된 설계에 따라 샌드박스 결제 구조를 구현한다.
+
+범위: PaymentIntent / PaymentTransaction / PaymentStatusHistory /
+결제 준비 API / 콜백 API / 사용자 결제 확인 화면 / 관리자 결제 상태 화면
+
+반드시: idempotency key / 상태 전이 / callback 검증 / 실패·취소 처리 /
+audit log / 테스트 PG sandbox 환경변수 / 민감정보 저장 금지
+
+하지 말 것: 실결제 운영키 금지 · 카드번호 직접 저장 금지 · 정산 자동화 금지
+테스트: 결제 생성 · 중복 callback · 실패 상태 · 취소 상태
+```
+
+---
+
+# 진행 순서 요약
+
+Phase 0 (문서): 01→02→03→04→05→06
+Phase 1 (기반): 07→08→09
+Phase 2 (핵심 흐름): 10→11→12A→12B
+Phase 3 (핵심 가치): 13A→13B→14A→14B→15→16
+Phase 4 (운영): 17→18→19
+Phase 5 (품질): 20→21→22→23→24
+결제: 검증 후 25A→25B
+
+**제일 중요한 한 줄:**
+코딩 시키기 전에, Codex가 흔들면 안 되는 제품 원칙과 데이터 모델을 먼저 문서로 코드베이스에 박는다.
+그다음부터는 "기능 하나 = PR 하나 = 테스트 포함 = 리뷰 포함".
