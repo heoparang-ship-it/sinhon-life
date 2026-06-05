@@ -55,6 +55,7 @@ function baselineCompatibleSchema() {
   runCommand("pnpm --filter @sinhon-os/database exec tsx scripts/baseline-if-compatible.ts");
 }
 
+runCommand("pnpm --filter @sinhon-os/database exec tsx scripts/ensure-production-schema.ts");
 baselineCompatibleSchema();
 
 const migrationResult = runCommand("pnpm db:migrate:deploy", { allowFailure: true });

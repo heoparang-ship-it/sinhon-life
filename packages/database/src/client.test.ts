@@ -6,6 +6,15 @@ describe("getDatabaseUrl", () => {
     expect(getDatabaseUrl({ DATABASE_URL: "postgresql://example" })).toBe("postgresql://example");
   });
 
+  it("uses the dedicated production schema on Vercel production", () => {
+    expect(
+      getDatabaseUrl({
+        DATABASE_URL: "postgresql://user:pass@example.com/postgres?sslmode=require&schema=public",
+        VERCEL_ENV: "production"
+      })
+    ).toBe("postgresql://user:pass@example.com/postgres?sslmode=require&schema=sinhon_os");
+  });
+
   it("throws when DATABASE_URL is missing", () => {
     expect(() => getDatabaseUrl({ DATABASE_URL: undefined })).toThrow("DATABASE_URL is required");
   });

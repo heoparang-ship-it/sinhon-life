@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
+import { withProductionDatabaseSchema } from "./database-url";
 
 export type SinhonPrismaClient = PrismaClient;
 export type { Prisma };
@@ -13,13 +14,13 @@ export type CreatePrismaClientOptions = {
 let prismaClient: SinhonPrismaClient | undefined;
 
 export function getDatabaseUrl(
-  env: Partial<Record<"DATABASE_URL", string | undefined>> = process.env
+  env: Partial<Record<"DATABASE_URL" | "VERCEL_ENV", string | undefined>> = process.env
 ): string {
   if (!env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to create a Prisma client.");
   }
 
-  return env.DATABASE_URL;
+  return withProductionDatabaseSchema(env.DATABASE_URL, env);
 }
 
 export function createPrismaClient(options: CreatePrismaClientOptions = {}): SinhonPrismaClient {
