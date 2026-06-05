@@ -18,7 +18,7 @@
 - 기존 `heoparang-ship-it/sinhon-life` main 위에 신혼OS 모노레포 전환 커밋을 push했다.
 - Vercel `sinhon-life` 프로젝트에 production 배포해 기존 `sinhon.life`, `www.sinhon.life` alias를 그대로 사용했다.
 - 루트 `api/index.js`가 빌드된 Express API 앱을 default export하고, `/api/v1/:path*` 요청을 해당 함수로 rewrite한다.
-- production build에서는 `scripts/vercel-production-db-prepare.mjs`가 `VERCEL_ENV=production`일 때만 `DIRECT_URL`로 호환 스키마 기준점 처리, DB migration, seed를 실행한다.
+- production build에서는 `scripts/vercel-production-db-prepare.mjs`가 `VERCEL_ENV=production`일 때만 `DIRECT_URL`로 호환 스키마 기준점 처리, 필요 시 비파괴 `db push` bootstrap, DB migration, seed를 실행한다.
 - 기존 공개 경로 `/budget`, `/ai`, `/archive`, `/support`, `/cheongmo`는 새 화면으로 임시 redirect한다.
 
 ## 현재 한계
