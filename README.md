@@ -68,7 +68,7 @@ NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.example/api/v1
 NEXT_PUBLIC_WEB_BASE_URL=https://your-web-domain.example
 ```
 
-Vercel production build는 `pnpm db:generate` 후 `VERCEL_ENV=production`일 때만 `scripts/vercel-production-db-prepare.mjs`로 `DIRECT_URL`을 사용해 `migrate deploy`와 seed를 실행합니다.
+Vercel production build는 `pnpm db:generate` 후 `VERCEL_ENV=production`일 때만 `scripts/vercel-production-db-prepare.mjs`로 `DIRECT_URL`을 사용해 호환 스키마 기준점 처리, `migrate deploy`, seed를 실행합니다.
 
 ## 기준 문서
 

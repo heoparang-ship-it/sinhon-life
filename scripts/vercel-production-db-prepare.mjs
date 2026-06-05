@@ -20,7 +20,11 @@ const directDatabaseEnv = {
   DATABASE_URL: process.env.DIRECT_URL
 };
 
-for (const command of ["pnpm db:migrate:deploy", "pnpm db:seed"]) {
+for (const command of [
+  "pnpm --filter @sinhon-os/database exec tsx scripts/baseline-if-compatible.ts",
+  "pnpm db:migrate:deploy",
+  "pnpm db:seed"
+]) {
   const result = spawnSync(command, {
     env: directDatabaseEnv,
     shell: true,
