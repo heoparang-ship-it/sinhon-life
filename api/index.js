@@ -1,8 +1,9 @@
-/* global module */
+/* global module, process */
 
 let appPromise;
 
 function getApp() {
+  process.env.SINHON_OS_SKIP_API_LISTEN = "true";
   appPromise ??= import("../apps/api/dist/server.js").then(({ createApp }) => createApp());
   return appPromise;
 }
