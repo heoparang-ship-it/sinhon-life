@@ -8,7 +8,7 @@
 - E2E 기준 URL은 `http://localhost:3002`를 사용한다.
 - 운영 API는 `AUTH_TOKEN_SECRET`, `PII_ENCRYPTION_KEY`, `CORS_ALLOWED_ORIGINS`, `ADMIN_ALLOWED_ORIGINS`가 없으면 시작하지 않는다.
 - production Vercel 배포는 웹과 API를 같은 프로젝트에서 제공하며 API는 `/api/v1`로 rewrite된다.
-- production Vercel build는 `pnpm db:generate` 후 `VERCEL_ENV=production`에서만 DB migration과 seed를 실행한다.
+- production Vercel build는 `pnpm db:generate` 후 `VERCEL_ENV=production`에서만 `DIRECT_URL`로 DB migration과 seed를 실행한다.
 - 실결제, 예약금, 환불, 파트너 정산은 법무·보안·운영 승인 전까지 배포 범위에서 제외한다.
 
 ## 최소 SLI

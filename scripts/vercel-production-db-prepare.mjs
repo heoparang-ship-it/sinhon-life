@@ -11,8 +11,18 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is required for production DB preparation.");
 }
 
+if (!process.env.DIRECT_URL) {
+  throw new Error("DIRECT_URL is required for production DB preparation.");
+}
+
+const directDatabaseEnv = {
+  ...process.env,
+  DATABASE_URL: process.env.DIRECT_URL
+};
+
 for (const command of ["pnpm db:migrate:deploy", "pnpm db:seed"]) {
   const result = spawnSync(command, {
+    env: directDatabaseEnv,
     shell: true,
     stdio: "inherit"
   });

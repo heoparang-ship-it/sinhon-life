@@ -18,13 +18,13 @@
 - 기존 `heoparang-ship-it/sinhon-life` main 위에 신혼OS 모노레포 전환 커밋을 push했다.
 - Vercel `sinhon-life` 프로젝트에 production 배포해 기존 `sinhon.life`, `www.sinhon.life` alias를 그대로 사용했다.
 - 루트 `api/index.js`가 빌드된 Express API 앱을 default export하고, `/api/v1/:path*` 요청을 해당 함수로 rewrite한다.
-- production build에서는 `scripts/vercel-production-db-prepare.mjs`가 `VERCEL_ENV=production`일 때만 DB migration과 seed를 실행한다.
+- production build에서는 `scripts/vercel-production-db-prepare.mjs`가 `VERCEL_ENV=production`일 때만 `DIRECT_URL`로 DB migration과 seed를 실행한다.
 - 기존 공개 경로 `/budget`, `/ai`, `/archive`, `/support`, `/cheongmo`는 새 화면으로 임시 redirect한다.
 
 ## 현재 한계
 
 - API는 같은 Vercel 프로젝트의 Node.js Function으로 제공된다.
-- 운영 환경변수는 Vercel production에 설정되어 있어야 한다: `DATABASE_URL`, `AUTH_TOKEN_SECRET`, `PII_ENCRYPTION_KEY`, `CORS_ALLOWED_ORIGINS`, `ADMIN_ALLOWED_ORIGINS`, `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_WEB_BASE_URL`.
+- 운영 환경변수는 Vercel production에 설정되어 있어야 한다: `DATABASE_URL`, `DIRECT_URL`, `AUTH_TOKEN_SECRET`, `PII_ENCRYPTION_KEY`, `CORS_ALLOWED_ORIGINS`, `ADMIN_ALLOWED_ORIGINS`, `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_WEB_BASE_URL`.
 - preview 환경은 production과 별도로 CORS/API URL을 조정해야 한다.
 - 운영 DB seed에는 샘플 정책, 샘플 상품, 샘플 콘텐츠가 포함된다. 실제 출시 전 운영 데이터로 교체해야 한다.
 
