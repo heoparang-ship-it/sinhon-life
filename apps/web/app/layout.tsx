@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "신혼OS",
-  description: "커플 중심 신혼 준비 실행 서비스"
+  title: "신혼생활",
+  description: "예비부부와 신혼부부를 위한 정책 톡과 인스타 아카이브"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

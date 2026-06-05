@@ -3,7 +3,7 @@ import { defaultPorts, productName, workspaceApps } from "./index.js";
 
 describe("config", () => {
   it("defines the product name and workspace apps", () => {
-    expect(productName).toBe("신혼OS");
+    expect(productName).toBe("신혼생활");
     expect(workspaceApps).toEqual(["web", "admin", "api"]);
     expect(defaultPorts.api).toBe(4000);
   });

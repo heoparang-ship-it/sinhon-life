@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   if (!article) {
     return {
-      title: "콘텐츠를 찾을 수 없습니다 | 신혼OS"
+      title: "콘텐츠를 찾을 수 없습니다 | 신혼생활"
     };
   }
 
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       title: article.seoTitle,
       type: "article"
     },
-    title: `${article.seoTitle} | 신혼OS`
+    title: `${article.seoTitle} | 신혼생활`
   };
 }
 

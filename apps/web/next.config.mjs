@@ -2,7 +2,7 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        destination: "/calculators",
+        destination: "/policies",
         permanent: false,
         source: "/budget"
       },
@@ -12,17 +12,12 @@ const nextConfig = {
         source: "/ai"
       },
       {
-        destination: "/articles",
-        permanent: false,
-        source: "/archive"
-      },
-      {
-        destination: "/signup",
+        destination: "/",
         permanent: false,
         source: "/support"
       },
       {
-        destination: "/articles",
+        destination: "/archive",
         permanent: false,
         source: "/cheongmo"
       }

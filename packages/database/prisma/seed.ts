@@ -1645,7 +1645,7 @@ async function main() {
     }
   });
 
-  console.log("Seeded 신혼OS database fixtures.");
+  console.log("Seeded 신혼생활 database fixtures.");
 }
 
 main()

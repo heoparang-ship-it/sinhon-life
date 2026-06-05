@@ -1,8 +1,8 @@
-# 신혼OS DB 스키마 설계안
+# 신혼생활 DB 스키마 설계안
 
 ## 1. 문서 목적
 
-이 문서는 `docs/03-domain-model.md`를 기준으로 신혼OS MVP의 PostgreSQL 스키마 설계안을 정리한다.
+이 문서는 `docs/03-domain-model.md`를 기준으로 신혼생활 MVP의 PostgreSQL 스키마 설계안을 정리한다.
 
 주의:
 
@@ -207,7 +207,7 @@ audit log 필요 여부:
 ### 7.2 `couples`
 
 역할:
-신혼OS의 핵심 작업 단위.
+신혼생활의 핵심 작업 단위.
 
 핵심 컬럼:
 

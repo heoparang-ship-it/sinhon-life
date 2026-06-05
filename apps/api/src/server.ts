@@ -1334,6 +1334,6 @@ export function createApp(options: CreateAppOptions = {}): Express {
 if (process.env.NODE_ENV !== "test" && process.env.SINHON_OS_SKIP_API_LISTEN !== "true") {
   const port = Number(process.env.PORT ?? 4000);
   createApp().listen(port, () => {
-    console.log(`신혼OS API listening on http://localhost:${port}`);
+    console.log(`신혼생활 API listening on http://localhost:${port}`);
   });
 }

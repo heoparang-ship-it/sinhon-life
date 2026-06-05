@@ -1,4 +1,4 @@
-# 신혼OS Deployment Report
+# 신혼생활 Deployment Report
 
 작성일: 2026-06-05
 
@@ -15,7 +15,7 @@
 
 - 루트 `vercel.json`에서 Vercel이 모노레포 루트에서 `pnpm install --frozen-lockfile`을 실행하고 Prisma Client 생성, production DB 준비, `@sinhon-os/api` build, `@sinhon-os/web` build를 순서대로 실행하도록 설정했다.
 - 루트 `package.json`에 Next.js 감지용 `next`, `react`, `react-dom` dev dependency를 추가했다.
-- 기존 `heoparang-ship-it/sinhon-life` main 위에 신혼OS 모노레포 전환 커밋을 push했다.
+- 기존 `heoparang-ship-it/sinhon-life` main 위에 신혼생활 모노레포 전환 커밋을 push했다.
 - Vercel `sinhon-life` 프로젝트에 production 배포해 기존 `sinhon.life`, `www.sinhon.life` alias를 그대로 사용했다.
 - 루트 `api/index.js`가 빌드된 Express API 앱을 default export하고, `/api/v1/:path*` 요청을 해당 함수로 rewrite한다.
 - production build에서는 `scripts/vercel-production-db-prepare.mjs`가 `VERCEL_ENV=production`일 때만 `DIRECT_URL`로 호환 스키마 기준점 처리, 필요 시 체크인된 migration SQL bootstrap, DB migration, seed를 실행한다. 기존 public schema의 다른 테이블은 삭제하거나 강제 동기화하지 않는다.
@@ -42,5 +42,5 @@
 - `/api/v1/ready` DB 연결 확인
 - CORS 허용/차단 확인
 - E2E 상담 신청 저장값 `aesgcm:v1` 암호화 확인
-- `https://sinhon.life`에서 `신혼OS`, `파트너 상품` 응답 확인
+- `https://sinhon.life`에서 `신혼생활`, `파트너 상품` 응답 확인
 - `https://www.sinhon.life/signup`에서 API 요청이 `localhost`가 아니라 `/api/v1` 또는 `https://www.sinhon.life/api/v1`로 나가는지 확인

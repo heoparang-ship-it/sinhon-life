@@ -296,11 +296,7 @@ describeWithDatabase("content API", () => {
     expect(detail.seoTitle).toBe("신혼 예산 콘텐츠 SEO");
     expect(detail.seoDescription).toBe("신혼 예산 콘텐츠의 SEO 설명입니다.");
     expect(detail.faq?.length).toBeGreaterThan(0);
-    expect(detail.ctaLinks?.map((cta) => cta.href).sort()).toEqual([
-      "/offers",
-      "/policies",
-      "/scenarios"
-    ]);
+    expect(detail.ctaLinks?.map((cta) => cta.href).sort()).toEqual(["/archive", "/policies"]);
   });
 
   it("blocks non-admin users from CMS mutations", async () => {

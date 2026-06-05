@@ -36,7 +36,7 @@ const faqByCategory: Record<string, Array<{ answer: string; question: string }>>
     {
       question: "정책 가능성이 높으면 바로 신청 가능한가요?",
       answer:
-        "신혼OS 결과는 준비용 판단입니다. 신청 전에는 반드시 공식 공고와 접수 기간을 확인해야 합니다."
+        "신혼생활 결과는 준비용 판단입니다. 신청 전에는 반드시 공식 공고와 접수 기간을 확인해야 합니다."
     }
   ],
   wedding: [
@@ -56,7 +56,7 @@ const faqByCategory: Record<string, Array<{ answer: string; question: string }>>
 const fallbackFaq = [
   {
     question: "이 글과 연결된 기능은 어디에서 볼 수 있나요?",
-    answer: "글 하단의 계산기, 정책, 파트너 CTA를 통해 바로 이어서 확인할 수 있습니다."
+    answer: "글 하단의 정책 톡과 인스타 아카이브 CTA를 통해 바로 이어서 확인할 수 있습니다."
   },
   {
     question: "작성 중인 글도 공개되나요?",
@@ -98,22 +98,16 @@ function getCtaLinks(article: ArticleRecord) {
 
   return [
     {
-      description: `${categoryLabel} 기준을 숫자로 바꿔 시나리오를 만들어 봅니다.`,
-      href: "/scenarios",
-      label: "계산기 열기",
-      type: "calculator" as const
-    },
-    {
-      description: "저장된 조건으로 받을 수 있는 정책과 필요 서류를 확인합니다.",
+      description: `${categoryLabel} 조건을 버튼으로 고르고 받을 수 있는 정책 가능성을 확인합니다.`,
       href: "/policies",
-      label: "정책 확인",
+      label: "정책 톡 열기",
       type: "policy" as const
     },
     {
-      description: "검증된 파트너 상품과 가격 버전을 비교방에 담아 봅니다.",
-      href: "/offers",
-      label: "파트너 보기",
-      type: "partner" as const
+      description: "신혼생활 공식 인스타 피드와 릴스를 모아 봅니다.",
+      href: "/archive",
+      label: "아카이브 보기",
+      type: "archive" as const
     }
   ];
 }

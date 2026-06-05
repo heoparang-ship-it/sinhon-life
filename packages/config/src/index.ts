@@ -1,6 +1,6 @@
-export const productName = "신혼OS";
+export const productName = "신혼생활";
 
-export const adminAppName = "신혼OS Admin";
+export const adminAppName = "신혼생활 Admin";
 
 export const workspaceApps = ["web", "admin", "api"] as const;
 

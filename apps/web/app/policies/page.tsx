@@ -4,9 +4,9 @@ import { PolicyMatcherClient } from "./policy-matcher-client";
 export default function PoliciesPage() {
   return (
     <AppFrame
-      eyebrow="정책 매칭"
-      title="정책·혜택 가능성 확인"
-      description="저장된 온보딩 입력과 샘플 정책 룰을 비교해 결과, 사유, 필요 서류를 확인합니다."
+      eyebrow="로그인 없는 정책 안내"
+      title="정책 톡"
+      description="거주지, 결혼 시기, 소득 구간을 고르면 맞을 가능성이 높은 정책을 카카오톡 대화처럼 안내합니다."
     >
       <PolicyMatcherClient />
     </AppFrame>

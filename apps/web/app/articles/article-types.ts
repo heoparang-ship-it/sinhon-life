@@ -2,7 +2,7 @@ export type ArticleCtaLink = {
   description: string;
   href: string;
   label: string;
-  type: "calculator" | "partner" | "policy";
+  type: "archive" | "policy";
 };
 
 export type ArticleFaq = {

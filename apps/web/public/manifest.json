@@ -1,0 +1,10 @@
+{
+  "name": "신혼생활",
+  "short_name": "신혼생활",
+  "description": "예비부부와 신혼부부를 위한 정책 톡과 인스타 아카이브",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffaf2",
+  "theme_color": "#315c45",
+  "lang": "ko"
+}

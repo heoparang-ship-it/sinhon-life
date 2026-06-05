@@ -1,4 +1,9 @@
 :root {
+  --coral: #b83a2f;
+  --coral-soft: #fff0e8;
+  --ink: #171717;
+  --mint: #dff4ea;
+  --paper: #fffaf2;
   color: #171717;
   background: #f7f8f5;
   font-family:
@@ -16,6 +21,7 @@
 }
 
 body {
+  background: var(--paper);
   margin: 0;
 }
 
@@ -1027,5 +1033,390 @@ body {
 
   .workspace-item-actions.compact {
     justify-content: stretch;
+  }
+}
+
+.home-feature-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.policy-talk-layout {
+  align-items: start;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+}
+
+.policy-talk-phone,
+.policy-selector-panel,
+.archive-fallback {
+  background: #ffffff;
+  border: 1px solid #dfe6db;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(18, 32, 24, 0.08);
+}
+
+.policy-talk-phone {
+  overflow: hidden;
+}
+
+.talk-header {
+  align-items: center;
+  background: #315c45;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0 18px;
+}
+
+.talk-header span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.talk-header strong {
+  font-size: 16px;
+}
+
+.talk-thread {
+  background: #dff4ea;
+  display: grid;
+  gap: 12px;
+  min-height: 620px;
+  padding: 18px;
+}
+
+.talk-bubble {
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.55;
+  max-width: 82%;
+  padding: 12px 14px;
+}
+
+.talk-bubble.bot {
+  background: #ffffff;
+  color: #171717;
+  justify-self: start;
+}
+
+.talk-bubble.user {
+  background: #ffe500;
+  color: #171717;
+  justify-self: end;
+}
+
+.talk-result-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.talk-result-card {
+  background: #ffffff;
+  border: 1px solid #cbd8ce;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.talk-result-topline {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.talk-result-topline span,
+.talk-result-topline small,
+.archive-card-media span,
+.archive-tag-row span {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 10px;
+}
+
+.talk-result-topline span {
+  background: var(--coral-soft);
+  color: var(--coral);
+}
+
+.talk-result-topline small {
+  background: #eef2ec;
+  color: #315c45;
+}
+
+.talk-result-card h2 {
+  font-size: 18px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.talk-result-card p,
+.talk-note,
+.archive-card-body p,
+.archive-fallback p {
+  color: #4f5a52;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.talk-reason {
+  background: #f7f8f5;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.talk-result-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.talk-result-card dl div {
+  align-items: baseline;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 80px minmax(0, 1fr);
+}
+
+.talk-result-card dt {
+  color: #657168;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.talk-result-card dd {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.policy-selector-panel {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.talk-option-group {
+  border: 0;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.talk-option-group legend {
+  color: #315c45;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 0;
+}
+
+.talk-option-row,
+.archive-control-row,
+.archive-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.talk-chip,
+.archive-filter {
+  background: #ffffff;
+  border: 1px solid #b9c7b7;
+  border-radius: 999px;
+  color: #315c45;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.talk-chip.active,
+.archive-filter.active {
+  background: #315c45;
+  border-color: #315c45;
+  color: #ffffff;
+}
+
+.archive-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.archive-control-row {
+  align-items: center;
+}
+
+.archive-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.archive-card {
+  background: #ffffff;
+  border: 1px solid #dfe6db;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(18, 32, 24, 0.08);
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.archive-card-media {
+  aspect-ratio: 4 / 5;
+  background: #dff4ea;
+  position: relative;
+}
+
+.archive-card-media::after {
+  background: linear-gradient(to top, rgba(23, 23, 23, 0.62), rgba(23, 23, 23, 0));
+  bottom: 0;
+  content: "";
+  height: 44%;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.archive-card-media img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.archive-card-media span {
+  background: rgba(23, 23, 23, 0.76);
+  bottom: 10px;
+  color: #ffffff;
+  left: 10px;
+  position: absolute;
+  z-index: 1;
+}
+
+.archive-media-title {
+  bottom: 44px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  left: 14px;
+  line-height: 1.3;
+  max-width: calc(100% - 28px);
+  overflow-wrap: anywhere;
+  position: absolute;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.36);
+  z-index: 1;
+}
+
+.archive-card-empty {
+  align-items: center;
+  color: #315c45;
+  display: flex;
+  font-size: 15px;
+  font-weight: 900;
+  height: 100%;
+  justify-content: center;
+}
+
+.archive-card-body {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.archive-card-meta {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.archive-card-meta strong {
+  color: #315c45;
+  font-size: 14px;
+}
+
+.archive-card-meta time {
+  color: #657168;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.archive-tag-row span {
+  background: var(--coral-soft);
+  color: var(--coral);
+}
+
+.instagram-embed-shell {
+  border-top: 1px solid #dfe6db;
+  min-height: 84px;
+  padding: 12px;
+}
+
+.instagram-embed-shell blockquote.instagram-media {
+  margin: 0 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.archive-skeleton {
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(90deg, #eef2ec 0%, #f7f8f5 48%, #eef2ec 100%);
+  background-size: 220% 100%;
+  border: 1px solid #dfe6db;
+  border-radius: 8px;
+  animation: archiveLoading 1.25s ease-in-out infinite;
+}
+
+.archive-fallback {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.archive-fallback strong {
+  font-size: 18px;
+}
+
+@keyframes archiveLoading {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-feature-grid,
+  .policy-talk-layout,
+  .archive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .talk-thread {
+    min-height: auto;
+  }
+
+  .talk-bubble {
+    max-width: 92%;
+  }
+
+  .archive-card-meta {
+    align-items: flex-start;
+    display: grid;
+    gap: 4px;
   }
 }

@@ -1,4 +1,4 @@
-# 신혼OS Production Readiness
+# 신혼생활 Production Readiness
 
 작성일: 2026-06-05
 
