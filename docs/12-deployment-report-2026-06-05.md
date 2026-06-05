@@ -4,17 +4,20 @@
 
 ## 배포 결과
 
-- Vercel 프로젝트: `sinhon-os-web`
-- Production URL: `https://sinhon-os-web.vercel.app`
-- Production deployment: `https://sinhon-os-a5nf8q8m0-heoparang-2238s-projects.vercel.app`
-- Preview deployment: `https://sinhon-os-dgtrabka2-heoparang-2238s-projects.vercel.app`
-- 상태: Vercel `READY`, public HTTP 200 확인
+- GitHub repo: `https://github.com/heoparang-ship-it/sinhon-life`
+- Vercel 프로젝트: `sinhon-life`
+- Production URL: `https://sinhon.life`
+- Canonical URL: `https://www.sinhon.life`
+- Production deployment: `https://sinhon-life-hdz6k6moi-heoparang-2238s-projects.vercel.app`
+- Commit: `29e5a19 Replace sinhon.life with Sinhon OS MVP`
+- 상태: Vercel `READY`, `sinhon.life` -> `www.sinhon.life` redirect, public HTTP 200 확인
 
 ## 배포를 위해 추가한 설정
 
 - 루트 `vercel.json`에서 Vercel이 모노레포 루트에서 `pnpm install --frozen-lockfile`을 실행하고 `@sinhon-os/web`만 빌드하도록 설정했다.
 - 루트 `package.json`에 Next.js 감지용 `next`, `react`, `react-dom` dev dependency를 추가했다.
-- Vercel 프로젝트의 SSO deployment protection을 해제해 공개 URL이 로그인 없이 열리도록 했다.
+- 기존 `heoparang-ship-it/sinhon-life` main 위에 신혼OS 모노레포 전환 커밋을 push했다.
+- Vercel `sinhon-life` 프로젝트에 production 배포해 기존 `sinhon.life`, `www.sinhon.life` alias를 그대로 사용했다.
 
 ## 현재 한계
 
@@ -34,3 +37,4 @@
 - `/ready` DB 연결 확인
 - CORS 허용/차단 확인
 - E2E 상담 신청 저장값 `aesgcm:v1` 암호화 확인
+- `https://sinhon.life`에서 `신혼OS`, `파트너 상품` 응답 확인
