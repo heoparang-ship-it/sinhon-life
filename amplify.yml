@@ -6,10 +6,10 @@ applications:
         preBuild:
           commands:
             - npm install -g pnpm@11.5.1
-            - cd ../.. && pnpm install --frozen-lockfile
+            - cd "$CODEBUILD_SRC_DIR" && pnpm install --frozen-lockfile
         build:
           commands:
-            - cd ../.. && npm --prefix apps/web run build
+            - cd "$CODEBUILD_SRC_DIR" && npm --prefix apps/web run build
       artifacts:
         baseDirectory: .next
         files:
