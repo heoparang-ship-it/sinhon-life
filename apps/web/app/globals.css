@@ -985,6 +985,44 @@ a {
   padding: clamp(26px, 6vw, 54px);
 }
 
+.home-hero-card--chat {
+  align-items: stretch;
+  gap: 26px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+}
+
+.home-hero-copy {
+  align-content: center;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.home-hero-chat {
+  min-width: 0;
+}
+
+.home-hero-chat .chat-frame {
+  box-shadow: 0 18px 48px rgba(69, 50, 31, 0.1);
+  margin: 0;
+  max-width: none;
+}
+
+.home-hero-chat .chat-thread {
+  max-height: 420px;
+  min-height: 300px;
+}
+
+.home-hero-card.home-hero-card--chat h2 {
+  font-size: clamp(30px, 4.5vw, 42px);
+  line-height: 1.08;
+  max-width: none;
+}
+
+.home-hero-copy p:not(.micro-label) {
+  font-size: 16px;
+}
+
 .home-hero-card h2 {
   font-size: clamp(34px, 7vw, 60px);
   line-height: 1.03;
@@ -1623,6 +1661,10 @@ a {
   }
 
   .policy-talk-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero-card--chat {
     grid-template-columns: 1fr;
   }
 
