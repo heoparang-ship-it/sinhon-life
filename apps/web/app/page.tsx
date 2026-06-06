@@ -1,79 +1,60 @@
-import { productName } from "@sinhon-os/config";
 import { InstagramArchiveClient } from "./archive/instagram-archive-client";
 import { PolicyMatcherClient } from "./policies/policy-matcher-client";
 
-const proofItems = [
-  "기존 앱 쉘 감각",
-  "AI 없는 정적 정책 룰",
-  "공식 인스타 피드·릴스"
-];
-
 export default function WebHomePage() {
   return (
-    <main className="home-shell">
-      <aside className="home-brand-panel" aria-label="신혼생활 소개">
-        <div className="brand-mark" aria-hidden="true">
-          <span />
-          <span />
-        </div>
-        <p className="micro-label">sinhon.life</p>
-        <h1>{productName}</h1>
-        <p>
-          신혼 준비에 바로 필요한 정책 안내와 공식 인스타 아카이브만 남긴 v1 미니멀 홈입니다.
+    <main className="mag-shell">
+      <header className="mag-topbar">
+        <a className="mag-wordmark" href="/" aria-label="신혼생활 홈">
+          신혼생활
+        </a>
+        <nav className="mag-nav" aria-label="주요 섹션">
+          <a href="#magazine">매거진</a>
+          <a href="#policy">AI 정책 톡</a>
+        </nav>
+      </header>
+
+      <section className="mag-hero" aria-labelledby="hero-title">
+        <p className="mag-kicker">SINHON LIFE · ISSUE NO.01</p>
+        <h1 id="hero-title" className="mag-hero-title">
+          신혼을 준비하는<br />모든 순간을 한 권에.
+        </h1>
+        <p className="mag-hero-sub">
+          웨딩 매거진과 AI 정책 톡 — 두 가지만 남겼습니다.
         </p>
-        <div className="brand-proof-list" aria-label="구성">
-          {proofItems.map((item) => (
-            <span key={item}>{item}</span>
-          ))}
+        <div className="mag-hero-meta">
+          <span>EDITORIAL</span>
+          <span aria-hidden="true">·</span>
+          <span>sinhon.life</span>
         </div>
-      </aside>
-
-      <section className="home-app-panel" aria-label="신혼생활 원페이지">
-        <header className="app-topbar">
-          <div className="app-wordmark">
-            <span className="mini-rings" aria-hidden="true" />
-            <strong>신혼생활</strong>
-          </div>
-          <nav aria-label="홈 섹션">
-            <a href="#policy-talk">정책 톡</a>
-            <a href="#instagram-archive">아카이브</a>
-          </nav>
-        </header>
-
-        <section className="home-hero-card" aria-labelledby="home-hero-title">
-          <p className="micro-label">v1 MVP</p>
-          <h2 id="home-hero-title">정책은 톡처럼, 인스타는 아카이브처럼.</h2>
-          <p>
-            11개 기능 허브 대신 지금 필요한 두 가지 흐름만 한 화면에 담았습니다.
-          </p>
-          <div className="hero-action-row" aria-label="바로가기">
-            <a href="#policy-talk">정책 확인</a>
-            <a href="#instagram-archive">게시물 보기</a>
-          </div>
-        </section>
-
-        <section className="one-page-section policy-section" id="policy-talk" aria-labelledby="policy-title">
-          <div className="section-heading">
-            <p className="micro-label">01 · rule based</p>
-            <h2 id="policy-title">정책 톡</h2>
-            <p>거주지, 결혼 시기, 소득 구간만 고르면 맞는 정책과 더 확인할 조건을 카카오톡 버블 형태로 정리합니다.</p>
-          </div>
-          <PolicyMatcherClient />
-        </section>
-
-        <section
-          className="one-page-section archive-section"
-          id="instagram-archive"
-          aria-labelledby="archive-title"
-        >
-          <div className="section-heading">
-            <p className="micro-label">02 · @sinhon.life</p>
-            <h2 id="archive-title">인스타 아카이브</h2>
-            <p>신혼생활 공식 계정의 피드와 릴스를 불러와 한 곳에서 확인합니다.</p>
-          </div>
-          <InstagramArchiveClient />
-        </section>
       </section>
+
+      <section className="mag-section" id="magazine" aria-labelledby="mag-title">
+        <div className="mag-section-head">
+          <p className="mag-kicker">01 · MAGAZINE</p>
+          <h2 id="mag-title" className="mag-section-title">웨딩 매거진</h2>
+          <p className="mag-section-lede">
+            공식 인스타그램에서 모은 신혼 준비 이야기, 새로 올라오는 순서대로.
+          </p>
+        </div>
+        <InstagramArchiveClient />
+      </section>
+
+      <section className="mag-section mag-section--alt" id="policy" aria-labelledby="policy-title">
+        <div className="mag-section-head">
+          <p className="mag-kicker">02 · AI POLICY</p>
+          <h2 id="policy-title" className="mag-section-title">AI 정책 톡</h2>
+          <p className="mag-section-lede">
+            거주지·결혼 시기·소득 구간만 고르면, 받을 수 있는 정책을 톡 버블로 정리합니다.
+          </p>
+        </div>
+        <PolicyMatcherClient />
+      </section>
+
+      <footer className="mag-footer">
+        <p className="mag-footer-mark">신혼생활</p>
+        <p className="mag-footer-meta">© sinhon.life · 신혼을 준비하는 모든 순간</p>
+      </footer>
     </main>
   );
 }

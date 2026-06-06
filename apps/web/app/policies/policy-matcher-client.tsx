@@ -375,10 +375,10 @@ export function PolicyMatcherClient() {
 
   return (
     <div className="policy-talk-layout refined">
-      <section className="policy-talk-phone" aria-label="정책 톡 대화">
+      <section className="policy-talk-phone" aria-label="AI 정책 톡 대화">
         <div className="talk-header">
           <span>신혼생활</span>
-          <strong>정책 톡</strong>
+          <strong>AI 정책 톡</strong>
         </div>
 
         <div className="talk-thread refined">
