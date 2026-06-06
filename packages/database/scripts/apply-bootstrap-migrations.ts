@@ -144,7 +144,7 @@ try {
     await applyMigrationSql(client, initialMigrationName);
   } else if (existingInitialTables.length !== initialTables.length) {
     throw new Error(
-      `Production schema has a partial or conflicting Sinhon OS table set: ${existingInitialTables.join(", ")}. Manual review is required before bootstrapping.`
+      `Production schema has a partial or conflicting 신혼생활 table set: ${existingInitialTables.join(", ")}. Manual review is required before bootstrapping.`
     );
   } else {
     console.log("Initial production migration is already reflected in public schema.");

@@ -22,7 +22,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:e2e": "playwright test",
-    "build": "pnpm -r --if-present build"
+    "build": "pnpm -r --if-present build",
+    "predeploy": "pnpm --filter @sinhon-os/web typecheck && pnpm --filter @sinhon-os/web build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -1,4 +1,6 @@
-export const productName = "신혼생활";
+export const BRAND = "신혼생활";
+
+export const productName = BRAND;
 
 export const adminAppName = "신혼생활 Admin";
 
