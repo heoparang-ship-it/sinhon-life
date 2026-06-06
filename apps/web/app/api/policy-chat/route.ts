@@ -7,6 +7,60 @@ export const dynamic = "force-dynamic";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
+function pickPolicies(message: string) {
+  const normalized = message.toLowerCase();
+  const matches = POLICIES.filter((policy) => {
+    const text = [
+      policy.name,
+      policy.oneLiner,
+      policy.supportSummary,
+      policy.target,
+      policy.category,
+      policy.level,
+      policy.note ?? "",
+      ...policy.stages,
+    ].join(" ");
+
+    if (/(인천|천원|계양|산후|보증료|1\.0|이자지원)/.test(normalized)) {
+      return policy.level === "city" || policy.level === "district" || /인천|계양|천원/.test(text);
+    }
+    if (/(신생아|출산|아이|아기|육아|산후)/.test(normalized)) {
+      return policy.category === "birth" || policy.stages.includes("newborn") || /신생아|출산|육아|산후/.test(text);
+    }
+    if (/(전세|월세|임대|보증)/.test(normalized)) {
+      return policy.category === "housing-rent" || /전세|임대|보증/.test(text);
+    }
+    if (/(구입|매매|디딤돌|보금자리|주담대|주택담보)/.test(normalized)) {
+      return policy.category === "housing-loan" || /구입|디딤돌|보금자리|주택담보/.test(text);
+    }
+    if (/청년/.test(normalized)) {
+      return policy.category === "youth" || policy.stages.includes("youth") || /청년/.test(text);
+    }
+    if (/(예정|결혼|신혼)/.test(normalized)) {
+      return policy.stages.includes("engaged") || policy.stages.includes("married");
+    }
+
+    return false;
+  });
+
+  return matches.slice(0, 3);
+}
+
+function buildFallbackReply(messages: ChatMessage[]) {
+  const last = messages[messages.length - 1]?.content ?? "";
+  const picked = pickPolicies(last);
+
+  if (picked.length === 0) {
+    return "먼저 거주지가 인천인지, 전세/구입/출산 중 어떤 상황인지 하나만 알려주세요. 지금 등록된 정책 기준으로 맞는 항목만 추려드릴게요.";
+  }
+
+  const lines = picked.map((policy) => {
+    return `${policy.name}: ${policy.oneLiner}. 신청/확인: ${policy.sourceUrl}`;
+  });
+
+  return `지금 조건이면 먼저 이 정책부터 확인해보세요.\n${lines.join("\n")}\n정확한 가능 여부는 혼인 시기, 거주지, 소득 조건을 한 번 더 확인해야 해요.`;
+}
+
 const POLICY_BRIEF = POLICIES.map((p) => {
   const elig = Object.entries(p.eligibility)
     .map(([k, v]) => `${k}: ${v}`)
@@ -35,13 +89,6 @@ const SYSTEM_PROMPT = `너는 "신혼생활" 웹사이트의 AI 정책 톡 도�
 ${POLICY_BRIEF}`;
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY가 설정되지 않았습니다." },
-      { status: 500 }
-    );
-  }
-
   let body: { messages?: ChatMessage[] };
   try {
     body = await req.json();
@@ -56,6 +103,10 @@ export async function POST(req: Request) {
   }
 
   const trimmed = messages.slice(-20);
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ reply: buildFallbackReply(trimmed) });
+  }
 
   const client = new Anthropic();
 
@@ -77,11 +128,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply: text });
   } catch (e) {
     if (e instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: `Anthropic API ${e.status}: ${e.message}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ reply: buildFallbackReply(trimmed) });
     }
-    return NextResponse.json({ error: "응답 실패" }, { status: 500 });
+    return NextResponse.json({ reply: buildFallbackReply(trimmed) });
   }
 }
