@@ -9,7 +9,7 @@ applications:
             - cd ../.. && pnpm install --frozen-lockfile
         build:
           commands:
-            - cd ../.. && pnpm --filter @sinhon-os/web build
+            - cd ../.. && npm --prefix apps/web run build
       artifacts:
         baseDirectory: .next
         files:
