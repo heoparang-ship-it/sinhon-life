@@ -1,5 +1,5 @@
 import { InstagramArchiveClient } from "./archive/instagram-archive-client";
-import { PolicyMatcherClient } from "./policies/policy-matcher-client";
+import { PolicyChatClient } from "./policies/policy-chat-client";
 
 export default function WebHomePage() {
   return (
@@ -19,10 +19,10 @@ export default function WebHomePage() {
           <p className="mag-kicker">AI POLICY TALK</p>
           <h1 id="policy-title" className="mag-section-title">AI 정책 톡</h1>
           <p className="mag-section-lede">
-            거주지·결혼 시기·소득만 고르면, 받을 수 있는 정책을 톡 버블로 정리합니다.
+            결혼·신혼·출산 정책을 톡으로 물어보세요. 거주지·시기·소득만 알려주면 받을 수 있는 정책을 정리해드려요.
           </p>
         </div>
-        <PolicyMatcherClient />
+        <PolicyChatClient />
       </section>
 
       <section className="mag-section mag-section--alt" id="magazine" aria-labelledby="mag-title">
