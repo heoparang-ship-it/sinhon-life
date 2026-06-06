@@ -6,7 +6,7 @@ applications:
         preBuild:
           commands:
             - npm install -g pnpm@11.5.1
-            - REPO_DIR="$(find "$CODEBUILD_SRC_DIR" -maxdepth 3 -name pnpm-workspace.yaml -print -quit | xargs dirname)" && cd "$REPO_DIR" && pnpm install --frozen-lockfile
+            - REPO_DIR="$(find "$CODEBUILD_SRC_DIR" -maxdepth 3 -name pnpm-workspace.yaml -print -quit | xargs dirname)" && cd "$REPO_DIR" && pnpm install --frozen-lockfile --config.node-linker=hoisted
         build:
           commands:
             - REPO_DIR="$(find "$CODEBUILD_SRC_DIR" -maxdepth 3 -name pnpm-workspace.yaml -print -quit | xargs dirname)" && cd "$REPO_DIR" && npm --prefix apps/web run build
