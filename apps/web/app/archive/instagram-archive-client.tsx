@@ -57,7 +57,9 @@ function formatDate(value: string) {
 }
 
 function isReel(item: ArchiveItem) {
-  return item.media_type === "VIDEO" || item.media_type === "REELS" || item.permalink.includes("/reel/");
+  return (
+    item.media_type === "VIDEO" || item.media_type === "REELS" || item.permalink.includes("/reel/")
+  );
 }
 
 function processInstagramEmbeds() {
@@ -147,7 +149,12 @@ export function InstagramArchiveClient() {
         <div className="archive-fallback">
           <strong>인스타 아카이브를 불러오지 못했습니다.</strong>
           <p>공식 계정에서 최신 피드와 릴스를 확인할 수 있습니다.</p>
-          <a className="button-link" href="https://www.instagram.com/sinhon.life/" rel="noreferrer" target="_blank">
+          <a
+            className="button-link"
+            href="https://www.instagram.com/sinhon.life/"
+            rel="noreferrer"
+            target="_blank"
+          >
             @sinhon.life 열기
           </a>
         </div>
@@ -210,7 +217,12 @@ export function InstagramArchiveClient() {
         <div className="archive-fallback">
           <strong>선택한 필터에 게시물이 없습니다.</strong>
           <p>다른 필터를 선택하거나 공식 계정을 확인해보세요.</p>
-          <a className="button-link" href="https://www.instagram.com/sinhon.life/" rel="noreferrer" target="_blank">
+          <a
+            className="button-link"
+            href="https://www.instagram.com/sinhon.life/"
+            rel="noreferrer"
+            target="_blank"
+          >
             @sinhon.life 열기
           </a>
         </div>

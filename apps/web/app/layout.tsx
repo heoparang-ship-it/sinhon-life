@@ -7,7 +7,8 @@ export const metadata: Metadata = {
     default: "신혼생활 · 신혼부부 정책 도우미",
     template: "%s · 신혼생활"
   },
-  description: "신혼, 시작은 혜택부터. 전세대출·청약·출산지원 — 신혼부부 정책을 두리AI가 모아드려요.",
+  description:
+    "신혼, 시작은 혜택부터. 전세대출·청약·출산지원 — 신혼부부 정책을 두리AI가 모아드려요.",
   metadataBase: new URL("https://sinhon.life"),
   openGraph: {
     description: "신혼, 시작은 혜택부터. 신혼부부 정책을 두리AI가 모아드려요.",

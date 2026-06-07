@@ -9,14 +9,14 @@ const INITIAL_GREETING: ChatMessage = {
   id: "greet-1",
   role: "assistant",
   content:
-    "안녕하세요 신혼생활입니다 💍\n결혼·신혼·출산 관련 정부·지자체 정책을 안내해드려요.\n어떤 게 궁금하세요? (예: 신혼부부 전세대출, 신생아 특례)",
+    "안녕하세요 신혼생활입니다 💍\n결혼·신혼·출산 관련 정부·지자체 정책을 안내해드려요.\n어떤 게 궁금하세요? (예: 신혼부부 전세대출, 신생아 특례)"
 };
 
 const QUICK_PROMPTS = [
   "신혼부부 전세대출 알려줘",
   "신생아 특례 디딤돌 자격 뭐야?",
   "인천 신혼 정책 뭐 있어?",
-  "결혼 3개월 남았어 — 뭐부터 봐야 해?",
+  "결혼 3개월 남았어 — 뭐부터 봐야 해?"
 ];
 
 function newId() {
@@ -82,19 +82,21 @@ export function PolicyChatClient() {
         body: JSON.stringify({
           messages: next
             .filter((m) => m.role !== "assistant" || m.id !== INITIAL_GREETING.id)
-            .map((m) => ({ role: m.role, content: m.content })),
-        }),
+            .map((m) => ({ role: m.role, content: m.content }))
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "응답 실패");
-      const reply = (data.reply as string | undefined)?.trim() || "응답이 비어있어요. 다시 한 번 물어봐 주실래요?";
+      const reply =
+        (data.reply as string | undefined)?.trim() ||
+        "응답이 비어있어요. 다시 한 번 물어봐 주실래요?";
       setMessages((curr) => [...curr, { id: newId(), role: "assistant", content: reply }]);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "알 수 없는 오류";
       setError(msg);
       setMessages((curr) => [
         ...curr,
-        { id: newId(), role: "assistant", content: `(잠깐, 답을 못 가져왔어요 — ${msg})` },
+        { id: newId(), role: "assistant", content: `(잠깐, 답을 못 가져왔어요 — ${msg})` }
       ]);
     } finally {
       setPending(false);
@@ -170,7 +172,9 @@ export function PolicyChatClient() {
       </form>
 
       {error && <p className="chat-error">{error}</p>}
-      <p className="chat-note">대화는 이 기기에만 저장돼요. 정확한 신청 조건은 공식 출처에서 확인하세요.</p>
+      <p className="chat-note">
+        대화는 이 기기에만 저장돼요. 정확한 신청 조건은 공식 출처에서 확인하세요.
+      </p>
     </div>
   );
 }
