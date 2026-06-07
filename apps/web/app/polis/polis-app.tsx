@@ -465,7 +465,9 @@ function ChatScreen({ active }: { active: boolean }) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) setMessages(parsed);
       }
-    } catch {}
+    } catch {
+      void 0;
+    }
     setHydrated(true);
   }, []);
 
@@ -473,7 +475,9 @@ function ChatScreen({ active }: { active: boolean }) {
     if (!hydrated) return;
     try {
       window.localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, [messages, hydrated]);
 
   useEffect(() => {
@@ -519,7 +523,9 @@ function ChatScreen({ active }: { active: boolean }) {
     setMessages([INITIAL]);
     try {
       window.localStorage.removeItem(CHAT_KEY);
-    } catch {}
+    } catch {
+      void 0;
+    }
   }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
