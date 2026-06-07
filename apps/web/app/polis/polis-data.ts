@@ -15,6 +15,7 @@ export type PolisPolicy = {
   summary: string;
   benefits: [string, string][];
   eligibility: string[];
+  sourceUrl?: string;
 };
 
 export const POLIS_POLICIES: PolisPolicy[] = [
