@@ -1,7 +1,74 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { POLIS_POLICIES, policyById, type PolisPolicy } from "./polis-data";
+import { POLIS_POLICIES, type PolisPolicy } from "./polis-data";
+
+type LivePolicy = {
+  id: string;
+  title: string;
+  dept: string;
+  cat: string;
+  icon: PolisPolicy["icon"];
+  summary: string;
+  target: string;
+  support: string;
+  howTo: string;
+  deadline: string;
+  sourceUrl: string;
+};
+
+function liveToPolis(p: LivePolicy, idx: number): PolisPolicy {
+  return {
+    id: p.id,
+    cat: p.cat,
+    dept: p.dept,
+    icon: p.icon,
+    title: p.title,
+    short: p.title.slice(0, 12),
+    amount: p.support ? p.support.slice(0, 12) : "지원금",
+    amountSub: p.support ? p.support.slice(0, 28) : p.target.slice(0, 28),
+    match: 88 - (idx % 10),
+    deadline: p.deadline,
+    deadlineTag: p.deadline.length > 6 ? p.deadline.slice(0, 6) : p.deadline,
+    cash: 0,
+    dday: null,
+    summary: p.summary || p.support,
+    benefits: [
+      ["지원 내용", p.support || "-"],
+      ["대상", p.target || "-"],
+      ["신청 방법", p.howTo || "-"],
+      ["신청 기한", p.deadline]
+    ],
+    eligibility: p.target ? [p.target] : ["공식 출처 참조"]
+  };
+}
+
+function useLivePolicies(): PolisPolicy[] {
+  const [live, setLive] = useState<PolisPolicy[]>(POLIS_POLICIES);
+  useEffect(() => {
+    let cancel = false;
+    fetch("/api/policies")
+      .then((r) => r.json())
+      .then((j: { policies?: LivePolicy[] }) => {
+        if (cancel) return;
+        const arr = j.policies ?? [];
+        if (arr.length === 0) return;
+        const mapped = arr.map(liveToPolis);
+        const merged = [
+          ...POLIS_POLICIES,
+          ...mapped.filter((p) => !POLIS_POLICIES.some((s) => s.id === p.id))
+        ];
+        setLive(merged);
+      })
+      .catch(() => {
+        /* keep seed */
+      });
+    return () => {
+      cancel = true;
+    };
+  }, []);
+  return live;
+}
 
 type Tab = "home" | "chat" | "geo" | "archive";
 type ChatRole = "user" | "assistant";
@@ -110,6 +177,7 @@ function categoryFilter(p: PolisPolicy, key: string): boolean {
 export default function PolisApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [sheetId, setSheetId] = useState<string | null>(null);
+  const policies = useLivePolicies();
 
   return (
     <div className="stage">
@@ -120,15 +188,16 @@ export default function PolisApp() {
         <div className="viewport">
           <HomeScreen
             active={tab === "home"}
+            policies={policies}
             onOpenChat={() => setTab("chat")}
             onOpenSheet={setSheetId}
             onGo={setTab}
           />
           <ChatScreen active={tab === "chat"} />
-          <GeoScreen active={tab === "geo"} onOpenSheet={setSheetId} />
-          <ArchiveScreen active={tab === "archive"} onOpenSheet={setSheetId} />
+          <GeoScreen active={tab === "geo"} policies={policies} onOpenSheet={setSheetId} />
+          <ArchiveScreen active={tab === "archive"} policies={policies} onOpenSheet={setSheetId} />
 
-          <PolicySheet policyId={sheetId} onClose={() => setSheetId(null)} />
+          <PolicySheet policies={policies} policyId={sheetId} onClose={() => setSheetId(null)} />
         </div>
 
         <TabBar tab={tab} onChange={setTab} />
@@ -243,19 +312,22 @@ function HomeScreen({
   active,
   onOpenChat,
   onOpenSheet,
-  onGo
+  onGo,
+  policies
 }: {
   active: boolean;
   onOpenChat: () => void;
   onOpenSheet: (id: string) => void;
   onGo: (t: Tab) => void;
+  policies: PolisPolicy[];
 }) {
   const matches = useMemo(
     () =>
-      POLIS_POLICIES.slice()
+      policies
+        .slice()
         .sort((a, b) => b.match - a.match)
         .slice(0, 3),
-    []
+    [policies]
   );
   return (
     <section className={`screen${active ? " active" : ""}`}>
@@ -599,11 +671,14 @@ function ChatScreen({ active }: { active: boolean }) {
 
 function GeoScreen({
   active,
-  onOpenSheet
+  onOpenSheet,
+  policies: _policies
 }: {
   active: boolean;
   onOpenSheet: (id: string) => void;
+  policies: PolisPolicy[];
 }) {
+  void _policies;
   return (
     <section className={`screen${active ? " active" : ""}`}>
       <div className="appbar">
@@ -757,24 +832,28 @@ function GeoScreen({
 
 function ArchiveScreen({
   active,
-  onOpenSheet
+  onOpenSheet,
+  policies
 }: {
   active: boolean;
   onOpenSheet: (id: string) => void;
+  policies: PolisPolicy[];
 }) {
   const [filter, setFilter] = useState("전체");
   const [q, setQ] = useState("");
   const list = useMemo(() => {
-    return POLIS_POLICIES.filter((p) => categoryFilter(p, filter)).filter((p) => {
-      if (!q.trim()) return true;
-      const s = q.toLowerCase();
-      return (
-        p.title.toLowerCase().includes(s) ||
-        p.cat.toLowerCase().includes(s) ||
-        p.summary.toLowerCase().includes(s)
-      );
-    });
-  }, [filter, q]);
+    return policies
+      .filter((p) => categoryFilter(p, filter))
+      .filter((p) => {
+        if (!q.trim()) return true;
+        const s = q.toLowerCase();
+        return (
+          p.title.toLowerCase().includes(s) ||
+          p.cat.toLowerCase().includes(s) ||
+          p.summary.toLowerCase().includes(s)
+        );
+      });
+  }, [filter, q, policies]);
   return (
     <section className={`screen${active ? " active" : ""}`}>
       <div className="appbar">
@@ -843,8 +922,16 @@ function ArchiveScreen({
   );
 }
 
-function PolicySheet({ policyId, onClose }: { policyId: string | null; onClose: () => void }) {
-  const p = policyId ? policyById(policyId) : null;
+function PolicySheet({
+  policies,
+  policyId,
+  onClose
+}: {
+  policies: PolisPolicy[];
+  policyId: string | null;
+  onClose: () => void;
+}) {
+  const p = policyId ? (policies.find((x) => x.id === policyId) ?? null) : null;
   const open = !!p;
   return (
     <>
