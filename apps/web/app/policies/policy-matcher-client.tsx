@@ -11,7 +11,13 @@ import {
 
 type ResidenceKey = "incheon" | "capital" | "nationwide" | "undecided";
 type WeddingTimingKey = "engaged_soon" | "married_7y" | "newborn_2y" | "undecided";
-type IncomeRangeKey = "under_50m" | "under_75m" | "under_85m" | "under_130m" | "over_130m" | "unknown";
+type IncomeRangeKey =
+  | "under_50m"
+  | "under_75m"
+  | "under_85m"
+  | "under_130m"
+  | "over_130m"
+  | "unknown";
 type SelectionKey = keyof SelectionState;
 
 type SelectionState = {
@@ -324,7 +330,10 @@ function PolicyResultCard({ policy }: { policy: EvaluatedPolicy }) {
         <section>
           <h4>{checkItems.length ? "더 확인할 것" : "주요 기준"}</h4>
           <ul>
-            {(checkItems.length ? checkItems : eligibility.map(([key, value]) => `${key}: ${String(value)}`))
+            {(checkItems.length
+              ? checkItems
+              : eligibility.map(([key, value]) => `${key}: ${String(value)}`)
+            )
               .slice(0, 3)
               .map((item) => (
                 <li key={item}>{item}</li>
@@ -371,7 +380,9 @@ export function PolicyMatcherClient() {
   const summary = selectedSummary(selection);
   const strongCount = evaluatedPolicies.filter((policy) => policy.status === "strong").length;
   const possibleCount = evaluatedPolicies.filter((policy) => policy.status === "possible").length;
-  const needInfoCount = evaluatedPolicies.filter((policy) => policy.status === "need_more_info").length;
+  const needInfoCount = evaluatedPolicies.filter(
+    (policy) => policy.status === "need_more_info"
+  ).length;
 
   return (
     <div className="policy-talk-layout refined">
@@ -408,9 +419,11 @@ export function PolicyMatcherClient() {
           </section>
 
           <div className="talk-result-stack">
-            {(visiblePolicies.length ? visiblePolicies : evaluatedPolicies.slice(0, 3)).map((policy) => (
-              <PolicyResultCard key={policy.id} policy={policy} />
-            ))}
+            {(visiblePolicies.length ? visiblePolicies : evaluatedPolicies.slice(0, 3)).map(
+              (policy) => (
+                <PolicyResultCard key={policy.id} policy={policy} />
+              )
+            )}
           </div>
         </div>
       </section>
@@ -477,7 +490,8 @@ export function PolicyMatcherClient() {
         </section>
 
         <p className="talk-note">
-          실제 신청 가능 여부는 접수 기간, 혼인신고일, 자산 기준, 세대주 여부에 따라 달라질 수 있습니다.
+          실제 신청 가능 여부는 접수 기간, 혼인신고일, 자산 기준, 세대주 여부에 따라 달라질 수
+          있습니다.
         </p>
       </section>
     </div>

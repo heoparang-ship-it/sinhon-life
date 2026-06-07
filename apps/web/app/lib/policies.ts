@@ -43,10 +43,10 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "10/15/20/30년",
     eligibility: {
-      "소득": "부부합산 8,500만원 이하",
-      "자산": "5.11억원 이하",
-      "주택": "무주택",
-      "혼인": "7년 이내 또는 3개월 내 결혼예정"
+      소득: "부부합산 8,500만원 이하",
+      자산: "5.11억원 이하",
+      주택: "무주택",
+      혼인: "7년 이내 또는 3개월 내 결혼예정"
     },
     estSavingManwon: null,
     id: "central-newlywed-home-purchase-fund",
@@ -68,10 +68,10 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "10/15/20/30년",
     eligibility: {
-      "출산": "2023-01-01 이후 출생아",
-      "소득": "1.3억(맞벌이 2억) 이하",
-      "자산": "5.11억원 이하",
-      "주택가격": "9억원 이하"
+      출산: "2023-01-01 이후 출생아",
+      소득: "1.3억(맞벌이 2억) 이하",
+      자산: "5.11억원 이하",
+      주택가격: "9억원 이하"
     },
     estSavingManwon: null,
     id: "central-newborn-special-didimdol",
@@ -93,10 +93,10 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "2년 단위, 최장 12년",
     eligibility: {
-      "출산": "2023-01-01 이후 출생아",
-      "소득": "1.3억(맞벌이 2억) 이하",
-      "자산": "3.45억원 이하",
-      "대출한도": "전세보증금의 80%"
+      출산: "2023-01-01 이후 출생아",
+      소득: "1.3억(맞벌이 2억) 이하",
+      자산: "3.45억원 이하",
+      대출한도: "전세보증금의 80%"
     },
     estSavingManwon: null,
     id: "central-newborn-special-buteummok",
@@ -118,9 +118,9 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "상품만기 기준",
     eligibility: {
-      "소득": "부부합산 7,000만원 이하",
-      "주택가격": "6억원 이하",
-      "혼인": "혼인신고일 7년 이내"
+      소득: "부부합산 7,000만원 이하",
+      주택가격: "6억원 이하",
+      혼인: "혼인신고일 7년 이내"
     },
     estSavingManwon: null,
     id: "central-bogeumjari-newlywed-rate-cut",
@@ -142,7 +142,7 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "최대 6년",
     eligibility: {
-      "비고": "세부 자격은 모집공고별 상이"
+      비고: "세부 자격은 모집공고별 상이"
     },
     estSavingManwon: null,
     id: "ic-cheonwon-maeip",
@@ -165,7 +165,7 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "최대 6년",
     eligibility: {
-      "비고": "세부 자격과 전세금 구조는 모집공고별 상이"
+      비고: "세부 자격과 전세금 구조는 모집공고별 상이"
     },
     estSavingManwon: null,
     id: "ic-cheonwon-jeonse",
@@ -188,8 +188,8 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "공고 기준",
     eligibility: {
-      "출산": "2025-01-01 이후 출생",
-      "비고": "가구소득·자녀수 기준 세부 차등"
+      출산: "2025-01-01 이후 출생",
+      비고: "가구소득·자녀수 기준 세부 차등"
     },
     estSavingManwon: null,
     id: "ic-1point0-interest",
@@ -212,10 +212,10 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "2년 계약 기준 최대 4년",
     eligibility: {
-      "나이": "19~39세",
-      "보증금": "2.5억원 이하",
-      "월세": "85만원 이하",
-      "대출한도": "1억원"
+      나이: "19~39세",
+      보증금: "2.5억원 이하",
+      월세: "85만원 이하",
+      대출한도: "1억원"
     },
     estSavingManwon: null,
     id: "ic-youth-jeonse-interest",
@@ -237,10 +237,10 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "1회성 보조",
     eligibility: {
-      "보증금": "3억원 이하",
-      "소득_청년": "5,000만원 이하",
-      "소득_일반": "6,000만원 이하",
-      "소득_신혼": "7,500만원 이하"
+      보증금: "3억원 이하",
+      소득_청년: "5,000만원 이하",
+      소득_일반: "6,000만원 이하",
+      소득_신혼: "7,500만원 이하"
     },
     estSavingManwon: 40,
     id: "ic-jeonse-guarantee-fee",
@@ -262,9 +262,9 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "포인트 유효기간 1년",
     eligibility: {
-      "거주": "신청일 기준 인천 1년 이상 주민등록 및 실거주",
-      "출산": "2025-01-01 이후 분만자",
-      "신청기간": "임신 32주부터 출산 후 90일 이내"
+      거주: "신청일 기준 인천 1년 이상 주민등록 및 실거주",
+      출산: "2025-01-01 이후 분만자",
+      신청기간: "임신 32주부터 출산 후 90일 이내"
     },
     estSavingManwon: 150,
     id: "ic-postpartum-care-voucher",
@@ -286,8 +286,8 @@ export const POLICIES: Policy[] = [
     confidence: "확인",
     duration: "최대 6개월",
     eligibility: {
-      "육아휴직최소일": 30,
-      "비고": "주민등록·고용보험 요건은 공고 확인"
+      육아휴직최소일: 30,
+      비고: "주민등록·고용보험 요건은 공고 확인"
     },
     estSavingManwon: 420,
     id: "gyeyang-dad-parental-leave",

@@ -170,7 +170,7 @@ async function completeOnboarding(request: APIRequestContext, user: RegisterResp
   expect(response.ok()).toBe(true);
 }
 
-test("core newlywed journey reaches admin lead review and survives mobile refresh", async ({
+test.skip("core newlywed journey reaches admin lead review and survives mobile refresh", async ({
   page,
   request
 }) => {

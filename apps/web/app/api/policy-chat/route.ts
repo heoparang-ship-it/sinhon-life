@@ -18,14 +18,18 @@ function pickPolicies(message: string) {
       policy.category,
       policy.level,
       policy.note ?? "",
-      ...policy.stages,
+      ...policy.stages
     ].join(" ");
 
     if (/(인천|천원|계양|산후|보증료|1\.0|이자지원)/.test(normalized)) {
       return policy.level === "city" || policy.level === "district" || /인천|계양|천원/.test(text);
     }
     if (/(신생아|출산|아이|아기|육아|산후)/.test(normalized)) {
-      return policy.category === "birth" || policy.stages.includes("newborn") || /신생아|출산|육아|산후/.test(text);
+      return (
+        policy.category === "birth" ||
+        policy.stages.includes("newborn") ||
+        /신생아|출산|육아|산후/.test(text)
+      );
     }
     if (/(전세|월세|임대|보증)/.test(normalized)) {
       return policy.category === "housing-rent" || /전세|임대|보증/.test(text);
@@ -114,10 +118,8 @@ export async function POST(req: Request) {
     const response = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 1024,
-      system: [
-        { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }
-      ],
-      messages: trimmed.map((m) => ({ role: m.role, content: m.content })),
+      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+      messages: trimmed.map((m) => ({ role: m.role, content: m.content }))
     });
 
     const text = response.content
