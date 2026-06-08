@@ -16,8 +16,8 @@ import {
 } from "./profile-store";
 import { formatCount, sparkPath, track, trendFor, useLiveTick } from "./trend";
 import { TrendScreen } from "./trend-screen";
-
-const GOV24_PORTAL = "https://www.gov.kr/portal/onestopSvc/maritalSupport";
+import { PolicyDetail } from "./policy-detail";
+import { PolicyCompare } from "./policy-compare";
 
 type LivePolicy = {
   id: string;
@@ -56,6 +56,13 @@ function liveToPolis(p: LivePolicy, idx: number): PolisPolicy {
       ["신청 기한", p.deadline]
     ],
     eligibility: p.target ? [p.target] : ["공식 출처 참조"],
+    docs: ["주민등록등본", "신청서", "관련 증빙 서류"],
+    steps: [
+      ["공식 페이지에서 자격 확인", p.howTo || "공고문 확인"],
+      ["신청 접수", p.howTo || "온라인 또는 방문 신청"],
+      ["서류 심사", "약 2~4주 소요"],
+      ["결과 통보", "기관에서 알림 발송"]
+    ],
     sourceUrl: p.sourceUrl
   };
 }
@@ -184,7 +191,8 @@ function Sep() {
 export default function PolisApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const [sheetId, setSheetId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [compareId, setCompareId] = useState<string | null>(null);
   const [regionSheet, setRegionSheet] = useState(false);
   const [archiveFilter, setArchiveFilter] = useState("전체");
 
@@ -206,7 +214,10 @@ export default function PolisApp() {
   function openSheet(id: string) {
     views.record(id);
     track("view", id, profile?.region);
-    setSheetId(id);
+    setDetailId(id);
+  }
+  function openCompare(id: string) {
+    setCompareId(id);
   }
   function pickCategory(cat: string) {
     setArchiveFilter(cat);
@@ -315,14 +326,28 @@ export default function PolisApp() {
             }}
           />
 
-          <PolicySheet
-            policies={scored}
-            policyId={sheetId}
-            bookmarks={bookmarks}
-            applied={applied}
-            views={views}
-            onClose={() => setSheetId(null)}
+          <PolicyDetail
+            policy={detailId ? (scored.find((x) => x.id === detailId) ?? null) : null}
+            bookmarked={detailId ? bookmarks.has(detailId) : false}
+            applied={detailId ? applied.has(detailId) : false}
+            onToggleBookmark={(id) => bookmarks.toggle(id)}
+            onApply={(id) => applied.apply(id)}
+            onClose={() => setDetailId(null)}
+            onCompare={(id) => openCompare(id)}
+            onGoMypage={() => setOverlay("mypage")}
           />
+
+          {compareId && (
+            <PolicyCompare
+              policies={scored}
+              policyAId={compareId}
+              onBack={() => setCompareId(null)}
+              onOpenSheet={(id) => {
+                setCompareId(null);
+                window.setTimeout(() => openSheet(id), 320);
+              }}
+            />
+          )}
         </div>
 
         <TabBar tab={tab} onChange={setTab} />
@@ -1222,113 +1247,6 @@ function ArchiveScreen({
         </div>
       </div>
     </section>
-  );
-}
-
-/* ---------------- POLICY SHEET ---------------- */
-function PolicySheet({
-  policies,
-  policyId,
-  bookmarks,
-  applied,
-  views,
-  onClose
-}: {
-  policies: PolisPolicy[];
-  policyId: string | null;
-  bookmarks: { ids: string[]; has: (id: string) => boolean; toggle: (id: string) => void };
-  applied: { ids: string[]; has: (id: string) => boolean; apply: (id: string) => void };
-  views: { map: Record<string, number>; record: (id: string) => void };
-  onClose: () => void;
-}) {
-  const tick = useLiveTick(2500);
-  const p = policyId ? (policies.find((x) => x.id === policyId) ?? null) : null;
-  const open = !!p;
-  const url = p?.sourceUrl ?? GOV24_PORTAL;
-  const isMarked = p ? bookmarks.has(p.id) : false;
-  const isApplied = p ? applied.has(p.id) : false;
-  const t = p ? trendFor(p.id, tick) : null;
-  const myViews = p ? (views.map[p.id] ?? 0) : 0;
-
-  return (
-    <>
-      <div className={`sheet-scrim${open ? " open" : ""}`} onClick={onClose} />
-      <div className={`sheet${open ? " open" : ""}`}>
-        <div className="grab" />
-        {p && t && (
-          <>
-            <span className="tag">
-              {p.cat}
-              <Sep />
-              {p.dept}
-            </span>
-            <h3>{p.title}</h3>
-
-            <div className="sheet-trend">
-              <div className="st-item">
-                <span className="st-k">지원자</span>
-                <span className="st-v mono">{formatCount(t.applicants)}명</span>
-              </div>
-              <div className="st-item">
-                <span className="st-k">전일 대비</span>
-                <span className={`st-v ${t.delta >= 0 ? "up" : "down"}`}>
-                  {t.delta >= 0 ? "▲" : "▼"}
-                  {Math.abs(t.delta)}%
-                </span>
-              </div>
-              <div className="st-item">
-                <span className="st-k">예산 소진</span>
-                <span className="st-v mono">{t.capacityPct}%</span>
-              </div>
-              <Sparkline series={t.series} up={t.delta >= 0} />
-            </div>
-
-            <p className="desc">{p.summary}</p>
-            {p.benefits.map(([k, v]) => (
-              <div key={k} className="kv">
-                <span className="k">{k}</span>
-                <span className="val blue">{v}</span>
-              </div>
-            ))}
-            <h4
-              style={{ margin: "22px 0 0", fontSize: 16, fontWeight: 800, letterSpacing: "-.03em" }}
-            >
-              신청 자격
-            </h4>
-            <ul className="elist">
-              {p.eligibility.map((e) => (
-                <li key={e}>{e}</li>
-              ))}
-            </ul>
-            {myViews > 1 && <p className="sheet-views">내가 {myViews}번 본 정책이에요</p>}
-            <div className="sheet-actions">
-              <button
-                type="button"
-                className={`btn-sec${isMarked ? " on" : ""}`}
-                onClick={() => {
-                  if (!isMarked) track("bookmark", p.id);
-                  bookmarks.toggle(p.id);
-                }}
-              >
-                {isMarked ? "★ 북마크됨" : "☆ 북마크"}
-              </button>
-              <a
-                className="btn-pri"
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => {
-                  track("apply", p.id);
-                  applied.apply(p.id);
-                }}
-              >
-                {isApplied ? "신청 페이지 다시 보기 ↗" : "신청하기 ↗"}
-              </a>
-            </div>
-          </>
-        )}
-      </div>
-    </>
   );
 }
 
