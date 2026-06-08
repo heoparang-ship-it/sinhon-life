@@ -14,7 +14,8 @@ import {
   useViews,
   type Profile
 } from "./profile-store";
-import { formatCount, sparkPath, trendFor, useLiveTick } from "./trend";
+import { formatCount, sparkPath, track, trendFor, useLiveTick } from "./trend";
+import { TrendScreen } from "./trend-screen";
 
 const GOV24_PORTAL = "https://www.gov.kr/portal/onestopSvc/maritalSupport";
 
@@ -87,7 +88,7 @@ function useLivePolicies(): PolisPolicy[] {
 }
 
 type Tab = "home" | "chat" | "geo" | "archive";
-type Overlay = "notif" | "mypage" | "calendar" | null;
+type Overlay = "notif" | "mypage" | "calendar" | "trends" | null;
 type ChatRole = "user" | "assistant";
 type ChatMsg = { id: string; role: ChatRole; content: string };
 
@@ -204,6 +205,7 @@ export default function PolisApp() {
 
   function openSheet(id: string) {
     views.record(id);
+    track("view", id, profile?.region);
     setSheetId(id);
   }
   function pickCategory(cat: string) {
@@ -249,6 +251,7 @@ export default function PolisApp() {
             onOpenMypage={() => setOverlay("mypage")}
             onPickCategory={pickCategory}
             onGoArchive={() => setTab("archive")}
+            onOpenTrends={() => setOverlay("trends")}
           />
           <ChatScreen active={tab === "chat"} profile={profile} />
           <GeoScreen
@@ -269,6 +272,13 @@ export default function PolisApp() {
 
           {overlay === "calendar" && (
             <CalendarScreen
+              policies={scored}
+              onBack={() => setOverlay(null)}
+              onOpenSheet={openSheet}
+            />
+          )}
+          {overlay === "trends" && (
+            <TrendScreen
               policies={scored}
               onBack={() => setOverlay(null)}
               onOpenSheet={openSheet}
@@ -567,7 +577,8 @@ function HomeScreen({
   onOpenNotif,
   onOpenMypage,
   onPickCategory,
-  onGoArchive
+  onGoArchive,
+  onOpenTrends
 }: {
   active: boolean;
   policies: PolisPolicy[];
@@ -579,6 +590,7 @@ function HomeScreen({
   onOpenMypage: () => void;
   onPickCategory: (cat: string) => void;
   onGoArchive: () => void;
+  onOpenTrends: () => void;
 }) {
   const tick = useLiveTick(2500);
   const matches = useMemo(() => policies.slice(0, 3), [policies]);
@@ -710,7 +722,9 @@ function HomeScreen({
       <div className="pad block">
         <div className="sec-head">
           <h2 className="sec-title">지금 뜨는 정책</h2>
-          <span className="more-tag">LIVE</span>
+          <button className="more" type="button" onClick={onOpenTrends}>
+            트렌드 전체
+          </button>
         </div>
         <div className="trend-row">
           {trending.map(({ p, t }) => (
@@ -1291,7 +1305,10 @@ function PolicySheet({
               <button
                 type="button"
                 className={`btn-sec${isMarked ? " on" : ""}`}
-                onClick={() => bookmarks.toggle(p.id)}
+                onClick={() => {
+                  if (!isMarked) track("bookmark", p.id);
+                  bookmarks.toggle(p.id);
+                }}
               >
                 {isMarked ? "★ 북마크됨" : "☆ 북마크"}
               </button>
@@ -1300,7 +1317,10 @@ function PolicySheet({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => applied.apply(p.id)}
+                onClick={() => {
+                  track("apply", p.id);
+                  applied.apply(p.id);
+                }}
               >
                 {isApplied ? "신청 페이지 다시 보기 ↗" : "신청하기 ↗"}
               </a>
@@ -1549,12 +1569,7 @@ function MyPageScreen({
         )}
       </div>
 
-      <MpList
-        title={`북마크한 정책 ${bookmarked.length}`}
-        items={bookmarked}
-        empty="아직 북마크한 정책이 없어요."
-        onOpenSheet={onOpenSheet}
-      />
+      <Portfolio items={bookmarked} appliedIds={applied.ids} onOpenSheet={onOpenSheet} />
       <MpList
         title={`신청한 정책 ${appliedList.length}`}
         items={appliedList}
@@ -1579,6 +1594,73 @@ function MyPageScreen({
           <span className="mp-setting-v">온보딩 다시 ›</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+function Portfolio({
+  items,
+  appliedIds,
+  onOpenSheet
+}: {
+  items: PolisPolicy[];
+  appliedIds: string[];
+  onOpenSheet: (id: string) => void;
+}) {
+  const totalCash = items.reduce((s, p) => s + (p.cash || 0), 0);
+  const appliedCount = items.filter((p) => appliedIds.includes(p.id)).length;
+  return (
+    <div className="pad block" style={{ marginTop: 22 }}>
+      <h3 className="mp-sec">내 정책 포트폴리오</h3>
+      {items.length === 0 ? (
+        <p className="mp-empty">북마크한 정책이 여기 모여요.</p>
+      ) : (
+        <>
+          <div className="pf-summary">
+            <div>
+              <span>담은 정책</span>
+              <b>{items.length}개</b>
+            </div>
+            <div>
+              <span>현금성 합계</span>
+              <b className="mono">{totalCash.toLocaleString()}만원</b>
+            </div>
+            <div>
+              <span>신청 완료</span>
+              <b>{appliedCount}개</b>
+            </div>
+          </div>
+          <div className="list">
+            {items.map((p) => {
+              const t = trendFor(p.id);
+              const done = appliedIds.includes(p.id);
+              const tone = t.capacityPct >= 80 ? "hot" : t.capacityPct >= 60 ? "warn" : "";
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="pf-item"
+                  onClick={() => onOpenSheet(p.id)}
+                >
+                  <span className="pf-tx">
+                    <b>{p.title}</b>
+                    <span>
+                      {p.amount}
+                      {done && <span className="pf-done"> 신청완료</span>}
+                    </span>
+                  </span>
+                  <span className="pf-meter">
+                    <span className={`prog ${tone}`}>
+                      <i style={{ width: `${t.capacityPct}%` }} />
+                    </span>
+                    <em>{t.capacityPct}%</em>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
