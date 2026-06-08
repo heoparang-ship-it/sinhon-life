@@ -3,7 +3,18 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { POLIS_POLICIES, type PolisPolicy } from "./polis-data";
 import { Onboarding } from "./onboarding";
-import { useApplied, useBookmarks, useProfile, type Profile } from "./profile-store";
+import {
+  INTERESTS,
+  REGIONS,
+  makeInviteCode,
+  useApplied,
+  useBookmarks,
+  useProfile,
+  useReadNotifications,
+  useViews,
+  type Profile
+} from "./profile-store";
+import { formatCount, sparkPath, trendFor, useLiveTick } from "./trend";
 
 const GOV24_PORTAL = "https://www.gov.kr/portal/onestopSvc/maritalSupport";
 
@@ -29,7 +40,7 @@ function liveToPolis(p: LivePolicy, idx: number): PolisPolicy {
     icon: p.icon,
     title: p.title,
     short: p.title.slice(0, 12),
-    amount: p.support ? p.support.slice(0, 12) : "지원금",
+    amount: p.support ? p.support.slice(0, 12) : "지원",
     amountSub: p.support ? p.support.slice(0, 28) : p.target.slice(0, 28),
     match: 88 - (idx % 10),
     deadline: p.deadline,
@@ -43,7 +54,8 @@ function liveToPolis(p: LivePolicy, idx: number): PolisPolicy {
       ["신청 방법", p.howTo || "-"],
       ["신청 기한", p.deadline]
     ],
-    eligibility: p.target ? [p.target] : ["공식 출처 참조"]
+    eligibility: p.target ? [p.target] : ["공식 출처 참조"],
+    sourceUrl: p.sourceUrl
   };
 }
 
@@ -75,6 +87,7 @@ function useLivePolicies(): PolisPolicy[] {
 }
 
 type Tab = "home" | "chat" | "geo" | "archive";
+type Overlay = "notif" | "mypage" | "calendar" | null;
 type ChatRole = "user" | "assistant";
 type ChatMsg = { id: string; role: ChatRole; content: string };
 
@@ -85,18 +98,11 @@ const QUICK_PROMPTS = [
   "결혼축하금 받을 수 있어?",
   "특별공급 청약 가점?"
 ];
-const ARCHIVE_FILTERS = [
-  { key: "전체", label: "전체" },
-  { key: "주거", label: "주거·청약" },
-  { key: "대출", label: "전세·대출" },
-  { key: "출산", label: "출산" },
-  { key: "육아", label: "육아" },
-  { key: "혼인", label: "혼인·세제" }
-];
+const ALL_CATS = ["전체", "주거/청약", "전세/대출", "출산", "육아", "혼인/세제", "건강/난임"];
 const TOPICS: { cat: string; label: string; icon: PolisPolicy["icon"]; svg: ReactNode }[] = [
   {
-    cat: "주거·청약",
-    label: "주거·청약",
+    cat: "주거/청약",
+    label: "주거/청약",
     icon: "b1",
     svg: (
       <>
@@ -106,8 +112,8 @@ const TOPICS: { cat: string; label: string; icon: PolisPolicy["icon"]; svg: Reac
     )
   },
   {
-    cat: "전세·대출",
-    label: "전세·대출",
+    cat: "전세/대출",
+    label: "전세/대출",
     icon: "b2",
     svg: (
       <>
@@ -139,8 +145,8 @@ const TOPICS: { cat: string; label: string; icon: PolisPolicy["icon"]; svg: Reac
     )
   },
   {
-    cat: "혼인·세제",
-    label: "혼인·세제",
+    cat: "혼인/세제",
+    label: "혼인/세제",
     icon: "b5",
     svg: (
       <>
@@ -151,8 +157,8 @@ const TOPICS: { cat: string; label: string; icon: PolisPolicy["icon"]; svg: Reac
     )
   },
   {
-    cat: "건강·난임",
-    label: "건강·난임",
+    cat: "건강/난임",
+    label: "건강/난임",
     icon: "b6",
     svg: (
       <>
@@ -169,25 +175,46 @@ const TOPICS: { cat: string; label: string; icon: PolisPolicy["icon"]; svg: Reac
 function newId() {
   return `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
-function categoryFilter(p: PolisPolicy, key: string): boolean {
-  if (key === "전체") return true;
-  if (key === "주거") return p.cat === "주거·청약";
-  if (key === "대출") return p.cat === "전세·대출";
-  if (key === "출산") return p.cat === "출산";
-  if (key === "혼인") return p.cat === "혼인·세제";
-  return p.cat.includes(key);
+
+function Sep() {
+  return <span className="sep" aria-hidden="true" />;
 }
 
 export default function PolisApp() {
   const [tab, setTab] = useState<Tab>("home");
+  const [overlay, setOverlay] = useState<Overlay>(null);
   const [sheetId, setSheetId] = useState<string | null>(null);
-  const [calOpen, setCalOpen] = useState(false);
+  const [regionSheet, setRegionSheet] = useState(false);
+  const [archiveFilter, setArchiveFilter] = useState("전체");
+
   const policies = useLivePolicies();
   const [profile, setProfile] = useProfile();
   const bookmarks = useBookmarks();
   const applied = useApplied();
+  const views = useViews();
+  const readNotif = useReadNotifications();
 
   const scored = useMemo(() => scorePolicies(policies, profile), [policies, profile]);
+
+  const notifications = useMemo(
+    () => buildNotifications(scored, bookmarks.ids.length),
+    [scored, bookmarks.ids.length]
+  );
+  const unread = notifications.some((n) => !readNotif.has(n.id));
+
+  function openSheet(id: string) {
+    views.record(id);
+    setSheetId(id);
+  }
+  function pickCategory(cat: string) {
+    setArchiveFilter(cat);
+    setOverlay(null);
+    setTab("archive");
+  }
+  function openNotif() {
+    setOverlay("notif");
+    readNotif.markAll(notifications.map((n) => n.id));
+  }
 
   if (!profile) {
     return (
@@ -215,33 +242,75 @@ export default function PolisApp() {
             active={tab === "home"}
             policies={scored}
             profile={profile}
+            hasUnread={unread}
             onOpenChat={() => setTab("chat")}
-            onOpenSheet={setSheetId}
-            onGo={setTab}
+            onOpenSheet={openSheet}
+            onOpenNotif={openNotif}
+            onOpenMypage={() => setOverlay("mypage")}
+            onPickCategory={pickCategory}
+            onGoArchive={() => setTab("archive")}
           />
           <ChatScreen active={tab === "chat"} profile={profile} />
           <GeoScreen
             active={tab === "geo"}
             policies={scored}
             profile={profile}
-            onOpenSheet={setSheetId}
-            onOpenCalendar={() => setCalOpen(true)}
+            onOpenSheet={openSheet}
+            onOpenCalendar={() => setOverlay("calendar")}
+            onOpenRegion={() => setRegionSheet(true)}
           />
-          <ArchiveScreen active={tab === "archive"} policies={scored} onOpenSheet={setSheetId} />
+          <ArchiveScreen
+            active={tab === "archive"}
+            policies={scored}
+            filter={archiveFilter}
+            onFilter={setArchiveFilter}
+            onOpenSheet={openSheet}
+          />
 
-          {calOpen && (
+          {overlay === "calendar" && (
             <CalendarScreen
               policies={scored}
-              onBack={() => setCalOpen(false)}
-              onOpenSheet={(id) => setSheetId(id)}
+              onBack={() => setOverlay(null)}
+              onOpenSheet={openSheet}
             />
           )}
+          {overlay === "notif" && (
+            <NotificationScreen
+              items={notifications}
+              onBack={() => setOverlay(null)}
+              onOpenSheet={openSheet}
+            />
+          )}
+          {overlay === "mypage" && (
+            <MyPageScreen
+              profile={profile}
+              setProfile={setProfile}
+              policies={scored}
+              bookmarks={bookmarks}
+              applied={applied}
+              views={views}
+              onBack={() => setOverlay(null)}
+              onOpenSheet={openSheet}
+              onOpenRegion={() => setRegionSheet(true)}
+            />
+          )}
+
+          <RegionSheet
+            open={regionSheet}
+            current={profile.region}
+            onClose={() => setRegionSheet(false)}
+            onPick={(r) => {
+              setProfile({ ...profile, region: r });
+              setRegionSheet(false);
+            }}
+          />
 
           <PolicySheet
             policies={scored}
             policyId={sheetId}
             bookmarks={bookmarks}
             applied={applied}
+            views={views}
             onClose={() => setSheetId(null)}
           />
         </div>
@@ -257,17 +326,67 @@ function scorePolicies(list: PolisPolicy[], profile: Profile | null): PolisPolic
   if (!profile) return list;
   const interests = new Set(profile.interests);
   const region = profile.region;
+  const gu = region.split(" ").pop() ?? "";
   return list
     .map((p) => {
       let m = 78;
       if (interests.has(p.cat)) m += 14;
-      if (region && p.dept.includes(region.split(" ").pop() ?? "")) m += 5;
+      if (gu && p.dept.includes(gu)) m += 5;
       m = Math.max(60, Math.min(99, m));
       return { ...p, match: m };
     })
     .sort((a, b) => b.match - a.match);
 }
 
+/* ---------------- notifications ---------------- */
+type Notif = {
+  id: string;
+  kind: "deadline" | "hot" | "bookmark";
+  title: string;
+  sub: string;
+  policyId?: string;
+};
+
+function buildNotifications(policies: PolisPolicy[], bookmarkCount: number): Notif[] {
+  const out: Notif[] = [];
+  policies
+    .filter((p) => p.dday !== null && (p.dday ?? 999) <= 30)
+    .sort((a, b) => (a.dday ?? 999) - (b.dday ?? 999))
+    .slice(0, 5)
+    .forEach((p) =>
+      out.push({
+        id: `dl-${p.id}`,
+        kind: "deadline",
+        title: `마감 D-${p.dday} — ${p.title}`,
+        sub: p.deadline,
+        policyId: p.id
+      })
+    );
+  policies
+    .map((p) => ({ p, t: trendFor(p.id) }))
+    .sort((a, b) => b.t.delta - a.t.delta)
+    .slice(0, 3)
+    .forEach(({ p, t }) =>
+      out.push({
+        id: `hot-${p.id}`,
+        kind: "hot",
+        title: `지금 뜨는 정책 — ${p.title}`,
+        sub: `지원자 ▲${t.delta}% 급상승`,
+        policyId: p.id
+      })
+    );
+  if (bookmarkCount > 0) {
+    out.push({
+      id: "bm-reminder",
+      kind: "bookmark",
+      title: `북마크한 정책 ${bookmarkCount}개`,
+      sub: "신청 기한을 놓치지 마세요"
+    });
+  }
+  return out;
+}
+
+/* ---------------- shared bits ---------------- */
 function StatusBar() {
   return (
     <div className="statusbar">
@@ -369,169 +488,6 @@ function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
   );
 }
 
-function HomeScreen({
-  active,
-  onOpenChat,
-  onOpenSheet,
-  onGo,
-  policies,
-  profile
-}: {
-  active: boolean;
-  onOpenChat: () => void;
-  onOpenSheet: (id: string) => void;
-  onGo: (t: Tab) => void;
-  policies: PolisPolicy[];
-  profile: Profile;
-}) {
-  const matches = useMemo(() => policies.slice(0, 3), [policies]);
-  const cashSum = useMemo(() => policies.reduce((sum, p) => sum + (p.cash || 0), 0), [policies]);
-  const matchCount = useMemo(() => policies.filter((p) => p.match >= 80).length, [policies]);
-  return (
-    <section className={`screen${active ? " active" : ""}`}>
-      <div className="appbar">
-        <div className="brand">
-          <span className="mk" />
-          신혼생활
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <button className="iconbtn badge-dot" aria-label="알림">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path
-                d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path d="M13.7 21a2 2 0 0 1-3.4 0" strokeLinecap="round" />
-            </svg>
-          </button>
-          <button className="av-btn" aria-label="마이페이지">
-            지·현
-          </button>
-        </div>
-      </div>
-
-      <div className="h-greet">
-        <p className="hi">
-          {profile.region} · {profile.stage}
-        </p>
-        <h1>
-          <b>{profile.name}</b>님 부부가
-          <br />
-          받을 수 있는 정책이에요
-        </h1>
-      </div>
-
-      <div className="pad block" style={{ marginTop: 20 }}>
-        <button
-          className="benefit card-tap"
-          type="button"
-          onClick={() => onOpenSheet(matches[0]?.id ?? "p1")}
-        >
-          <div className="lbl">신혼부부 현금성 지원</div>
-          <div className="amt mono">
-            {cashSum.toLocaleString()}
-            <small>만원</small>
-          </div>
-          <div className="benefit-meta">
-            <span className="bdot" />
-            맞춤 정책 {matchCount}개 · 전세대출 한도 별도
-          </div>
-          <div className="cta">
-            우리 부부 혜택 보기
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.4}
-              width={16}
-              height={16}
-            >
-              <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </button>
-      </div>
-
-      <div className="pad block" style={{ marginTop: 14 }}>
-        <button className="dday-widget" type="button" onClick={() => onOpenSheet("p8")}>
-          <span className="dday-badge">D-7</span>
-          <span className="dday-tx">
-            <b>마포구 결혼축하금</b>
-            <span>혼인신고 1년 이내 · 마감이 가까워요</span>
-          </span>
-          <span className="dday-chev">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
-              <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </button>
-      </div>
-
-      <div className="pad block" style={{ marginTop: 12 }}>
-        <button className="ask-entry" type="button" onClick={onOpenChat}>
-          <span className="av" />
-          <span className="tx">
-            <b>두리AI에게 물어보기</b>
-            <span>“신혼부부 전세대출 얼마까지 돼요?”</span>
-          </span>
-          <span className="mic">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.1}>
-              <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </button>
-      </div>
-
-      <div className="pad block">
-        <div className="sec-head">
-          <h2 className="sec-title">우리 부부에게 딱 맞는</h2>
-          <span className="more" onClick={() => onGo("archive")}>
-            전체
-          </span>
-        </div>
-        <div className="list">
-          {matches.map((p) => (
-            <button key={p.id} type="button" className="row" onClick={() => onOpenSheet(p.id)}>
-              <span className={`ic ${p.icon}`}>
-                <PolicyIcon icon={p.icon} />
-              </span>
-              <span className="tx">
-                <b>{p.title}</b>
-                <span>
-                  {p.dept} · {p.amountSub}
-                </span>
-              </span>
-              <span className="rt">
-                <span className="v">{p.amount}</span>
-                <span className="s">
-                  <span className="match">매칭 {p.match}%</span>
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="pad block">
-        <h2 className="sec-title">관심사로 찾기</h2>
-        <div className="topic-row">
-          {TOPICS.map((t) => (
-            <button key={t.cat} type="button" className="topic" onClick={() => onGo("archive")}>
-              <span className={`ti ${t.icon}`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  {t.svg}
-                </svg>
-              </span>
-              <span>{t.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function PolicyIcon({ icon }: { icon: PolisPolicy["icon"] }) {
   if (icon === "b1")
     return (
@@ -582,11 +538,268 @@ function PolicyIcon({ icon }: { icon: PolisPolicy["icon"] }) {
   );
 }
 
+/* 실시간 스파크라인 (주식 차트 느낌) */
+function Sparkline({ series, up }: { series: number[]; up: boolean }) {
+  const path = sparkPath(series, 100, 28);
+  const color = up ? "var(--red)" : "var(--blue)";
+  return (
+    <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/* ---------------- HOME ---------------- */
+function HomeScreen({
+  active,
+  policies,
+  profile,
+  hasUnread,
+  onOpenChat,
+  onOpenSheet,
+  onOpenNotif,
+  onOpenMypage,
+  onPickCategory,
+  onGoArchive
+}: {
+  active: boolean;
+  policies: PolisPolicy[];
+  profile: Profile;
+  hasUnread: boolean;
+  onOpenChat: () => void;
+  onOpenSheet: (id: string) => void;
+  onOpenNotif: () => void;
+  onOpenMypage: () => void;
+  onPickCategory: (cat: string) => void;
+  onGoArchive: () => void;
+}) {
+  const tick = useLiveTick(2500);
+  const matches = useMemo(() => policies.slice(0, 3), [policies]);
+  const cashSum = useMemo(() => policies.reduce((s, p) => s + (p.cash || 0), 0), [policies]);
+  const matchCount = useMemo(() => policies.filter((p) => p.match >= 80).length, [policies]);
+  const nearest = useMemo(() => {
+    return policies
+      .filter((p) => p.dday !== null)
+      .sort((a, b) => (a.dday ?? 999) - (b.dday ?? 999))[0];
+  }, [policies]);
+  const trending = useMemo(() => {
+    return policies
+      .map((p) => ({ p, t: trendFor(p.id, tick) }))
+      .sort((a, b) => b.t.delta - a.t.delta)
+      .slice(0, 6);
+  }, [policies, tick]);
+
+  return (
+    <section className={`screen${active ? " active" : ""}`}>
+      <div className="appbar">
+        <div className="brand">
+          <span className="mk" />
+          신혼생활
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button
+            className={`iconbtn${hasUnread ? " badge-dot" : ""}`}
+            aria-label="알림"
+            type="button"
+            onClick={onOpenNotif}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path
+                d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path d="M13.7 21a2 2 0 0 1-3.4 0" strokeLinecap="round" />
+            </svg>
+          </button>
+          <button className="av-btn" aria-label="마이페이지" type="button" onClick={onOpenMypage}>
+            {profile.name.slice(0, 1)}
+          </button>
+        </div>
+      </div>
+
+      <div className="h-greet">
+        <p className="hi">
+          {profile.region}
+          <Sep />
+          {profile.stage}
+        </p>
+        <h1>
+          <b>{profile.name}</b>님이
+          <br />
+          받을 수 있는 정책이에요
+        </h1>
+      </div>
+
+      <div className="pad block" style={{ marginTop: 20 }}>
+        <button
+          className="benefit card-tap"
+          type="button"
+          onClick={() => onOpenSheet(matches[0]?.id ?? "p1")}
+        >
+          <div className="lbl">현금성 지원 합계</div>
+          <div className="amt mono">
+            {cashSum.toLocaleString()}
+            <small>만원</small>
+          </div>
+          <div className="benefit-meta">
+            <span className="bdot" />
+            맞춤 정책 {matchCount}개<Sep />
+            전세대출 한도 별도
+          </div>
+          <div className="cta">
+            내 맞춤 정책 보기
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.4}
+              width={16}
+              height={16}
+            >
+              <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </button>
+      </div>
+
+      {nearest && (
+        <div className="pad block" style={{ marginTop: 14 }}>
+          <button className="dday-widget" type="button" onClick={() => onOpenSheet(nearest.id)}>
+            <span className="dday-badge">D-{nearest.dday}</span>
+            <span className="dday-tx">
+              <b>{nearest.title}</b>
+              <span>
+                {nearest.deadline}
+                <Sep />
+                마감이 가까워요
+              </span>
+            </span>
+            <span className="dday-chev">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+                <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      )}
+
+      <div className="pad block" style={{ marginTop: 12 }}>
+        <button className="ask-entry" type="button" onClick={onOpenChat}>
+          <span className="av" />
+          <span className="tx">
+            <b>두리AI에게 물어보기</b>
+            <span>“신혼부부 전세대출 얼마까지 돼요?”</span>
+          </span>
+          <span className="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.1}>
+              <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      {/* 실시간 트렌드 — 주식 차트 느낌 */}
+      <div className="pad block">
+        <div className="sec-head">
+          <h2 className="sec-title">지금 뜨는 정책</h2>
+          <span className="more-tag">LIVE</span>
+        </div>
+        <div className="trend-row">
+          {trending.map(({ p, t }) => (
+            <button
+              key={p.id}
+              type="button"
+              className="trend-card"
+              onClick={() => onOpenSheet(p.id)}
+            >
+              <div className="trend-top">
+                <span className={`trend-cat ${p.icon}`}>{p.cat}</span>
+                <span className={`trend-delta ${t.delta >= 0 ? "up" : "down"}`}>
+                  {t.delta >= 0 ? "▲" : "▼"}
+                  {Math.abs(t.delta)}%
+                </span>
+              </div>
+              <b className="trend-title">{p.title}</b>
+              <Sparkline series={t.series} up={t.delta >= 0} />
+              <div className="trend-foot">
+                <span className="trend-appl mono">{formatCount(t.applicants)}</span>
+                <span className="trend-unit">명 지원중</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="pad block">
+        <div className="sec-head">
+          <h2 className="sec-title">나에게 딱 맞는</h2>
+          <button className="more" type="button" onClick={onGoArchive}>
+            전체
+          </button>
+        </div>
+        <div className="list">
+          {matches.map((p) => (
+            <button key={p.id} type="button" className="row" onClick={() => onOpenSheet(p.id)}>
+              <span className={`ic ${p.icon}`}>
+                <PolicyIcon icon={p.icon} />
+              </span>
+              <span className="tx">
+                <b>{p.title}</b>
+                <span>
+                  {p.dept}
+                  <Sep />
+                  {p.amountSub}
+                </span>
+              </span>
+              <span className="rt">
+                <span className="v">{p.amount}</span>
+                <span className="s">
+                  <span className="match">매칭 {p.match}%</span>
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="pad block">
+        <h2 className="sec-title">관심사로 찾기</h2>
+        <div className="topic-row">
+          {TOPICS.map((t) => (
+            <button
+              key={t.cat}
+              type="button"
+              className="topic"
+              onClick={() => onPickCategory(t.cat)}
+            >
+              <span className={`ti ${t.icon}`}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  {t.svg}
+                </svg>
+              </span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- CHAT ---------------- */
 function ChatScreen({ active, profile }: { active: boolean; profile: Profile }) {
   const INITIAL: ChatMsg = {
     id: "greet",
     role: "assistant",
-    content: `안녕하세요 ${profile.name}님 💍\n${profile.region}에 사시는 ${profile.stage} 부부시군요.\n어떤 정책이 궁금하세요?`
+    content: `안녕하세요 ${profile.name}님 💍\n${profile.region}에 사시는 ${profile.stage} 시군요.\n어떤 정책이 궁금하세요?`
   };
   const profileContext = `[사용자 프로필] 이름: ${profile.name} / 거주지: ${profile.region} / 혼인단계: ${profile.stage} / 관심사: ${profile.interests.join(", ") || "(미지정)"}`;
   const [messages, setMessages] = useState<ChatMsg[]>([INITIAL]);
@@ -681,7 +894,7 @@ function ChatScreen({ active, profile }: { active: boolean; profile: Profile }) 
           <b>두리AI</b>
           <span>
             <i className="live" />
-            신혼부부 정책을 찾아드려요
+            신혼 정책을 찾아드려요
           </span>
         </div>
         <button className="iconbtn" type="button" aria-label="새 대화" onClick={reset}>
@@ -737,21 +950,37 @@ function ChatScreen({ active, profile }: { active: boolean; profile: Profile }) 
   );
 }
 
+/* ---------------- GEO ---------------- */
 function GeoScreen({
   active,
-  onOpenSheet,
   policies,
   profile,
-  onOpenCalendar
+  onOpenSheet,
+  onOpenCalendar,
+  onOpenRegion
 }: {
   active: boolean;
-  onOpenSheet: (id: string) => void;
   policies: PolisPolicy[];
   profile: Profile;
+  onOpenSheet: (id: string) => void;
   onOpenCalendar: () => void;
+  onOpenRegion: () => void;
 }) {
+  const tick = useLiveTick(2500);
+  const gu = profile.region.split(" ").pop() ?? profile.region;
   const localCount = policies.length;
+  const liveApplicants = useMemo(
+    () => policies.reduce((s, p) => s + trendFor(p.id, tick).applicants, 0),
+    [policies, tick]
+  );
+  const budgets = useMemo(() => {
+    return policies
+      .map((p) => ({ p, t: trendFor(p.id, tick) }))
+      .sort((a, b) => b.t.capacityPct - a.t.capacityPct)
+      .slice(0, 3);
+  }, [policies, tick]);
   const top2 = policies.slice(0, 2);
+
   return (
     <section className={`screen${active ? " active" : ""}`}>
       <div className="appbar">
@@ -761,7 +990,7 @@ function GeoScreen({
       </div>
 
       <div className="pad block" style={{ marginTop: 8 }}>
-        <button type="button" className="region-pick">
+        <button type="button" className="region-pick" onClick={onOpenRegion}>
           <span className="l">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" strokeLinejoin="round" />
@@ -807,7 +1036,7 @@ function GeoScreen({
       <div className="pad block">
         <div className="stat2">
           <div className="statcard">
-            <div className="k">우리 동네 신혼 정책</div>
+            <div className="k">내 동네 정책</div>
             <div className="v mono">
               {localCount}
               <small>건</small>
@@ -815,11 +1044,9 @@ function GeoScreen({
             <div className="d">실시간 보조금24 기준</div>
           </div>
           <div className="statcard">
-            <div className="k">결혼·출산 축하금</div>
-            <div className="v mono">
-              300<small>만원</small>
-            </div>
-            <div className="d">마포구 최대</div>
+            <div className="k">지금 지원 중</div>
+            <div className="v mono">{formatCount(liveApplicants)}</div>
+            <div className="d live-up">실시간 집계 ▲</div>
           </div>
         </div>
       </div>
@@ -830,49 +1057,38 @@ function GeoScreen({
           <span className="more-tag">실시간</span>
         </div>
         <div className="list">
-          <div className="budget">
-            <div className="top">
-              <b>신혼부부 전세임대주택</b>
-              <span className="pct" style={{ color: "var(--red)" }}>
-                88%
-              </span>
-            </div>
-            <div className="prog hot">
-              <i style={{ width: "88%" }} />
-            </div>
-            <div className="budget-sub">
-              올해 공급 240호 중 <b style={{ color: "var(--red)" }}>잔여 29호</b>
-            </div>
-          </div>
-          <div className="budget">
-            <div className="top">
-              <b>마포구 결혼축하금</b>
-              <span className="pct" style={{ color: "var(--amber)" }}>
-                61%
-              </span>
-            </div>
-            <div className="prog warn">
-              <i style={{ width: "61%" }} />
-            </div>
-            <div className="budget-sub">부부당 100만원 · 혼인신고 1년 이내</div>
-          </div>
-          <div className="budget">
-            <div className="top">
-              <b>첫째 출산장려금</b>
-              <span className="pct" style={{ color: "var(--blue)" }}>
-                42%
-              </span>
-            </div>
-            <div className="prog">
-              <i style={{ width: "42%" }} />
-            </div>
-            <div className="budget-sub">첫째 200만원 · 예산 여유 있음</div>
-          </div>
+          {budgets.map(({ p, t }) => {
+            const tone = t.capacityPct >= 80 ? "hot" : t.capacityPct >= 60 ? "warn" : "";
+            const col =
+              t.capacityPct >= 80
+                ? "var(--red)"
+                : t.capacityPct >= 60
+                  ? "var(--amber)"
+                  : "var(--blue)";
+            return (
+              <button key={p.id} type="button" className="budget" onClick={() => onOpenSheet(p.id)}>
+                <div className="top">
+                  <b>{p.title}</b>
+                  <span className="pct" style={{ color: col }}>
+                    {t.capacityPct}%
+                  </span>
+                </div>
+                <div className={`prog ${tone}`}>
+                  <i style={{ width: `${t.capacityPct}%` }} />
+                </div>
+                <div className="budget-sub">
+                  지원자 {formatCount(t.applicants)}명
+                  <Sep />
+                  {t.capacityPct >= 80 ? "마감 임박" : "신청 가능"}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="pad block">
-        <h2 className="sec-title">{profile.region.split(" ").pop()} 신혼부부 추천 정책</h2>
+        <h2 className="sec-title">{gu} 추천 정책</h2>
         <div className="list">
           {top2.map((p, i) => (
             <button key={p.id} className="row" type="button" onClick={() => onOpenSheet(p.id)}>
@@ -882,7 +1098,8 @@ function GeoScreen({
               <span className="tx">
                 <b>{p.title}</b>
                 <span>
-                  매칭 {p.match}% · {p.dept}
+                  매칭 {p.match}%<Sep />
+                  {p.dept}
                 </span>
               </span>
               <span className="rt">
@@ -896,20 +1113,24 @@ function GeoScreen({
   );
 }
 
+/* ---------------- ARCHIVE ---------------- */
 function ArchiveScreen({
   active,
-  onOpenSheet,
-  policies
+  policies,
+  filter,
+  onFilter,
+  onOpenSheet
 }: {
   active: boolean;
-  onOpenSheet: (id: string) => void;
   policies: PolisPolicy[];
+  filter: string;
+  onFilter: (f: string) => void;
+  onOpenSheet: (id: string) => void;
 }) {
-  const [filter, setFilter] = useState("전체");
   const [q, setQ] = useState("");
   const list = useMemo(() => {
     return policies
-      .filter((p) => categoryFilter(p, filter))
+      .filter((p) => filter === "전체" || p.cat === filter)
       .filter((p) => {
         if (!q.trim()) return true;
         const s = q.toLowerCase();
@@ -920,6 +1141,8 @@ function ArchiveScreen({
         );
       });
   }, [filter, q, policies]);
+  const hero = policies.find((p) => p.cat === "주거/청약") ?? policies[0];
+
   return (
     <section className={`screen${active ? " active" : ""}`}>
       <div className="appbar">
@@ -930,41 +1153,39 @@ function ArchiveScreen({
       <div className="arc-search">
         <input
           type="text"
-          placeholder="정책·키워드 검색 (예: 전세, 출산)"
+          placeholder="정책 키워드 검색 (예: 전세, 출산)"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
       <div className="arc-filter">
-        {ARCHIVE_FILTERS.map((f) => (
+        {ALL_CATS.map((c) => (
           <button
-            key={f.key}
+            key={c}
             type="button"
-            className={`afc${filter === f.key ? " on" : ""}`}
-            onClick={() => setFilter(f.key)}
+            className={`afc${filter === c ? " on" : ""}`}
+            onClick={() => onFilter(c)}
           >
-            {f.label}
+            {c}
           </button>
         ))}
       </div>
 
-      <div className="pad" style={{ marginTop: 6 }}>
-        <button type="button" className="arc-hero card-tap" onClick={() => onOpenSheet("p3")}>
-          <span className="arc-hero-grad" />
-          <span className="arc-hero-tx">
-            <span className="badge">이주의 정책 · 청약</span>
-            <b>
-              신혼·신생아·생애최초,
-              <br />
-              특별공급 완전 정복 가이드
-            </b>
-            <span className="meta">읽기 7분 · 06.05 발행</span>
-          </span>
-        </button>
-      </div>
+      {hero && (
+        <div className="pad" style={{ marginTop: 6 }}>
+          <button type="button" className="arc-hero card-tap" onClick={() => onOpenSheet(hero.id)}>
+            <span className="arc-hero-grad" />
+            <span className="arc-hero-tx">
+              <span className="badge">이주의 정책</span>
+              <b>{hero.title}</b>
+              <span className="meta">{hero.summary.slice(0, 40)}…</span>
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="pad block" style={{ marginTop: 24 }}>
-        <h2 className="sec-title">신혼부부 최신 이슈</h2>
+        <h2 className="sec-title">{filter === "전체" ? "신혼 정책 전체" : filter}</h2>
         <div className="arc-list">
           {list.length === 0 ? (
             <div className="arc-empty">조건에 맞는 정책이 없어요.</div>
@@ -976,7 +1197,9 @@ function ArchiveScreen({
                   <span className="cat-t">{p.cat}</span>
                   <b>{p.title}</b>
                   <span className="meta">
-                    {p.dept} · {p.amount}
+                    {p.dept}
+                    <Sep />
+                    {p.amount}
                   </span>
                 </span>
               </button>
@@ -988,35 +1211,64 @@ function ArchiveScreen({
   );
 }
 
+/* ---------------- POLICY SHEET ---------------- */
 function PolicySheet({
   policies,
   policyId,
   bookmarks,
   applied,
+  views,
   onClose
 }: {
   policies: PolisPolicy[];
   policyId: string | null;
   bookmarks: { ids: string[]; has: (id: string) => boolean; toggle: (id: string) => void };
   applied: { ids: string[]; has: (id: string) => boolean; apply: (id: string) => void };
+  views: { map: Record<string, number>; record: (id: string) => void };
   onClose: () => void;
 }) {
+  const tick = useLiveTick(2500);
   const p = policyId ? (policies.find((x) => x.id === policyId) ?? null) : null;
   const open = !!p;
   const url = p?.sourceUrl ?? GOV24_PORTAL;
   const isMarked = p ? bookmarks.has(p.id) : false;
   const isApplied = p ? applied.has(p.id) : false;
+  const t = p ? trendFor(p.id, tick) : null;
+  const myViews = p ? (views.map[p.id] ?? 0) : 0;
+
   return (
     <>
       <div className={`sheet-scrim${open ? " open" : ""}`} onClick={onClose} />
       <div className={`sheet${open ? " open" : ""}`}>
         <div className="grab" />
-        {p && (
+        {p && t && (
           <>
             <span className="tag">
-              {p.cat} · {p.dept}
+              {p.cat}
+              <Sep />
+              {p.dept}
             </span>
             <h3>{p.title}</h3>
+
+            <div className="sheet-trend">
+              <div className="st-item">
+                <span className="st-k">지원자</span>
+                <span className="st-v mono">{formatCount(t.applicants)}명</span>
+              </div>
+              <div className="st-item">
+                <span className="st-k">전일 대비</span>
+                <span className={`st-v ${t.delta >= 0 ? "up" : "down"}`}>
+                  {t.delta >= 0 ? "▲" : "▼"}
+                  {Math.abs(t.delta)}%
+                </span>
+              </div>
+              <div className="st-item">
+                <span className="st-k">예산 소진</span>
+                <span className="st-v mono">{t.capacityPct}%</span>
+              </div>
+              <Sparkline series={t.series} up={t.delta >= 0} />
+            </div>
+
             <p className="desc">{p.summary}</p>
             {p.benefits.map(([k, v]) => (
               <div key={k} className="kv">
@@ -1034,6 +1286,7 @@ function PolicySheet({
                 <li key={e}>{e}</li>
               ))}
             </ul>
+            {myViews > 1 && <p className="sheet-views">내가 {myViews}번 본 정책이에요</p>}
             <div className="sheet-actions">
               <button
                 type="button"
@@ -1059,6 +1312,7 @@ function PolicySheet({
   );
 }
 
+/* ---------------- CALENDAR ---------------- */
 function CalendarScreen({
   policies,
   onBack,
@@ -1068,11 +1322,13 @@ function CalendarScreen({
   onBack: () => void;
   onOpenSheet: (id: string) => void;
 }) {
-  const upcoming = useMemo(() => {
-    return policies
-      .filter((p) => p.dday !== null && p.dday !== undefined)
-      .sort((a, b) => (a.dday ?? 999) - (b.dday ?? 999));
-  }, [policies]);
+  const upcoming = useMemo(
+    () =>
+      policies
+        .filter((p) => p.dday !== null && p.dday !== undefined)
+        .sort((a, b) => (a.dday ?? 999) - (b.dday ?? 999)),
+    [policies]
+  );
   return (
     <div className="cal-screen">
       <div className="cal-head">
@@ -1101,7 +1357,9 @@ function CalendarScreen({
                 <span className="tx">
                   <b>{p.title}</b>
                   <span>
-                    {p.deadline} · {p.dept}
+                    {p.deadline}
+                    <Sep />
+                    {p.dept}
                   </span>
                 </span>
               </button>
@@ -1110,5 +1368,297 @@ function CalendarScreen({
         )}
       </div>
     </div>
+  );
+}
+
+/* ---------------- NOTIFICATIONS ---------------- */
+function NotificationScreen({
+  items,
+  onBack,
+  onOpenSheet
+}: {
+  items: Notif[];
+  onBack: () => void;
+  onOpenSheet: (id: string) => void;
+}) {
+  return (
+    <div className="cal-screen">
+      <div className="cal-head">
+        <button type="button" className="cal-back" onClick={onBack} aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+            <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <h2>알림</h2>
+      </div>
+      <div className="cal-list">
+        {items.length === 0 ? (
+          <div className="arc-empty">새 알림이 없어요.</div>
+        ) : (
+          items.map((n) => (
+            <button
+              key={n.id}
+              type="button"
+              className="noti-item"
+              onClick={() => n.policyId && onOpenSheet(n.policyId)}
+            >
+              <span className={`noti-ic ${n.kind}`}>
+                {n.kind === "deadline" ? "⏰" : n.kind === "hot" ? "🔥" : "🔖"}
+              </span>
+              <span className="tx">
+                <b>{n.title}</b>
+                <span>{n.sub}</span>
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- MY PAGE ---------------- */
+function MyPageScreen({
+  profile,
+  setProfile,
+  policies,
+  bookmarks,
+  applied,
+  views,
+  onBack,
+  onOpenSheet,
+  onOpenRegion
+}: {
+  profile: Profile;
+  setProfile: (p: Profile | null) => void;
+  policies: PolisPolicy[];
+  bookmarks: { ids: string[] };
+  applied: { ids: string[] };
+  views: { map: Record<string, number> };
+  onBack: () => void;
+  onOpenSheet: (id: string) => void;
+  onOpenRegion: () => void;
+}) {
+  const byId = useMemo(() => {
+    const m = new Map<string, PolisPolicy>();
+    policies.forEach((p) => m.set(p.id, p));
+    return m;
+  }, [policies]);
+
+  const bookmarked = bookmarks.ids.map((id) => byId.get(id)).filter(Boolean) as PolisPolicy[];
+  const appliedList = applied.ids.map((id) => byId.get(id)).filter(Boolean) as PolisPolicy[];
+  const recentViews = useMemo(() => {
+    return Object.entries(views.map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => byId.get(id))
+      .filter(Boolean)
+      .slice(0, 5) as PolisPolicy[];
+  }, [views.map, byId]);
+
+  function invitePartner() {
+    setProfile({ ...profile, partner: { name: "", status: "invited", code: makeInviteCode() } });
+  }
+  function cancelInvite() {
+    setProfile({ ...profile, partner: null });
+  }
+  function copyInvite(code: string) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://sinhon.life";
+    const link = `${origin}/?invite=${code}`;
+    try {
+      void navigator.clipboard?.writeText(link);
+    } catch {
+      /* ignore */
+    }
+  }
+  function resetAll() {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("프로필을 초기화할까요? 온보딩을 다시 합니다.")
+    )
+      return;
+    setProfile(null);
+  }
+
+  return (
+    <div className="cal-screen">
+      <div className="cal-head">
+        <button type="button" className="cal-back" onClick={onBack} aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+            <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <h2>마이페이지</h2>
+      </div>
+
+      <div className="pad" style={{ marginTop: 4 }}>
+        <div className="mp-profile">
+          <span className="mp-avatar">{profile.name.slice(0, 1)}</span>
+          <div className="mp-id">
+            <b>{profile.name}님</b>
+            <span>
+              {profile.region}
+              <Sep />
+              {profile.stage}
+            </span>
+          </div>
+        </div>
+        {profile.interests.length > 0 && (
+          <div className="mp-tags">
+            {profile.interests.map((i) => {
+              const meta = INTERESTS.find((x) => x.v === i);
+              return (
+                <span key={i} className="mp-tag">
+                  {meta?.emoji} {i}
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 파트너 초대 */}
+      <div className="pad block" style={{ marginTop: 22 }}>
+        <h3 className="mp-sec">파트너</h3>
+        {!profile.partner ? (
+          <div className="invite-card">
+            <p className="invite-lead">
+              혼자 시작했어요. 파트너를 초대하면 함께 정책을 챙길 수 있어요.
+            </p>
+            <button type="button" className="btn-cta sm" onClick={invitePartner}>
+              파트너 초대하기
+            </button>
+          </div>
+        ) : (
+          <div className="invite-card">
+            <p className="invite-lead">초대 코드를 파트너에게 전달하세요.</p>
+            <div className="invite-code">{profile.partner.code}</div>
+            <div className="sheet-actions">
+              <button
+                type="button"
+                className="btn-sec"
+                onClick={() => copyInvite(profile.partner?.code ?? "")}
+              >
+                초대 링크 복사
+              </button>
+              <button type="button" className="btn-sec" onClick={cancelInvite}>
+                초대 취소
+              </button>
+            </div>
+            <p className="invite-note">상대가 코드를 입력하면 연결돼요. (연결 기능 준비 중)</p>
+          </div>
+        )}
+      </div>
+
+      <MpList
+        title={`북마크한 정책 ${bookmarked.length}`}
+        items={bookmarked}
+        empty="아직 북마크한 정책이 없어요."
+        onOpenSheet={onOpenSheet}
+      />
+      <MpList
+        title={`신청한 정책 ${appliedList.length}`}
+        items={appliedList}
+        empty="아직 신청한 정책이 없어요."
+        onOpenSheet={onOpenSheet}
+      />
+      <MpList
+        title="최근 본 정책"
+        items={recentViews}
+        empty="최근 본 정책이 없어요."
+        onOpenSheet={onOpenSheet}
+      />
+
+      <div className="pad block" style={{ marginTop: 22 }}>
+        <h3 className="mp-sec">설정</h3>
+        <button type="button" className="mp-setting" onClick={onOpenRegion}>
+          <span>지역 변경</span>
+          <span className="mp-setting-v">{profile.region} ›</span>
+        </button>
+        <button type="button" className="mp-setting danger" onClick={resetAll}>
+          <span>프로필 초기화</span>
+          <span className="mp-setting-v">온보딩 다시 ›</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MpList({
+  title,
+  items,
+  empty,
+  onOpenSheet
+}: {
+  title: string;
+  items: PolisPolicy[];
+  empty: string;
+  onOpenSheet: (id: string) => void;
+}) {
+  return (
+    <div className="pad block" style={{ marginTop: 22 }}>
+      <h3 className="mp-sec">{title}</h3>
+      {items.length === 0 ? (
+        <p className="mp-empty">{empty}</p>
+      ) : (
+        <div className="list">
+          {items.map((p) => (
+            <button key={p.id} type="button" className="row" onClick={() => onOpenSheet(p.id)}>
+              <span className={`ic ${p.icon}`}>
+                <PolicyIcon icon={p.icon} />
+              </span>
+              <span className="tx">
+                <b>{p.title}</b>
+                <span>
+                  {p.cat}
+                  <Sep />
+                  {p.dept}
+                </span>
+              </span>
+              <span className="rt">
+                <span className="s">›</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- REGION SHEET ---------------- */
+function RegionSheet({
+  open,
+  current,
+  onClose,
+  onPick
+}: {
+  open: boolean;
+  current: string;
+  onClose: () => void;
+  onPick: (r: string) => void;
+}) {
+  return (
+    <>
+      <div className={`sheet-scrim${open ? " open" : ""}`} onClick={onClose} />
+      <div className={`sheet${open ? " open" : ""}`}>
+        <div className="grab" />
+        <h3>지역 선택</h3>
+        <p className="desc" style={{ marginBottom: 14 }}>
+          거주지를 바꾸면 맞춤 정책이 다시 정렬돼요.
+        </p>
+        <div className="region-grid">
+          {REGIONS.map((r) => (
+            <button
+              key={r}
+              type="button"
+              className={`region-chip${r === current ? " on" : ""}`}
+              onClick={() => onPick(r)}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
