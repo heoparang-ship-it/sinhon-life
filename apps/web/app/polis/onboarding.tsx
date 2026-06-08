@@ -28,8 +28,9 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       region,
       stage,
       interests,
-      name: name.trim() || "부부",
-      onboardedAt: new Date().toISOString()
+      name: name.trim() || "나",
+      onboardedAt: new Date().toISOString(),
+      partner: null
     });
   }
 
@@ -45,7 +46,6 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
           type="button"
           aria-label="이전"
           onClick={() => setStep((s) => Math.max(0, s - 1))}
-          disabled={step === 0}
           style={{ visibility: step === 0 ? "hidden" : "visible" }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
@@ -69,9 +69,9 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
               시작은 <b>혜택부터</b>
             </h1>
             <p>
-              전세대출부터 청약·출산지원까지,
+              전세대출부터 청약, 출산지원까지,
               <br />
-              신혼부부 정책을 두리AI가 모아드려요.
+              나에게 맞는 정책을 두리AI가 모아드려요.
             </p>
             <div className="ob-pills">
               <span className="ob-pill">버팀목 전세 1.5%</span>
@@ -84,13 +84,13 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 1 && (
           <div className="ob-step">
-            <span className="ob-kicker">STEP 1 · 지역</span>
+            <span className="ob-kicker">STEP 1 지역</span>
             <h2>
               어느 동네에
               <br />
-              신혼집을 차리셨어요?
+              사시나요?
             </h2>
-            <p className="ob-sub">지역마다 결혼·출산 축하금이 크게 달라요.</p>
+            <p className="ob-sub">지역마다 결혼, 출산 축하금이 크게 달라요.</p>
             <div className="ob-chips">
               {REGIONS.map((r) => (
                 <button
@@ -108,7 +108,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 2 && (
           <div className="ob-step">
-            <span className="ob-kicker">STEP 2 · 혼인</span>
+            <span className="ob-kicker">STEP 2 혼인</span>
             <h2>
               결혼은
               <br />
@@ -132,7 +132,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 3 && (
           <div className="ob-step">
-            <span className="ob-kicker">STEP 3 · 관심사</span>
+            <span className="ob-kicker">STEP 3 관심사</span>
             <h2>
               지금 가장
               <br />
@@ -156,20 +156,20 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 4 && (
           <div className="ob-step">
-            <span className="ob-kicker">STEP 4 · 이름</span>
+            <span className="ob-kicker">STEP 4 이름</span>
             <h2>
-              두 분을
+              어떻게
               <br />
-              뭐라고 부를까요?
+              불러드릴까요?
             </h2>
-            <p className="ob-sub">인사말에 쓰여요. 예: 지민·현우</p>
+            <p className="ob-sub">혼자 시작해요. 파트너는 나중에 초대할 수 있어요.</p>
             <input
               className="ob-input"
               type="text"
-              placeholder="지민·현우"
+              placeholder="예: 지민"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              maxLength={20}
+              maxLength={16}
               autoFocus
             />
           </div>

@@ -21,7 +21,8 @@ export type PolisPolicy = {
 export const POLIS_POLICIES: PolisPolicy[] = [
   {
     id: "p1",
-    cat: "전세·대출",
+    sourceUrl: "https://nhuf.molit.go.kr/",
+    cat: "전세/대출",
     dept: "주택도시기금",
     icon: "b1",
     title: "신혼부부 버팀목 전세자금대출",
@@ -50,6 +51,7 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p2",
+    sourceUrl: "https://www.bokjiro.go.kr/",
     cat: "출산",
     dept: "보건복지부",
     icon: "b4",
@@ -74,7 +76,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p3",
-    cat: "주거·청약",
+    sourceUrl: "https://www.applyhome.co.kr/",
+    cat: "주거/청약",
     dept: "국토교통부",
     icon: "b1",
     title: "신혼부부 특별공급",
@@ -103,7 +106,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p4",
-    cat: "전세·대출",
+    sourceUrl: "https://nhuf.molit.go.kr/",
+    cat: "전세/대출",
     dept: "주택도시기금",
     icon: "b2",
     title: "신생아 특례 디딤돌 대출",
@@ -132,7 +136,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p5",
-    cat: "주거·청약",
+    sourceUrl: "https://apply.lh.or.kr/",
+    cat: "주거/청약",
     dept: "LH",
     icon: "b1",
     title: "신혼희망타운",
@@ -161,7 +166,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p6",
-    cat: "건강·난임",
+    sourceUrl: "https://www.bokjiro.go.kr/",
+    cat: "건강/난임",
     dept: "보건복지부",
     icon: "b6",
     title: "난임부부 시술비 지원",
@@ -189,7 +195,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p7",
-    cat: "주거·청약",
+    sourceUrl: "https://apply.lh.or.kr/",
+    cat: "주거/청약",
     dept: "LH / 지자체",
     icon: "b1",
     title: "신혼부부 전세임대주택",
@@ -218,7 +225,8 @@ export const POLIS_POLICIES: PolisPolicy[] = [
   },
   {
     id: "p8",
-    cat: "혼인·세제",
+    sourceUrl: "https://www.mapo.go.kr/",
+    cat: "혼인/세제",
     dept: "마포구",
     icon: "b5",
     title: "마포구 결혼축하금",

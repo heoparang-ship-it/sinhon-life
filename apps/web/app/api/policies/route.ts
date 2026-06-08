@@ -35,13 +35,13 @@ export type NormalizedPolicy = {
 
 function categorize(text: string): { cat: string; icon: NormalizedPolicy["icon"] } {
   const t = text;
-  if (/(전세|대출|디딤돌|버팀목|보금자리)/.test(t)) return { cat: "전세·대출", icon: "b2" };
-  if (/(청약|특별공급|희망타운|임대주택|주거)/.test(t)) return { cat: "주거·청약", icon: "b1" };
+  if (/(전세|대출|디딤돌|버팀목|보금자리)/.test(t)) return { cat: "전세/대출", icon: "b2" };
+  if (/(청약|특별공급|희망타운|임대주택|주거)/.test(t)) return { cat: "주거/청약", icon: "b1" };
   if (/(출산|신생아|첫만남|산후)/.test(t)) return { cat: "출산", icon: "b4" };
   if (/(육아|돌봄|보육|어린이집|아이|유아)/.test(t)) return { cat: "육아", icon: "b3" };
-  if (/(난임|시술|건강|임신)/.test(t)) return { cat: "건강·난임", icon: "b6" };
-  if (/(혼인|결혼|신혼|축하금|세제)/.test(t)) return { cat: "혼인·세제", icon: "b5" };
-  return { cat: "혼인·세제", icon: "b5" };
+  if (/(난임|시술|건강|임신)/.test(t)) return { cat: "건강/난임", icon: "b6" };
+  if (/(혼인|결혼|신혼|축하금|세제)/.test(t)) return { cat: "혼인/세제", icon: "b5" };
+  return { cat: "혼인/세제", icon: "b5" };
 }
 
 function trimText(s: string | undefined, max = 160): string {
