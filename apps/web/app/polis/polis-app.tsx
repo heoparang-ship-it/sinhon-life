@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { POLIS_POLICIES, type PolisPolicy } from "./polis-data";
 import { Onboarding } from "./onboarding";
+import { useAuth, type AuthProvider } from "./auth-store";
+import { LoginScreen } from "./login-screen";
 import {
   INTERESTS,
   REGIONS,
@@ -14,7 +16,16 @@ import {
   useViews,
   type Profile
 } from "./profile-store";
-import { formatCount, sparkPath, track, trendFor, useLiveTick } from "./trend";
+import {
+  formatCount,
+  isLive,
+  resolveTrend,
+  sparkPath,
+  track,
+  useLiveTick,
+  useTrends,
+  type TrendsResult
+} from "./trend";
 import { TrendScreen } from "./trend-screen";
 import { PolicyDetail } from "./policy-detail";
 import { PolicyCompare } from "./policy-compare";
@@ -196,6 +207,7 @@ export default function PolisApp() {
   const [regionSheet, setRegionSheet] = useState(false);
   const [archiveFilter, setArchiveFilter] = useState("전체");
 
+  const { user, hydrated: authHydrated, kakaoReady, loginKakao, loginGuest, logout } = useAuth();
   const policies = useLivePolicies();
   const [profile, setProfile] = useProfile();
   const bookmarks = useBookmarks();
@@ -205,9 +217,13 @@ export default function PolisApp() {
 
   const scored = useMemo(() => scorePolicies(policies, profile), [policies, profile]);
 
+  // 실시간 트렌드 — /api/trends 실집계를 앱 전역 단일 소스로 (KV 미설정 시 시뮬 폴백)
+  const trendIds = useMemo(() => scored.map((p) => p.id), [scored]);
+  const live = useTrends(trendIds);
+
   const notifications = useMemo(
-    () => buildNotifications(scored, bookmarks.ids.length),
-    [scored, bookmarks.ids.length]
+    () => buildNotifications(scored, bookmarks.ids.length, live),
+    [scored, bookmarks.ids.length, live]
   );
   const unread = notifications.some((n) => !readNotif.has(n.id));
 
@@ -229,6 +245,34 @@ export default function PolisApp() {
     readNotif.markAll(notifications.map((n) => n.id));
   }
 
+  if (!authHydrated) {
+    return (
+      <div className="stage">
+        <div className="phone">
+          <div className="notch" />
+          <StatusBar />
+          <div className="viewport" />
+          <div className="home-ind" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="stage">
+        <div className="phone">
+          <div className="notch" />
+          <StatusBar />
+          <div className="viewport">
+            <LoginScreen kakaoReady={kakaoReady} onKakao={loginKakao} onGuest={loginGuest} />
+          </div>
+          <div className="home-ind" />
+        </div>
+      </div>
+    );
+  }
+
   if (!profile) {
     return (
       <div className="stage">
@@ -236,7 +280,10 @@ export default function PolisApp() {
           <div className="notch" />
           <StatusBar />
           <div className="viewport">
-            <Onboarding onDone={(p) => setProfile(p)} />
+            <Onboarding
+              defaultName={user.provider === "kakao" ? user.nickname.slice(0, 16) : undefined}
+              onDone={(p) => setProfile(p)}
+            />
           </div>
           <div className="home-ind" />
         </div>
@@ -256,6 +303,7 @@ export default function PolisApp() {
             policies={scored}
             profile={profile}
             hasUnread={unread}
+            live={live}
             onOpenChat={() => setTab("chat")}
             onOpenSheet={openSheet}
             onOpenNotif={openNotif}
@@ -269,6 +317,7 @@ export default function PolisApp() {
             active={tab === "geo"}
             policies={scored}
             profile={profile}
+            live={live}
             onOpenSheet={openSheet}
             onOpenCalendar={() => setOverlay("calendar")}
             onOpenRegion={() => setRegionSheet(true)}
@@ -291,6 +340,7 @@ export default function PolisApp() {
           {overlay === "trends" && (
             <TrendScreen
               policies={scored}
+              live={live}
               onBack={() => setOverlay(null)}
               onOpenSheet={openSheet}
             />
@@ -310,9 +360,12 @@ export default function PolisApp() {
               bookmarks={bookmarks}
               applied={applied}
               views={views}
+              live={live}
+              provider={user.provider}
               onBack={() => setOverlay(null)}
               onOpenSheet={openSheet}
               onOpenRegion={() => setRegionSheet(true)}
+              onLogout={logout}
             />
           )}
 
@@ -330,6 +383,7 @@ export default function PolisApp() {
             policy={detailId ? (scored.find((x) => x.id === detailId) ?? null) : null}
             bookmarked={detailId ? bookmarks.has(detailId) : false}
             applied={detailId ? applied.has(detailId) : false}
+            live={live}
             onToggleBookmark={(id) => bookmarks.toggle(id)}
             onApply={(id) => applied.apply(id)}
             onClose={() => setDetailId(null)}
@@ -382,7 +436,11 @@ type Notif = {
   policyId?: string;
 };
 
-function buildNotifications(policies: PolisPolicy[], bookmarkCount: number): Notif[] {
+function buildNotifications(
+  policies: PolisPolicy[],
+  bookmarkCount: number,
+  live?: TrendsResult
+): Notif[] {
   const out: Notif[] = [];
   policies
     .filter((p) => p.dday !== null && (p.dday ?? 999) <= 30)
@@ -398,7 +456,7 @@ function buildNotifications(policies: PolisPolicy[], bookmarkCount: number): Not
       })
     );
   policies
-    .map((p) => ({ p, t: trendFor(p.id) }))
+    .map((p) => ({ p, t: resolveTrend(p.id, 0, live) }))
     .sort((a, b) => b.t.delta - a.t.delta)
     .slice(0, 3)
     .forEach(({ p, t }) =>
@@ -597,6 +655,7 @@ function HomeScreen({
   policies,
   profile,
   hasUnread,
+  live,
   onOpenChat,
   onOpenSheet,
   onOpenNotif,
@@ -609,6 +668,7 @@ function HomeScreen({
   policies: PolisPolicy[];
   profile: Profile;
   hasUnread: boolean;
+  live: TrendsResult;
   onOpenChat: () => void;
   onOpenSheet: (id: string) => void;
   onOpenNotif: () => void;
@@ -628,10 +688,10 @@ function HomeScreen({
   }, [policies]);
   const trending = useMemo(() => {
     return policies
-      .map((p) => ({ p, t: trendFor(p.id, tick) }))
+      .map((p) => ({ p, t: resolveTrend(p.id, tick, live) }))
       .sort((a, b) => b.t.delta - a.t.delta)
       .slice(0, 6);
-  }, [policies, tick]);
+  }, [policies, tick, live]);
 
   return (
     <section className={`screen${active ? " active" : ""}`}>
@@ -994,6 +1054,7 @@ function GeoScreen({
   active,
   policies,
   profile,
+  live,
   onOpenSheet,
   onOpenCalendar,
   onOpenRegion
@@ -1001,6 +1062,7 @@ function GeoScreen({
   active: boolean;
   policies: PolisPolicy[];
   profile: Profile;
+  live: TrendsResult;
   onOpenSheet: (id: string) => void;
   onOpenCalendar: () => void;
   onOpenRegion: () => void;
@@ -1008,16 +1070,17 @@ function GeoScreen({
   const tick = useLiveTick(2500);
   const gu = profile.region.split(" ").pop() ?? profile.region;
   const localCount = policies.length;
+  const liveOn = isLive(live);
   const liveApplicants = useMemo(
-    () => policies.reduce((s, p) => s + trendFor(p.id, tick).applicants, 0),
-    [policies, tick]
+    () => policies.reduce((s, p) => s + resolveTrend(p.id, tick, live).applicants, 0),
+    [policies, tick, live]
   );
   const budgets = useMemo(() => {
     return policies
-      .map((p) => ({ p, t: trendFor(p.id, tick) }))
+      .map((p) => ({ p, t: resolveTrend(p.id, tick, live) }))
       .sort((a, b) => b.t.capacityPct - a.t.capacityPct)
       .slice(0, 3);
-  }, [policies, tick]);
+  }, [policies, tick, live]);
   const top2 = policies.slice(0, 2);
 
   return (
@@ -1085,7 +1148,7 @@ function GeoScreen({
           <div className="statcard">
             <div className="k">지금 지원 중</div>
             <div className="v mono">{formatCount(liveApplicants)}</div>
-            <div className="d live-up">실시간 집계 ▲</div>
+            <div className="d live-up">{liveOn ? "실시간 집계 ▲" : "예상 추이 ▲"}</div>
           </div>
         </div>
       </div>
@@ -1093,7 +1156,7 @@ function GeoScreen({
       <div className="pad block">
         <div className="sec-head">
           <h2 className="sec-title">예산 소진 현황</h2>
-          <span className="more-tag">실시간</span>
+          <span className="more-tag">{liveOn ? "실시간" : "추정"}</span>
         </div>
         <div className="list">
           {budgets.map(({ p, t }) => {
@@ -1363,9 +1426,12 @@ function MyPageScreen({
   bookmarks,
   applied,
   views,
+  live,
+  provider,
   onBack,
   onOpenSheet,
-  onOpenRegion
+  onOpenRegion,
+  onLogout
 }: {
   profile: Profile;
   setProfile: (p: Profile | null) => void;
@@ -1373,9 +1439,12 @@ function MyPageScreen({
   bookmarks: { ids: string[] };
   applied: { ids: string[] };
   views: { map: Record<string, number> };
+  live: TrendsResult;
+  provider: AuthProvider;
   onBack: () => void;
   onOpenSheet: (id: string) => void;
   onOpenRegion: () => void;
+  onLogout: () => void;
 }) {
   const byId = useMemo(() => {
     const m = new Map<string, PolisPolicy>();
@@ -1487,7 +1556,12 @@ function MyPageScreen({
         )}
       </div>
 
-      <Portfolio items={bookmarked} appliedIds={applied.ids} onOpenSheet={onOpenSheet} />
+      <Portfolio
+        items={bookmarked}
+        appliedIds={applied.ids}
+        live={live}
+        onOpenSheet={onOpenSheet}
+      />
       <MpList
         title={`신청한 정책 ${appliedList.length}`}
         items={appliedList}
@@ -1503,9 +1577,21 @@ function MyPageScreen({
 
       <div className="pad block" style={{ marginTop: 22 }}>
         <h3 className="mp-sec">설정</h3>
+        <div className="mp-setting">
+          <span>로그인 상태</span>
+          <span className="mp-setting-v">
+            {provider === "kakao" ? "카카오 연결됨" : "게스트로 둘러보는 중"}
+          </span>
+        </div>
         <button type="button" className="mp-setting" onClick={onOpenRegion}>
           <span>지역 변경</span>
           <span className="mp-setting-v">{profile.region} ›</span>
+        </button>
+        <button type="button" className="mp-setting" onClick={onLogout}>
+          <span>로그아웃</span>
+          <span className="mp-setting-v">
+            {provider === "kakao" ? "카카오 로그아웃 ›" : "나가기 ›"}
+          </span>
         </button>
         <button type="button" className="mp-setting danger" onClick={resetAll}>
           <span>프로필 초기화</span>
@@ -1519,10 +1605,12 @@ function MyPageScreen({
 function Portfolio({
   items,
   appliedIds,
+  live,
   onOpenSheet
 }: {
   items: PolisPolicy[];
   appliedIds: string[];
+  live: TrendsResult;
   onOpenSheet: (id: string) => void;
 }) {
   const totalCash = items.reduce((s, p) => s + (p.cash || 0), 0);
@@ -1550,7 +1638,7 @@ function Portfolio({
           </div>
           <div className="list">
             {items.map((p) => {
-              const t = trendFor(p.id);
+              const t = resolveTrend(p.id, 0, live);
               const done = appliedIds.includes(p.id);
               const tone = t.capacityPct >= 80 ? "hot" : t.capacityPct >= 60 ? "warn" : "";
               return (

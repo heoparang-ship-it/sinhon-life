@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import type { PolisPolicy } from "./polis-data";
-import { track } from "./trend";
+import { formatCount, isLive, track, type TrendsResult } from "./trend";
 
 type CalcResult = [string, string][];
 type CalcConfig = {
@@ -110,6 +110,7 @@ export type PolicyDetailProps = {
   policy: PolisPolicy | null;
   bookmarked: boolean;
   applied: boolean;
+  live?: TrendsResult;
   onToggleBookmark: (id: string) => void;
   onApply: (id: string) => void;
   onClose: () => void;
@@ -121,6 +122,7 @@ export function PolicyDetail({
   policy,
   bookmarked,
   applied,
+  live,
   onToggleBookmark,
   onApply,
   onClose,
@@ -164,6 +166,8 @@ export function PolicyDetail({
   }
 
   if (!policy) return null;
+
+  const liveTotal = isLive(live) ? (live?.totals[policy.id]?.total ?? 0) : 0;
 
   const eligCount = checked.size;
   const eligTotal = policy.eligibility.length;
@@ -265,6 +269,12 @@ export function PolicyDetail({
               우리 부부 적합도 <b>{policy.match}%</b>
             </em>
           </div>
+          {liveTotal > 0 && (
+            <p className="dt-live">
+              <i className="live" />
+              이번 주 {formatCount(liveTotal)}명이 이 정책을 살펴봤어요
+            </p>
+          )}
           <button type="button" className="dt-compare" onClick={() => onCompare(policy.id)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { trendFor, type Trend } from "./trend-core";
 
 export { formatCount, hourlySeries, sparkPath, trendFor, type Trend } from "./trend-core";
 
@@ -66,4 +67,30 @@ export function useTrends(ids: string[]): TrendsResult {
   }, [key]);
 
   return result;
+}
+
+/** /api/trends 실집계가 살아있나 (KV 연결됨) */
+export function isLive(live?: TrendsResult): boolean {
+  return !!live && live.source === "live";
+}
+
+/**
+ * 화면에 쓰는 단일 트렌드 소스.
+ * - 기본은 결정론적 시뮬(trendFor) — 콜드스타트에도 앱이 "살아있게" 보이도록
+ * - /api/trends 가 live 면 실제 클릭 집계(total)를 시뮬 위에 더하고, 실측 delta 로 덮어씀
+ * 이렇게 하면 KV 연결 즉시 화면 숫자가 실제 사용자 관심을 반영함.
+ */
+export function resolveTrend(id: string, tick = 0, live?: TrendsResult): Trend {
+  const base = trendFor(id, tick);
+  const l = live && live.source === "live" ? live.totals[id] : undefined;
+  if (!l) return base;
+  const applicants = base.applicants + l.total;
+  const delta = l.total > 0 ? l.delta : base.delta;
+  return {
+    ...base,
+    applicants,
+    delta,
+    hot: base.capacityPct >= 80 || delta >= 7,
+    score: Math.round(applicants * (1 + delta / 100) * (1 + base.capacityPct / 200))
+  };
 }

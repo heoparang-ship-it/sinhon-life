@@ -2,7 +2,14 @@
 
 import { useMemo } from "react";
 import type { PolisPolicy } from "./polis-data";
-import { formatCount, hourlySeries, sparkPath, trendFor, useLiveTick, useTrends } from "./trend";
+import {
+  formatCount,
+  hourlySeries,
+  resolveTrend,
+  sparkPath,
+  useLiveTick,
+  type TrendsResult
+} from "./trend";
 
 const CAT_COLOR: Record<string, string> = {
   "주거/청약": "#3182f6",
@@ -21,25 +28,22 @@ function colorOf(cat: string): string {
 
 export function TrendScreen({
   policies,
+  live,
   onBack,
   onOpenSheet
 }: {
   policies: PolisPolicy[];
+  live: TrendsResult;
   onBack: () => void;
   onOpenSheet: (id: string) => void;
 }) {
   const tick = useLiveTick(2000);
-  const ids = useMemo(() => policies.map((p) => p.id), [policies]);
-  const live = useTrends(ids);
 
   const rows = useMemo(() => {
     return policies
       .map((p) => {
-        const t = trendFor(p.id, tick);
-        const l = live.source === "live" ? live.totals[p.id] : undefined;
-        const applicants = l ? l.total : t.applicants;
-        const delta = l ? l.delta : t.delta;
-        return { p, t, applicants, delta, score: applicants * (1 + delta / 100) };
+        const t = resolveTrend(p.id, tick, live);
+        return { p, t, applicants: t.applicants, delta: t.delta, score: t.score };
       })
       .sort((a, b) => b.score - a.score);
   }, [policies, tick, live]);
@@ -48,10 +52,10 @@ export function TrendScreen({
     () =>
       policies
         .filter((p) => p.dday !== null && p.dday !== undefined)
-        .map((p) => ({ p, t: trendFor(p.id, tick) }))
+        .map((p) => ({ p, t: resolveTrend(p.id, tick, live) }))
         .sort((a, b) => (a.p.dday ?? 999) - (b.p.dday ?? 999))
         .slice(0, 4),
-    [policies, tick]
+    [policies, tick, live]
   );
 
   // 히트맵: 카테고리 × 시간대(4)

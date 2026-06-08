@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { INTERESTS, REGIONS, STAGES, type Profile } from "./profile-store";
 
-export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
+export function Onboarding({
+  onDone,
+  defaultName
+}: {
+  onDone: (p: Profile) => void;
+  defaultName?: string;
+}) {
   const [step, setStep] = useState(0);
   const [region, setRegion] = useState("");
   const [stage, setStage] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(defaultName ?? "");
 
   const total = 5;
   const canNext =
