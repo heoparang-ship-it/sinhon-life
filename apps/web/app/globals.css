@@ -703,6 +703,8 @@ button {
 }
 
 .chat-screen {
+  position: absolute;
+  inset: 0;
   display: none;
   flex-direction: column;
   padding-top: var(--safe-top);
