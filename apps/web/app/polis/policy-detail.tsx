@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ChangeEvent
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from "react";
 import type { PolisPolicy } from "./polis-data";
 import { track } from "./trend";
 
@@ -175,7 +169,11 @@ export function PolicyDetail({
   const eligTotal = policy.eligibility.length;
   const eligPct = eligTotal ? Math.round((eligCount / eligTotal) * 100) : 0;
   const eligStatusCls =
-    eligCount === 0 ? "elig-status" : eligCount === eligTotal ? "elig-status ok" : "elig-status partial";
+    eligCount === 0
+      ? "elig-status"
+      : eligCount === eligTotal
+        ? "elig-status ok"
+        : "elig-status partial";
   const eligStatusText =
     eligCount === 0
       ? `해당하는 자격을 확인해보세요 (0/${eligTotal})`
@@ -267,11 +265,7 @@ export function PolicyDetail({
               우리 부부 적합도 <b>{policy.match}%</b>
             </em>
           </div>
-          <button
-            type="button"
-            className="dt-compare"
-            onClick={() => onCompare(policy.id)}
-          >
+          <button type="button" className="dt-compare" onClick={() => onCompare(policy.id)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path
                 d="M3 6h7M3 12h7M3 18h7M17 4v16M14 7l3-3 3 3M14 17l3 3 3-3"
@@ -357,7 +351,10 @@ export function PolicyDetail({
 
         <div className="dt-sec">
           <h2>
-            서류 준비 <span className={docCountCls}>{docDone}/{docTotal} 준비됨</span>
+            서류 준비{" "}
+            <span className={docCountCls}>
+              {docDone}/{docTotal} 준비됨
+            </span>
           </h2>
           <p className="doc-note">미리 준비해두면 신청이 빨라져요. 부부가 같이 체크해보세요.</p>
           <div className="doc-list">
@@ -436,11 +433,7 @@ export function PolicyDetail({
             확인할 수 있어요.
           </p>
           <div className="dt-success-btns">
-            <button
-              type="button"
-              className="btn-cta ghost"
-              onClick={() => setSuccess(false)}
-            >
+            <button type="button" className="btn-cta ghost" onClick={() => setSuccess(false)}>
               계속 둘러보기
             </button>
             <button
@@ -484,7 +477,8 @@ function ApplyConfirm({
           신청을 진행할까요?
         </h3>
         <p className="desc">
-          두리AI가 필요한 서류 안내와 신청 링크를 준비해 드려요. 실제 제출은 기관 페이지에서 마무리돼요.
+          두리AI가 필요한 서류 안내와 신청 링크를 준비해 드려요. 실제 제출은 기관 페이지에서
+          마무리돼요.
         </p>
         <div className="apply-docs">
           <div className="apply-docs-h">미리 준비하면 좋아요</div>
@@ -498,12 +492,7 @@ function ApplyConfirm({
         <button type="button" className="btn-cta" onClick={onConfirm}>
           네, 신청할게요
         </button>
-        <button
-          type="button"
-          className="btn-cta ghost"
-          onClick={onClose}
-          style={{ marginTop: 8 }}
-        >
+        <button type="button" className="btn-cta ghost" onClick={onClose} style={{ marginTop: 8 }}>
           다시 볼게요
         </button>
       </div>

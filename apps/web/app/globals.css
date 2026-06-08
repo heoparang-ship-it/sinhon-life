@@ -3016,11 +3016,7 @@ button {
   width: 100%;
   height: 6px;
   border-radius: 99px;
-  background: linear-gradient(
-    90deg,
-    var(--blue) var(--pct, 50%),
-    var(--g200) var(--pct, 50%)
-  );
+  background: linear-gradient(90deg, var(--blue) var(--pct, 50%), var(--g200) var(--pct, 50%));
   outline: none;
   margin: 4px 0 18px;
 }
