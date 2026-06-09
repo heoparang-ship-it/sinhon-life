@@ -478,7 +478,7 @@ function buildNotifications(
         id: `hot-${p.id}`,
         kind: "hot",
         title: `지금 뜨는 정책 — ${p.title}`,
-        sub: `지원자 ▲${t.delta}% 급상승`,
+        sub: `관심 ▲${t.delta}% 급상승`,
         policyId: p.id
       })
     );
@@ -844,7 +844,7 @@ function HomeScreen({
               <Sparkline series={t.series} up={t.delta >= 0} />
               <div className="trend-foot">
                 <span className="trend-appl mono">{formatCount(t.applicants)}</span>
-                <span className="trend-unit">명 지원중</span>
+                <span className="trend-unit">이번 주 조회</span>
               </div>
             </button>
           ))}
@@ -1160,17 +1160,17 @@ function GeoScreen({
             <div className="d">실시간 보조금24 기준</div>
           </div>
           <div className="statcard">
-            <div className="k">지금 지원 중</div>
+            <div className="k">이번 주 관심</div>
             <div className="v mono">{formatCount(liveApplicants)}</div>
-            <div className="d live-up">{liveOn ? "실시간 집계 ▲" : "예상 추이 ▲"}</div>
+            <div className="d live-up">{liveOn ? "실시간 클릭 집계" : "초기 추정"}</div>
           </div>
         </div>
       </div>
 
       <div className="pad block">
         <div className="sec-head">
-          <h2 className="sec-title">예산 소진 현황</h2>
-          <span className="more-tag">{liveOn ? "실시간" : "추정"}</span>
+          <h2 className="sec-title">관심 많은 정책</h2>
+          <span className="more-tag">{liveOn ? "실시간" : "초기 추정"}</span>
         </div>
         <div className="list">
           {budgets.map(({ p, t }) => {
@@ -1193,7 +1193,7 @@ function GeoScreen({
                   <i style={{ width: `${t.capacityPct}%` }} />
                 </div>
                 <div className="budget-sub">
-                  지원자 {formatCount(t.applicants)}명
+                  이번 주 조회 {formatCount(t.applicants)}
                   <Sep />
                   {t.capacityPct >= 80 ? "마감 임박" : "신청 가능"}
                 </div>

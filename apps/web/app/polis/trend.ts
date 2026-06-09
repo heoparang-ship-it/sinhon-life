@@ -76,21 +76,31 @@ export function isLive(live?: TrendsResult): boolean {
 
 /**
  * 화면에 쓰는 단일 트렌드 소스.
- * - 기본은 결정론적 시뮬(trendFor) — 콜드스타트에도 앱이 "살아있게" 보이도록
- * - /api/trends 가 live 면 실제 클릭 집계(total)를 시뮬 위에 더하고, 실측 delta 로 덮어씀
- * 이렇게 하면 KV 연결 즉시 화면 숫자가 실제 사용자 관심을 반영함.
+ * - "applicants" 필드는 이름과 달리 "이번 주 조회/관심 클릭 수" 의미입니다.
+ *   (정부 API에 실제 신청자 수는 없어요. 그래서 우리 앱 안 클릭 집계로 대체합니다.)
+ * - KV(/api/trends) 가 live 면 실측 total/delta 를 그대로 사용
+ * - 미연결이면 시뮬 베이스를 0.15배로 축소해 "초기 추정" 으로 표기
+ *   (시뮬을 0으로 두면 콜드스타트에 모든 카드가 0 으로 보여 비어 보임)
  */
 export function resolveTrend(id: string, tick = 0, live?: TrendsResult): Trend {
   const base = trendFor(id, tick);
   const l = live && live.source === "live" ? live.totals[id] : undefined;
-  if (!l) return base;
-  const applicants = base.applicants + l.total;
-  const delta = l.total > 0 ? l.delta : base.delta;
+  if (l) {
+    // 실집계: KV 가 모은 진짜 클릭 수
+    return {
+      ...base,
+      applicants: l.total,
+      delta: l.delta,
+      hot: base.capacityPct >= 80 || l.delta >= 7,
+      score: Math.round(l.total * (1 + l.delta / 100) * (1 + base.capacityPct / 200))
+    };
+  }
+  // 미연결: 시뮬을 작게 축소한 최소 베이스 (정직하게 "초기 추정" 라벨로 노출)
+  const applicants = Math.max(1, Math.round(base.applicants * 0.15));
   return {
     ...base,
     applicants,
-    delta,
-    hot: base.capacityPct >= 80 || delta >= 7,
-    score: Math.round(applicants * (1 + delta / 100) * (1 + base.capacityPct / 200))
+    hot: base.capacityPct >= 80 || base.delta >= 7,
+    score: Math.round(applicants * (1 + base.delta / 100) * (1 + base.capacityPct / 200))
   };
 }
