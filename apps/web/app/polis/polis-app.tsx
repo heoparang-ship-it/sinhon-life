@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { POLIS_POLICIES, type PolisPolicy } from "./polis-data";
-import { Onboarding } from "./onboarding";
-import { useAuth, type AuthProvider } from "./auth-store";
+import { useAuth, type AuthProvider, type AuthUser } from "./auth-store";
 import { LoginScreen } from "./login-screen";
 import {
   INTERESTS,
@@ -195,6 +194,20 @@ function newId() {
   return `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** 로그인 직후 기본 프로필 — 온보딩 없이 바로 진입.
+ *  지역/혼인단계/관심사는 마이페이지·홈 토픽에서 언제든 바꿀 수 있음. */
+function defaultProfile(user: AuthUser): Profile {
+  const fallbackName = user.provider === "kakao" ? user.nickname.slice(0, 16) : "둘러보는 중";
+  return {
+    name: fallbackName || "신혼부부",
+    region: REGIONS[0] ?? "서울 마포구",
+    stage: "신혼 1년 이내",
+    interests: [],
+    onboardedAt: new Date().toISOString(),
+    partner: null
+  };
+}
+
 function Sep() {
   return <span className="sep" aria-hidden="true" />;
 }
@@ -245,6 +258,11 @@ export default function PolisApp() {
     readNotif.markAll(notifications.map((n) => n.id));
   }
 
+  // 로그인 직후 프로필 없으면 기본값으로 즉시 생성 — 온보딩 스텝 제거
+  useEffect(() => {
+    if (user && !profile) setProfile(defaultProfile(user));
+  }, [user, profile, setProfile]);
+
   if (!authHydrated) {
     return (
       <div className="stage">
@@ -274,17 +292,13 @@ export default function PolisApp() {
   }
 
   if (!profile) {
+    // 프로필 생성 효과가 다음 프레임에 적용될 때까지의 짧은 공백
     return (
       <div className="stage">
         <div className="phone">
           <div className="notch" />
           <StatusBar />
-          <div className="viewport">
-            <Onboarding
-              defaultName={user.provider === "kakao" ? user.nickname.slice(0, 16) : undefined}
-              onDone={(p) => setProfile(p)}
-            />
-          </div>
+          <div className="viewport" />
           <div className="home-ind" />
         </div>
       </div>
@@ -1480,7 +1494,7 @@ function MyPageScreen({
   function resetAll() {
     if (
       typeof window !== "undefined" &&
-      !window.confirm("프로필을 초기화할까요? 온보딩을 다시 합니다.")
+      !window.confirm("프로필을 기본값으로 되돌릴까요? 지역·관심사가 초기화돼요.")
     )
       return;
     setProfile(null);
@@ -1595,7 +1609,7 @@ function MyPageScreen({
         </button>
         <button type="button" className="mp-setting danger" onClick={resetAll}>
           <span>프로필 초기화</span>
-          <span className="mp-setting-v">온보딩 다시 ›</span>
+          <span className="mp-setting-v">기본값으로 ›</span>
         </button>
       </div>
     </div>
