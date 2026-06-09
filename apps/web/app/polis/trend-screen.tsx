@@ -103,7 +103,9 @@ export function TrendScreen({
           </svg>
         </button>
         <h2>정책 트렌드</h2>
-        <span className={`tr-src ${live.source}`}>{live.source === "live" ? "LIVE" : "시뮬"}</span>
+        <span className={`tr-src ${live.source}`}>
+          {live.source === "live" ? "LIVE" : "초기 추정"}
+        </span>
       </div>
 
       {/* 1) 티커 스트립 */}
@@ -126,7 +128,7 @@ export function TrendScreen({
       {/* 2) 버블 인기 */}
       <div className="pad block" style={{ marginTop: 18 }}>
         <h3 className="tr-sec">관심 버블</h3>
-        <p className="tr-cap">크기 = 지원자 수, 색 = 분야. 누르면 상세로 가요.</p>
+        <p className="tr-cap">크기 = 이번 주 조회 수, 색 = 분야. 누르면 상세로 가요.</p>
         <div className="bubble-box">
           {bubbles.map(({ p, x, y, size, delta }) => (
             <button
@@ -185,9 +187,9 @@ export function TrendScreen({
         </div>
       )}
 
-      {/* 5) 지원 많은 순 랭킹 */}
+      {/* 5) 관심 많은 순 랭킹 */}
       <div className="pad block" style={{ marginTop: 22 }}>
-        <h3 className="tr-sec">지원 많은 순</h3>
+        <h3 className="tr-sec">관심 많은 순</h3>
         <div className="rank-list">
           {rows.slice(0, 10).map(({ p, applicants, delta, t }, i) => (
             <button
@@ -223,8 +225,8 @@ export function TrendScreen({
         </div>
         <p className="tr-foot">
           {live.source === "live"
-            ? "실시간 사용자 클릭·신청 집계 기준"
-            : "집계 서버 연결 전 — 시뮬레이션 값입니다"}
+            ? "실시간 사용자 클릭·찜·신청 집계 기준"
+            : "초기 추정 — 집계 서버 연결 시 실제 클릭 수로 바뀝니다"}
           {` · 점수 상한 ${formatCount(Math.round(maxScore))}`}
         </p>
       </div>
